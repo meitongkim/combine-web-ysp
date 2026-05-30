@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}YSP Learns{% endblock %} — Learning Portal</title>
+  <meta name="description" content="YSP Learns Learning Management System — your one-stop portal for online learning modules.">
+
+  <!-- Fonts (matching YSP) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <!-- Grain overlay -->
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- Navigation -->
+  <div class="nav-wrap" id="navWrap">
+    <nav class="nav">
+      <a class="brand" href="{{ url_for('index') }}">
+        <span class="logo-icon">Y</span>
+        <span class="word">YSP <i>Learns</i></span>
+      </a>
+
+      <div class="nav-links">
+        <a href="{{ url_for('index') }}" class="{{ 'active' if request.endpoint == 'index' else '' }}">Home</a>
+        <a href="{{ url_for('catalog') }}" class="{{ 'active' if request.endpoint == 'catalog' else '' }}">Modules</a>
+        {% if current_user.is_authenticated %}
+          {% if current_user.role == 'student' %}
+            <a href="{{ url_for('student_dashboard') }}" class="{{ 'active' if request.endpoint == 'student_dashboard' else '' }}">My Learning</a>
+          {% else %}
+            <a href="{{ url_for('admin_dashboard') }}" class="{{ 'active' if request.endpoint == 'admin_dashboard' else '' }}">Dashboard</a>
+            <a href="{{ url_for('admin_modules') }}" class="{{ 'active' if request.endpoint in ('admin_modules', 'create_module', 'edit_module') else '' }}">Manage</a>
+          {% endif %}
+        {% endif %}
+      </div>
+
+      {% if current_user.is_authenticated %}
+        <div class="nav-user">
+          <span class="nav-avatar">{{ current_user.full_name[0] }}</span>
+          <a href="{{ url_for('logout') }}" class="btn btn-sm btn-ghost" data-magnetic>Sign Out</a>
+        </div>
+      {% else %}
+        <a href="{{ url_for('login') }}" class="btn btn-sm btn-primary" data-magnetic>Sign In <span class="arr">↗</span></a>
+      {% endif %}
+    </nav>
+  </div>
+
+  <!-- Flash Messages (Toasts) -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="toast-container">
+        {% for category, message in messages %}
+          <div class="toast toast-{{ category }}" role="alert">
+            <span class="toast-icon">
+              {% if category == 'success' %}✓{% elif category == 'error' %}✕{% else %}ℹ{% endif %}
+            </span>
+            <span>{{ message }}</span>
+            <button class="toast-close" aria-label="Close">✕</button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Page Content -->
+  {% if error_code %}
+    <div class="auth-page">
+      <div class="auth-card" style="text-align:center">
+        <div style="font-size:72px;font-family:'Fraunces',serif;font-weight:300;color:var(--sage-deep);margin-bottom:12px">{{ error_code }}</div>
+        <h2 class="serif">{{ error_message }}</h2>
+        <p class="text-mute mt-md">The page you're looking for doesn't exist or has been moved.</p>
+        <a href="{{ url_for('index') }}" class="btn btn-forest mt-md">Back to Home <span class="arr">↗</span></a>
+      </div>
+    </div>
+  {% else %}
+    {% block content %}{% endblock %}
+  {% endif %}
+
+  <!-- Footer -->
+  {% block footer %}
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>
+        <span class="brand-text">YSP <i>Learns</i></span>
+        <span class="footer-copy" style="margin-left:16px">© 2026 YSP Learns. All rights reserved.</span>
+      </div>
+      <div class="footer-links">
+        <a href="{{ url_for('catalog') }}">Modules</a>
+        <a href="{{ url_for('login') }}">Sign In</a>
+      </div>
+    </div>
+  </footer>
+  {% endblock %}
+
+  <!-- JavaScript -->
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

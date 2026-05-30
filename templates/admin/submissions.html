@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}All Submissions{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Admin Panel</div>
+      <a href="{{ url_for('admin_dashboard') }}" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+      <a href="{{ url_for('admin_modules') }}" class="sidebar-link"><span class="icon">📚</span> Modules</a>
+      <a href="{{ url_for('create_module') }}" class="sidebar-link"><span class="icon">➕</span> Create Module</a>
+      <a href="{{ url_for('admin_announcements') }}" class="sidebar-link"><span class="icon">📢</span> Announcements</a>
+      <a href="{{ url_for('admin_submissions') }}" class="sidebar-link active"><span class="icon">📋</span> Submissions</a>
+    </div>
+  </aside>
+
+  <button class="mobile-menu-btn" id="sidebarToggle"><span>☰</span></button>
+
+  <main class="dashboard-main" style="background:linear-gradient(180deg, #f0f5e6 0%, var(--paper) 60%)">
+    <div class="page-header apple-reveal">
+      <span class="eyebrow"><span class="leaf"></span> Submissions</span>
+      <h2 class="section-title serif" style="font-size:clamp(28px, 4vw, 42px)">
+        Student <em>Submissions.</em>
+      </h2>
+      <p class="section-sub">View all assignment submissions across all modules.</p>
+    </div>
+
+    {% if submissions %}
+    <div class="glass-card no-hover apple-reveal" style="transition-delay:.1s; padding:0; overflow-x:auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Module</th>
+            <th>Programme</th>
+            <th>Type</th>
+            <th>Date</th>
+            <th style="text-align:right">View</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sub in submissions %}
+          <tr>
+            <td>
+              <div style="display:flex; align-items:center; gap:10px">
+                <span class="nav-avatar" style="width:32px; height:32px; font-size:12px; flex-shrink:0">{{ sub.student_name[0] }}</span>
+                <div>
+                  <div style="font-weight:500">{{ sub.student_name }}</div>
+                  <div style="font-size:12px; color:var(--ink-mute)">{{ sub.student_email }}</div>
+                </div>
+              </div>
+            </td>
+            <td style="font-size:13px; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ sub.module_title }}</td>
+            <td><span class="badge badge-programme">{{ sub.programme_area.split(' ')[0] }}</span></td>
+            <td>
+              {% if sub.text_response and sub.file_filename %}
+                <span class="chip" style="font-size:11px; padding:2px 8px">📝 + 📎</span>
+              {% elif sub.text_response %}
+                <span class="chip" style="font-size:11px; padding:2px 8px">📝 Text</span>
+              {% elif sub.file_filename %}
+                <span class="chip" style="font-size:11px; padding:2px 8px">📎 File</span>
+              {% endif %}
+            </td>
+            <td style="font-size:13px; color:var(--ink-mute); white-space:nowrap">{{ sub.submitted_at[:16] }}</td>
+            <td style="text-align:right">
+              <div style="display:flex; gap:6px; justify-content:flex-end; align-items:center">
+                {% if sub.text_response %}
+                  <button class="btn btn-outline btn-sm" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'" title="View text response">View</button>
+                  <div style="display:none; position:fixed; inset:0; z-index:300; background:rgba(31,42,34,0.4); backdrop-filter:blur(6px); padding:24px; cursor:pointer" onclick="this.style.display='none'">
+                    <div style="max-width:600px; margin:80px auto; padding:32px; background:rgba(255,255,255,0.95); backdrop-filter:blur(20px); border-radius:var(--radius-lg); box-shadow:var(--shadow-2); cursor:default" onclick="event.stopPropagation()">
+                      <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:16px">
+                        <div>
+                          <h3 class="serif" style="font-size:20px; margin:0">{{ sub.student_name }}</h3>
+                          <div style="font-size:13px; color:var(--ink-mute)">{{ sub.module_title }} · {{ sub.submitted_at[:16] }}</div>
+                        </div>
+                        <button onclick="this.closest('[style*=fixed]').style.display='none'" style="font-size:20px; color:var(--ink-mute); cursor:pointer; background:none; border:none">✕</button>
+                      </div>
+                      <div style="font-size:14px; line-height:1.6; color:var(--ink-soft); white-space:pre-wrap; max-height:400px; overflow-y:auto">{{ sub.text_response }}</div>
+                    </div>
+                  </div>
+                {% endif %}
+                {% if sub.file_filename %}
+                  <a href="{{ url_for('uploaded_file', filename=sub.file_filename) }}" class="btn btn-forest btn-sm" download title="{{ sub.file_original_name }}">↓ File</a>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state apple-reveal">
+      <div class="empty-icon">📋</div>
+      <h3 class="serif">No submissions yet</h3>
+      <p>Student submissions will appear here once they submit assignments.</p>
+    </div>
+    {% endif %}
+  </main>
+</div>
+{% endblock %}

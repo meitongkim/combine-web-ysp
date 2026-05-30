@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Module Catalog{% endblock %}
+
+{% block content %}
+<div class="page-wrapper" style="background:linear-gradient(180deg, #f0f5e6 0%, var(--paper) 100%)">
+  <div class="container" style="padding-top:32px; padding-bottom:60px">
+
+    <!-- Header -->
+    <div class="page-header apple-reveal">
+      <span class="eyebrow"><span class="leaf"></span> Module Catalog</span>
+      <h2 class="section-title serif" style="margin-bottom:8px">Browse <em>all modules.</em></h2>
+      <p class="section-sub">Discover and enroll in modules across Foundation, Discipline-Specific, and General programme areas.</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="glass-card no-hover apple-reveal" style="transition-delay:.1s; padding:20px 24px; margin-bottom:28px; display:flex; gap:12px; flex-wrap:wrap; align-items:center">
+      <form method="GET" action="{{ url_for('catalog') }}" style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; width:100%">
+        <!-- Search -->
+        <div style="flex:2; min-width:200px">
+          <input type="text" name="search" value="{{ current_search }}" placeholder="Search modules by title or keyword..." class="form-input" style="margin:0">
+        </div>
+
+        <!-- Programme Area -->
+        <div style="flex:1; min-width:180px">
+          <select name="programme" class="form-select" style="margin:0">
+            <option value="">All Programme Areas</option>
+            {% for p in programmes %}
+              <option value="{{ p.programme_area }}" {{ 'selected' if current_programme == p.programme_area else '' }}>{{ p.programme_area }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Cluster -->
+        <div style="flex:1; min-width:180px">
+          <select name="cluster" class="form-select" style="margin:0">
+            <option value="">All Clusters</option>
+            {% for c in clusters %}
+              <option value="{{ c.cluster }}" {{ 'selected' if current_cluster == c.cluster else '' }}>{{ c.cluster }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-forest btn-sm" data-magnetic>Search</button>
+
+        {% if current_search or current_programme or current_cluster %}
+          <a href="{{ url_for('catalog') }}" class="btn btn-ghost btn-sm">Clear</a>
+        {% endif %}
+      </form>
+    </div>
+
+    <!-- Active Filters Display -->
+    {% if current_search or current_programme or current_cluster %}
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px" class="apple-reveal" style="transition-delay:.15s">
+      {% if current_search %}
+        <span class="chip chip-sage"><span class="dot"></span>Search: "{{ current_search }}"</span>
+      {% endif %}
+      {% if current_programme %}
+        <span class="chip chip-sage"><span class="dot"></span>{{ current_programme }}</span>
+      {% endif %}
+      {% if current_cluster %}
+        <span class="chip chip-sage"><span class="dot"></span>{{ current_cluster }}</span>
+      {% endif %}
+      <span class="chip">{{ modules|length }} result{{ 's' if modules|length != 1 else '' }}</span>
+    </div>
+    {% endif %}
+
+    <!-- Module Grid -->
+    {% if modules %}
+    <div class="module-grid">
+      {% for mod in modules %}
+      <a href="{{ url_for('module_detail', module_id=mod.id) }}" class="module-card apple-reveal" style="transition-delay:{{ loop.index * 0.04 }}s; text-decoration:none; color:inherit">
+        <div style="display:flex; justify-content:space-between; align-items:start">
+          <span class="glyph">{{ mod.title[0] }}</span>
+          {% if mod.material_filename %}
+            <span class="chip" style="font-size:10px; padding:3px 8px">📎 Materials</span>
+          {% endif %}
+        </div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap">
+          <span class="badge badge-programme">{{ mod.programme_area.split(' ')[0] }}</span>
+          <span class="chip" style="font-size:11px; padding:3px 10px"><span class="dot"></span>{{ mod.delivery_mode }}</span>
+        </div>
+        <h3>{{ mod.title }}</h3>
+        <p>{{ mod.description[:130] }}{% if mod.description and mod.description|length > 130 %}...{% endif %}</p>
+        <div class="card-footer">
+          <span style="font-size:12px; color:var(--ink-mute)">{{ mod.cluster }}</span>
+          <span class="arrow">↗</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state apple-reveal">
+      <div class="empty-icon">📚</div>
+      <h3 class="serif">No modules found</h3>
+      <p>Try adjusting your search or filters to find what you're looking for.</p>
+      <a href="{{ url_for('catalog') }}" class="btn btn-outline">View All Modules</a>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

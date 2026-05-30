@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}My Learning{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Student Portal</div>
+      <a href="{{ url_for('student_dashboard') }}" class="sidebar-link active">
+        <span class="icon">📊</span> Dashboard
+      </a>
+      <a href="{{ url_for('catalog') }}" class="sidebar-link">
+        <span class="icon">📚</span> Browse Modules
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">My Modules</div>
+      {% for e in enrollments %}
+        <a href="{{ url_for('student_module', module_id=e.module_id) }}" class="sidebar-link">
+          <span class="icon">{{ '✅' if e.progress == 'completed' else '📖' }}</span>
+          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ e.title }}</span>
+        </a>
+      {% endfor %}
+      {% if not enrollments %}
+        <div style="padding:10px 14px; font-size:13px; color:var(--ink-mute)">No modules enrolled yet</div>
+      {% endif %}
+    </div>
+    <div class="sidebar-section" style="margin-top:auto; padding-top:16px; border-top:1px solid var(--line)">
+      <div style="padding:10px 14px">
+        <div style="font-size:13px; font-weight:500; color:var(--ink)">{{ current_user.full_name }}</div>
+        <div style="font-size:12px; color:var(--ink-mute)">{{ current_user.email }}</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Mobile sidebar toggle -->
+  <button class="mobile-menu-btn" id="sidebarToggle"><span>☰</span></button>
+
+  <!-- Main Content -->
+  <main class="dashboard-main" style="background:linear-gradient(180deg, #f0f5e6 0%, var(--paper) 60%)">
+    <!-- Welcome Header -->
+    <div class="page-header apple-reveal">
+      <span class="eyebrow"><span class="leaf"></span> Student Dashboard</span>
+      <h2 class="section-title serif" style="font-size:clamp(28px, 4vw, 42px)">
+        Welcome back, <em>{{ current_user.full_name.split(' ')[0] }}.</em>
+      </h2>
+    </div>
+
+    <!-- Stats -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:14px; margin-bottom:32px">
+      <div class="stat-card apple-reveal" style="transition-delay:.1s">
+        <div class="stat-number"><span data-counter="{{ enrollments|length }}">0</span></div>
+        <div class="stat-label">Enrolled Modules</div>
+      </div>
+      <div class="stat-card apple-reveal" style="transition-delay:.2s">
+        <div class="stat-number"><span data-counter="{{ submissions_count }}">0</span></div>
+        <div class="stat-label">Submissions</div>
+      </div>
+      <div class="stat-card apple-reveal" style="transition-delay:.3s">
+        <div class="stat-number"><span data-counter="{{ announcements|length }}">0</span></div>
+        <div class="stat-label">Announcements</div>
+      </div>
+    </div>
+
+    <!-- My Enrolled Modules -->
+    <div class="apple-reveal" style="transition-delay:.15s; margin-bottom:40px">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
+        <h3 class="serif" style="font-size:24px; margin:0">My <em>Modules</em></h3>
+        <a href="{{ url_for('catalog') }}" class="btn btn-outline btn-sm">Browse More →</a>
+      </div>
+
+      {% if enrollments %}
+      <div class="module-grid">
+        {% for e in enrollments %}
+        <a href="{{ url_for('student_module', module_id=e.module_id) }}" class="module-card" style="text-decoration:none; color:inherit">
+          <div style="display:flex; justify-content:space-between; align-items:start">
+            <span class="glyph">{{ e.title[0] }}</span>
+            {% if e.progress == 'completed' %}
+              <span class="badge badge-completed">Completed</span>
+            {% elif e.progress == 'in-progress' %}
+              <span class="badge badge-enrolled">In Progress</span>
+            {% else %}
+              <span class="badge badge-enrolled">Enrolled</span>
+            {% endif %}
+          </div>
+          <h3>{{ e.title }}</h3>
+          <div style="display:flex; gap:6px; flex-wrap:wrap">
+            <span class="chip" style="font-size:11px; padding:3px 8px"><span class="dot"></span>{{ e.delivery_mode }}</span>
+            <span class="chip" style="font-size:11px; padding:3px 8px">{{ e.cluster }}</span>
+          </div>
+          <p>{{ e.description[:100] }}{% if e.description and e.description|length > 100 %}...{% endif %}</p>
+          <div class="card-footer">
+            <span style="font-size:12px; color:var(--ink-mute)">{{ e.programme_area }}</span>
+            <span class="arrow">↗</span>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state" style="padding:40px">
+        <div class="empty-icon">📚</div>
+        <h3 class="serif">No modules enrolled yet</h3>
+        <p>Browse our catalog to find modules that interest you and start learning.</p>
+        <a href="{{ url_for('catalog') }}" class="btn btn-forest" data-magnetic>Browse Modules <span class="arr">↗</span></a>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Announcements -->
+    {% if announcements %}
+    <div class="apple-reveal" style="transition-delay:.25s">
+      <h3 class="serif" style="font-size:24px; margin:0 0 20px">Latest <em>Announcements</em></h3>
+      <div style="display:grid; gap:12px">
+        {% for ann in announcements %}
+        <div class="announcement-card">
+          <h4>{{ ann.title }}</h4>
+          <p>{{ ann.content[:250] }}{% if ann.content|length > 250 %}...{% endif %}</p>
+          <div class="ann-meta">
+            <span class="pulse-dot"></span>
+            <span>{{ ann.author or 'Admin' }}</span>
+            <span>·</span>
+            <span>{{ ann.created_at[:16] }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </main>
+</div>
+{% endblock %}

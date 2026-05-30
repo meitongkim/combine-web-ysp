@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}{{ module.title }}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Student Portal</div>
+      <a href="{{ url_for('student_dashboard') }}" class="sidebar-link">
+        <span class="icon">📊</span> Dashboard
+      </a>
+      <a href="{{ url_for('catalog') }}" class="sidebar-link">
+        <span class="icon">📚</span> Browse Modules
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Current Module</div>
+      <a href="{{ url_for('student_module', module_id=module.id) }}" class="sidebar-link active">
+        <span class="icon">📖</span>
+        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ module.title }}</span>
+      </a>
+    </div>
+  </aside>
+
+  <button class="mobile-menu-btn" id="sidebarToggle"><span>☰</span></button>
+
+  <!-- Main Content -->
+  <main class="dashboard-main" style="background:linear-gradient(180deg, #f0f5e6 0%, var(--paper) 60%)">
+
+    <!-- Back link -->
+    <a href="{{ url_for('student_dashboard') }}" class="apple-reveal" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--sage-deep); text-decoration:none; margin-bottom:20px">
+      ← Back to Dashboard
+    </a>
+
+    <!-- Module Header -->
+    <div class="glass-card no-hover apple-reveal" style="transition-delay:.1s; padding:36px; margin-bottom:24px">
+      <div style="display:flex; gap:16px; align-items:start; margin-bottom:16px">
+        <span class="glyph" style="width:52px; height:52px; font-size:24px; border-radius:14px; flex-shrink:0">{{ module.title[0] }}</span>
+        <div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px">
+            <span class="badge badge-programme">{{ module.programme_area }}</span>
+            <span class="chip chip-sage" style="font-size:11px; padding:3px 10px"><span class="dot"></span>{{ module.delivery_mode }}</span>
+            {% if enrollment.progress == 'completed' %}
+              <span class="badge badge-completed">✓ Completed</span>
+            {% else %}
+              <span class="badge badge-enrolled">Enrolled</span>
+            {% endif %}
+          </div>
+          <h1 class="serif" style="font-size:clamp(24px, 3.5vw, 36px); line-height:1.1; letter-spacing:-0.025em; margin:0">{{ module.title }}</h1>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px">
+        <span class="chip">{{ module.cluster }}</span>
+        <span class="chip">🏛 {{ module.institution or 'YSP Learns' }}</span>
+        {% if module.instructor %}
+          <span class="chip">👤 {{ module.instructor }}</span>
+        {% endif %}
+      </div>
+
+      <p style="color:var(--ink-soft); font-size:15px; line-height:1.6; margin:0">
+        {{ module.description or 'No description available.' }}
+      </p>
+    </div>
+
+    <!-- Learning Materials -->
+    {% if module.material_filename %}
+    <div class="glass-card no-hover apple-reveal" style="transition-delay:.15s; padding:28px; margin-bottom:24px">
+      <h3 class="serif" style="font-size:20px; margin:0 0 16px">📄 Learning Materials</h3>
+      <div style="display:flex; align-items:center; gap:14px; padding:18px; background:rgba(154,176,120,0.08); border:1px solid rgba(154,176,120,0.2); border-radius:var(--radius-sm)">
+        <span style="font-size:32px">📎</span>
+        <div style="flex:1">
+          <div style="font-weight:600; font-size:15px">{{ module.material_original_name }}</div>
+          <div style="font-size:12px; color:var(--ink-mute); margin-top:2px">Download and study this material at your own pace</div>
+        </div>
+        <a href="{{ url_for('uploaded_file', filename=module.material_filename) }}" class="btn btn-forest btn-sm" data-magnetic download>
+          Download <span class="arr">↓</span>
+        </a>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Assignment Submission -->
+    <div class="glass-card no-hover apple-reveal" style="transition-delay:.2s; padding:28px; margin-bottom:24px">
+      <h3 class="serif" style="font-size:20px; margin:0 0 6px">📝 Submit Assignment</h3>
+      <p style="font-size:14px; color:var(--ink-mute); margin:0 0 20px">Submit a text response, upload a file, or both.</p>
+
+      <form method="POST" action="{{ url_for('student_module', module_id=module.id) }}" enctype="multipart/form-data" data-validate>
+        <div class="form-group">
+          <label class="form-label">Text Response</label>
+          <textarea name="text_response" class="form-textarea" placeholder="Write your response here..." rows="6"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Upload File (Optional)</label>
+          <label class="form-file-upload file-upload-trigger" style="cursor:pointer">
+            <input type="file" name="submission_file" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.zip,.png,.jpg,.py,.java,.c,.cpp">
+            <span style="font-size:28px">📤</span>
+            <div>
+              <div class="file-label" style="font-size:14px; color:var(--ink-soft)">Choose a file or drag it here</div>
+              <div style="font-size:12px; color:var(--ink-mute); margin-top:2px">PDF, DOC, PPT, TXT, ZIP, images, code files — Max 16MB</div>
+            </div>
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-forest btn-lg" data-magnetic>
+          Submit Assignment <span class="arr">↗</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Previous Submissions -->
+    {% if submissions %}
+    <div class="glass-card no-hover apple-reveal" style="transition-delay:.25s; padding:28px">
+      <h3 class="serif" style="font-size:20px; margin:0 0 16px">📋 Your Submissions</h3>
+      <div style="display:grid; gap:12px">
+        {% for sub in submissions %}
+        <div style="padding:18px; background:rgba(255,255,255,0.5); border:1px solid var(--line); border-radius:var(--radius-sm)">
+          <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:10px">
+            <span class="badge badge-completed">Submitted</span>
+            <span style="font-size:12px; color:var(--ink-mute)">{{ sub.submitted_at[:16] }}</span>
+          </div>
+          {% if sub.text_response %}
+            <p style="font-size:14px; color:var(--ink-soft); margin:0 0 8px; line-height:1.5">{{ sub.text_response[:300] }}{% if sub.text_response|length > 300 %}...{% endif %}</p>
+          {% endif %}
+          {% if sub.file_original_name %}
+            <div style="display:flex; align-items:center; gap:8px">
+              <span>📎</span>
+              <a href="{{ url_for('uploaded_file', filename=sub.file_filename) }}" style="font-size:13px; color:var(--sage-deep); text-decoration:underline" download>{{ sub.file_original_name }}</a>
+            </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+  </main>
+</div>
+{% endblock %}

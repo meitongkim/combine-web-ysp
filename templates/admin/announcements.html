@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Announcements{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Admin Panel</div>
+      <a href="{{ url_for('admin_dashboard') }}" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+      <a href="{{ url_for('admin_modules') }}" class="sidebar-link"><span class="icon">📚</span> Modules</a>
+      <a href="{{ url_for('create_module') }}" class="sidebar-link"><span class="icon">➕</span> Create Module</a>
+      <a href="{{ url_for('admin_announcements') }}" class="sidebar-link active"><span class="icon">📢</span> Announcements</a>
+      <a href="{{ url_for('admin_submissions') }}" class="sidebar-link"><span class="icon">📋</span> Submissions</a>
+    </div>
+  </aside>
+
+  <button class="mobile-menu-btn" id="sidebarToggle"><span>☰</span></button>
+
+  <main class="dashboard-main" style="background:linear-gradient(180deg, #f0f5e6 0%, var(--paper) 60%)">
+    <div class="page-header apple-reveal">
+      <span class="eyebrow"><span class="leaf"></span> Announcements</span>
+      <h2 class="section-title serif" style="font-size:clamp(28px, 4vw, 42px)">
+        Post <em>Announcements.</em>
+      </h2>
+    </div>
+
+    <!-- Create Announcement Form -->
+    <div class="glass-card no-hover apple-reveal" style="transition-delay:.1s; padding:32px; margin-bottom:32px; max-width:700px">
+      <h3 class="serif" style="font-size:20px; margin:0 0 16px">New Announcement</h3>
+      <form method="POST" action="{{ url_for('admin_announcements') }}" data-validate>
+        <div class="form-group">
+          <label class="form-label">Title *</label>
+          <input type="text" name="title" class="form-input" placeholder="Announcement title..." required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Content *</label>
+          <textarea name="content" class="form-textarea" rows="4" placeholder="Write your announcement..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-forest" data-magnetic>Post Announcement <span class="arr">↗</span></button>
+      </form>
+    </div>
+
+    <!-- Existing Announcements -->
+    <div class="apple-reveal" style="transition-delay:.2s">
+      <h3 class="serif" style="font-size:22px; margin:0 0 20px">All <em>Announcements</em></h3>
+
+      {% if announcements %}
+      <div style="display:grid; gap:12px; max-width:700px">
+        {% for ann in announcements %}
+        <div class="announcement-card" style="display:flex; gap:16px; align-items:start">
+          <div style="flex:1">
+            <h4>{{ ann.title }}</h4>
+            <p>{{ ann.content }}</p>
+            <div class="ann-meta">
+              <span class="pulse-dot"></span>
+              <span>{{ ann.author or 'Admin' }}</span>
+              <span>·</span>
+              <span>{{ ann.created_at[:16] }}</span>
+            </div>
+          </div>
+          <form method="POST" action="{{ url_for('delete_announcement', ann_id=ann.id) }}">
+            <button type="submit" class="btn btn-danger btn-sm" data-confirm="Delete this announcement?">Delete</button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state" style="padding:40px">
+        <div class="empty-icon">📢</div>
+        <h3 class="serif">No announcements yet</h3>
+        <p>Post your first announcement above.</p>
+      </div>
+      {% endif %}
+    </div>
+  </main>
+</div>
+{% endblock %}

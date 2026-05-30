@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block footer %}{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero" id="top">
+  <div class="hero-bg" id="heroBg">
+    <div class="hero-orbits" aria-hidden="true">
+      <span class="orbit o1"></span>
+      <span class="orbit o2"></span>
+      <span class="orbit o3"></span>
+      <span class="glow g1"></span>
+      <span class="glow g2"></span>
+    </div>
+  </div>
+
+  <div class="hero-content">
+    <div class="eyebrow-pill apple-reveal" style="transition-delay:.05s">
+      <span class="tag"><span class="dot"></span>OPEN FOR ENROLLMENT</span>
+      <span class="meta">YSP Learns · Semester 2, 2026</span>
+    </div>
+
+    <h1 class="serif hero-title apple-reveal" style="transition-delay:.15s">
+      Embark on your<br>
+      <span class="glow-text">Online Learning</span><br>
+      Journey.
+    </h1>
+
+    <p class="hero-sub apple-reveal" style="transition-delay:.28s">
+      YSP Learns is your one-stop portal to access high quality learning modules across multiple disciplines.
+      Browse, enroll, and learn at your own pace with materials from our expert instructors.
+    </p>
+
+    <div class="hero-cta apple-reveal" style="transition-delay:.4s">
+      <a href="{{ url_for('catalog') }}" class="btn btn-forest btn-lg" data-magnetic>Explore Modules <span class="arr">↗</span></a>
+      {% if not current_user.is_authenticated %}
+        <a href="{{ url_for('signup') }}" class="btn btn-ghost btn-lg">Create Account ▸</a>
+      {% else %}
+        <a href="{{ url_for('student_dashboard') if current_user.role == 'student' else url_for('admin_dashboard') }}" class="btn btn-ghost btn-lg">Go to Dashboard ▸</a>
+      {% endif %}
+    </div>
+
+    <div class="avatar-row apple-reveal" style="transition-delay:.55s">
+      <span class="av-stack">
+        <span class="av1"></span><span class="av2"></span><span class="av3"></span><span class="av4"></span>
+      </span>
+      <span>{{ total_students }}+ students already learning</span>
+    </div>
+  </div>
+</section>
+
+<!-- Stats Section -->
+<section class="page-section section-mist" style="padding:80px 24px">
+  <div class="container">
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px">
+      <div class="stat-card apple-reveal" style="transition-delay:.1s">
+        <div class="stat-number"><span data-counter="{{ total_modules }}">0</span><span class="suffix">+</span></div>
+        <div class="stat-label">Learning Modules</div>
+      </div>
+      <div class="stat-card apple-reveal" style="transition-delay:.2s">
+        <div class="stat-number"><span data-counter="{{ total_students }}">0</span><span class="suffix">+</span></div>
+        <div class="stat-label">Active Students</div>
+      </div>
+      <div class="stat-card apple-reveal" style="transition-delay:.3s">
+        <div class="stat-number"><span data-counter="{{ total_enrollments }}">0</span><span class="suffix">+</span></div>
+        <div class="stat-label">Total Enrollments</div>
+      </div>
+      <div class="stat-card apple-reveal" style="transition-delay:.4s">
+        <div class="stat-number">3<span class="suffix"> areas</span></div>
+        <div class="stat-label">Programme Areas</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Modules -->
+<section class="page-section section-cream" style="padding:80px 24px">
+  <div class="container">
+    <span class="eyebrow apple-reveal"><span class="leaf"></span> Featured Modules</span>
+    <h2 class="section-title serif apple-reveal" style="transition-delay:.1s">
+      High quality content,<br><em>at your fingertips.</em>
+    </h2>
+    <p class="section-sub apple-reveal" style="transition-delay:.2s">
+      Access modules across Foundation, Discipline-Specific, and General programme areas.
+      Self-paced, instructor-led, or blended — learn the way that suits you best.
+    </p>
+
+    <div class="module-grid">
+      {% for mod in modules %}
+      <a href="{{ url_for('module_detail', module_id=mod.id) }}" class="module-card apple-reveal" style="transition-delay:{{ loop.index * 0.06 }}s; text-decoration:none; color:inherit">
+        <span class="glyph">{{ mod.title[0] }}</span>
+        <div style="display:flex; gap:6px; flex-wrap:wrap">
+          <span class="chip chip-sage" style="font-size:11px; padding:3px 10px">{{ mod.programme_area }}</span>
+          <span class="chip" style="font-size:11px; padding:3px 10px"><span class="dot"></span>{{ mod.delivery_mode }}</span>
+        </div>
+        <h3>{{ mod.title }}</h3>
+        <p>{{ mod.description[:120] }}{% if mod.description|length > 120 %}...{% endif %}</p>
+        <div class="card-footer">
+          <span style="font-size:12px; color:var(--ink-mute)">{{ mod.cluster }}</span>
+          <span class="arrow">↗</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+
+    <div style="text-align:center; margin-top:40px" class="apple-reveal">
+      <a href="{{ url_for('catalog') }}" class="btn btn-outline btn-lg" data-magnetic>Browse All Modules <span class="arr">→</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Announcements Section -->
+{% if announcements %}
+<section class="page-section section-mist" style="padding:80px 24px">
+  <div class="container">
+    <span class="eyebrow apple-reveal"><span class="leaf"></span> Latest Announcements</span>
+    <h2 class="section-title serif apple-reveal" style="transition-delay:.1s; margin-bottom:32px">
+      Stay <em>informed.</em>
+    </h2>
+
+    <div style="display:grid; gap:14px; max-width:800px">
+      {% for ann in announcements %}
+      <div class="announcement-card apple-reveal" style="transition-delay:{{ loop.index * 0.08 }}s">
+        <h4>{{ ann.title }}</h4>
+        <p>{{ ann.content[:200] }}{% if ann.content|length > 200 %}...{% endif %}</p>
+        <div class="ann-meta">
+          <span class="pulse-dot"></span>
+          <span>Posted by {{ ann.author or 'Admin' }}</span>
+          <span>·</span>
+          <span>{{ ann.created_at[:16] }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- CTA Section -->
+<section class="page-section section-deep" style="padding:100px 24px; text-align:center">
+  <div class="container">
+    <h2 class="section-title serif apple-reveal" style="max-width:none; text-align:center">
+      Ready to start <em>learning?</em>
+    </h2>
+    <p class="section-sub apple-reveal" style="transition-delay:.1s; text-align:center; margin:0 auto 36px">
+      Join YSP Learns today and access a world of knowledge. Browse modules, enroll instantly, and begin your learning journey.
+    </p>
+    <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap" class="apple-reveal" style="transition-delay:.2s">
+      <a href="{{ url_for('catalog') }}" class="btn btn-forest btn-lg" data-magnetic>Explore Modules <span class="arr">↗</span></a>
+      {% if not current_user.is_authenticated %}
+        <a href="{{ url_for('signup') }}" class="btn btn-primary btn-lg" data-magnetic>Join YSP Learns <span class="arr">↗</span></a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div>
+      <span class="brand-text">YSP <i>Learns</i></span>
+      <span class="footer-copy" style="margin-left:16px">© 2026 YSP Learns. All rights reserved.</span>
+    </div>
+    <div class="footer-links">
+      <a href="{{ url_for('catalog') }}">Modules</a>
+      <a href="{{ url_for('login') }}">Sign In</a>
+    </div>
+  </div>
+</footer>
+{% endblock %}

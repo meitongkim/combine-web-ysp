@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit Module' if editing else 'Create Module' }}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Admin Panel</div>
+      <a href="{{ url_for('admin_dashboard') }}" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+      <a href="{{ url_for('admin_modules') }}" class="sidebar-link"><span class="icon">📚</span> Modules</a>
+      <a href="{{ url_for('create_module') }}" class="sidebar-link {{ 'active' if not editing else '' }}"><span class="icon">➕</span> Create Module</a>
+      <a href="{{ url_for('admin_announcements') }}" class="sidebar-link"><span class="icon">📢</span> Announcements</a>
+      <a href="{{ url_for('admin_submissions') }}" class="sidebar-link"><span class="icon">📋</span> Submissions</a>
+    </div>
+  </aside>
+
+  <button class="mobile-menu-btn" id="sidebarToggle"><span>☰</span></button>
+
+  <main class="dashboard-main" style="background:linear-gradient(180deg, #f0f5e6 0%, var(--paper) 60%)">
+    <a href="{{ url_for('admin_modules') }}" class="apple-reveal" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--sage-deep); text-decoration:none; margin-bottom:20px">
+      ← Back to Modules
+    </a>
+
+    <div class="page-header apple-reveal">
+      <span class="eyebrow"><span class="leaf"></span> {{ 'Edit Module' if editing else 'Create Module' }}</span>
+      <h2 class="section-title serif" style="font-size:clamp(28px, 4vw, 42px)">
+        {% if editing %}Edit <em>{{ module.title }}.</em>{% else %}Create a new <em>module.</em>{% endif %}
+      </h2>
+    </div>
+
+    <div class="glass-card no-hover apple-reveal" style="transition-delay:.1s; padding:36px; max-width:700px">
+      <form method="POST" enctype="multipart/form-data"
+            action="{{ url_for('edit_module', module_id=module.id) if editing else url_for('create_module') }}"
+            data-validate>
+
+        <div class="form-group">
+          <label class="form-label">Module Title *</label>
+          <input type="text" name="title" class="form-input" placeholder="e.g. Introduction to Web Development"
+                 value="{{ module.title if editing else '' }}" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea name="description" class="form-textarea" rows="5" placeholder="Describe this module's content and learning objectives...">{{ module.description if editing else '' }}</textarea>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px">
+          <div class="form-group">
+            <label class="form-label">Programme Area *</label>
+            <select name="programme_area" class="form-select" required>
+              <option value="">Select area...</option>
+              {% set areas = ['Foundation Modules', 'Discipline-Specific Modules', 'General Modules'] %}
+              {% for area in areas %}
+                <option value="{{ area }}" {{ 'selected' if editing and module.programme_area == area else '' }}>{{ area }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Cluster *</label>
+            <select name="cluster" class="form-select" required>
+              <option value="">Select cluster...</option>
+              {% set clusters = [
+                'Business & Management',
+                'Design, Media & Humanities',
+                'Applied & Health Sciences',
+                'Built Environment, Engineering & Maritime',
+                'Information & Digital Technologies',
+                'General Education'
+              ] %}
+              {% for c in clusters %}
+                <option value="{{ c }}" {{ 'selected' if editing and module.cluster == c else '' }}>{{ c }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Delivery Mode</label>
+          <select name="delivery_mode" class="form-select">
+            {% set modes = ['Self-paced', 'Instructor-led', 'Blended'] %}
+            {% for m in modes %}
+              <option value="{{ m }}" {{ 'selected' if editing and module.delivery_mode == m else '' }}>{{ m }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Learning Material (File Upload)</label>
+          {% if editing and module.material_original_name %}
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; padding:10px; background:rgba(154,176,120,0.08); border:1px solid rgba(154,176,120,0.2); border-radius:var(--radius-sm)">
+            <span>📎</span>
+            <span style="font-size:13px; color:var(--sage-deep)">Current: {{ module.material_original_name }}</span>
+          </div>
+          {% endif %}
+          <label class="form-file-upload file-upload-trigger" style="cursor:pointer">
+            <input type="file" name="material" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar,.png,.jpg,.jpeg,.gif,.mp4,.py,.java,.c,.cpp">
+            <span style="font-size:28px">📤</span>
+            <div>
+              <div class="file-label" style="font-size:14px; color:var(--ink-soft)">{{ 'Upload new file to replace' if editing and module.material_original_name else 'Choose a file to upload' }}</div>
+              <div style="font-size:12px; color:var(--ink-mute); margin-top:2px">Max 16MB — PDF, DOC, PPT, ZIP, images, code files</div>
+            </div>
+          </label>
+        </div>
+
+        <div style="display:flex; gap:12px; margin-top:8px">
+          <button type="submit" class="btn btn-forest btn-lg" data-magnetic>
+            {{ 'Update Module' if editing else 'Create Module' }} <span class="arr">↗</span>
+          </button>
+          <a href="{{ url_for('admin_modules') }}" class="btn btn-ghost btn-lg">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </main>
+</div>
+{% endblock %}

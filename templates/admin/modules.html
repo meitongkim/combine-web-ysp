@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Manage Modules{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Admin Panel</div>
+      <a href="{{ url_for('admin_dashboard') }}" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+      <a href="{{ url_for('admin_modules') }}" class="sidebar-link active"><span class="icon">📚</span> Modules</a>
+      <a href="{{ url_for('create_module') }}" class="sidebar-link"><span class="icon">➕</span> Create Module</a>
+      <a href="{{ url_for('admin_announcements') }}" class="sidebar-link"><span class="icon">📢</span> Announcements</a>
+      <a href="{{ url_for('admin_submissions') }}" class="sidebar-link"><span class="icon">📋</span> Submissions</a>
+    </div>
+  </aside>
+
+  <button class="mobile-menu-btn" id="sidebarToggle"><span>☰</span></button>
+
+  <main class="dashboard-main" style="background:linear-gradient(180deg, #f0f5e6 0%, var(--paper) 60%)">
+    <div class="page-header apple-reveal">
+      <span class="eyebrow"><span class="leaf"></span> Module Management</span>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px">
+        <h2 class="section-title serif" style="font-size:clamp(28px, 4vw, 42px); margin-bottom:0">
+          All <em>Modules</em>
+        </h2>
+        <a href="{{ url_for('create_module') }}" class="btn btn-forest" data-magnetic>Create Module <span class="arr">↗</span></a>
+      </div>
+    </div>
+
+    {% if modules %}
+    <div class="glass-card no-hover apple-reveal" style="transition-delay:.1s; padding:0; overflow-x:auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Module</th>
+            <th>Programme Area</th>
+            <th>Cluster</th>
+            <th>Mode</th>
+            <th>Enrolled</th>
+            <th>Materials</th>
+            <th style="text-align:right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for mod in modules %}
+          <tr>
+            <td>
+              <div style="display:flex; align-items:center; gap:10px">
+                <span class="glyph" style="width:36px; height:36px; font-size:16px; border-radius:10px; flex-shrink:0">{{ mod.title[0] }}</span>
+                <div>
+                  <div style="font-weight:500">{{ mod.title }}</div>
+                  <div style="font-size:12px; color:var(--ink-mute)">{{ mod.instructor or 'Admin' }}</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge badge-programme">{{ mod.programme_area.split(' ')[0] }}</span></td>
+            <td style="font-size:13px">{{ mod.cluster }}</td>
+            <td><span class="chip" style="font-size:11px; padding:2px 8px"><span class="dot"></span>{{ mod.delivery_mode }}</span></td>
+            <td style="text-align:center; font-weight:500">{{ mod.enrolled_count }}</td>
+            <td>
+              {% if mod.material_filename %}
+                <span style="color:var(--sage-deep)">📎 Yes</span>
+              {% else %}
+                <span style="color:var(--ink-mute)">—</span>
+              {% endif %}
+            </td>
+            <td style="text-align:right">
+              <div style="display:flex; gap:6px; justify-content:flex-end">
+                <a href="{{ url_for('edit_module', module_id=mod.id) }}" class="btn btn-outline btn-sm">Edit</a>
+                <form method="POST" action="{{ url_for('delete_module', module_id=mod.id) }}" style="display:inline">
+                  <button type="submit" class="btn btn-danger btn-sm" data-confirm="Delete this module? All enrollments and submissions will be removed.">Delete</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state apple-reveal">
+      <div class="empty-icon">📚</div>
+      <h3 class="serif">No modules yet</h3>
+      <p>Create your first module to get started.</p>
+      <a href="{{ url_for('create_module') }}" class="btn btn-forest" data-magnetic>Create Module <span class="arr">↗</span></a>
+    </div>
+    {% endif %}
+  </main>
+</div>
+{% endblock %}
