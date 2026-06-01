@@ -27,6 +27,16 @@ from werkzeug.utils import secure_filename
 # ─── Configuration ───────────────────────────────────────────────────────────
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Manually load local .env file if present
+env_path = os.path.join(BASE_DIR, '.env')
+if os.path.exists(env_path):
+    with open(env_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            if '=' in line and not line.strip().startswith('#'):
+                key, val = line.strip().split('=', 1)
+                os.environ[key.strip()] = val.strip()
+
 DB_PATH = os.path.join(BASE_DIR, 'database.db')
 UPLOAD_DIR = os.path.join(BASE_DIR, 'uploads')
 ALLOWED_EXTENSIONS = {
