@@ -44,15 +44,19 @@ if IS_VERCEL:
     DB_PATH = '/tmp/database.db'
     UPLOAD_DIR = '/tmp/uploads'
     
-    # Copy seed database to writeable /tmp folder if not present
-    original_db = os.path.join(BASE_DIR, 'database.db')
-    if not os.path.exists(DB_PATH) and os.path.exists(original_db):
-        import shutil
-        shutil.copy2(original_db, DB_PATH)
-        try:
-            os.chmod(DB_PATH, 0o666)
-        except Exception:
-            pass
+    try:
+        # Copy seed database to writeable /tmp folder if not present
+        original_db = os.path.join(BASE_DIR, 'database.db')
+        if not os.path.exists(DB_PATH) and os.path.exists(original_db):
+            import shutil
+            # Use copyfile instead of copy2 to prevent copying OS metadata, which fails on Vercel
+            shutil.copyfile(original_db, DB_PATH)
+            try:
+                os.chmod(DB_PATH, 0o666)
+            except Exception:
+                pass
+    except Exception as e:
+        print(f"Failed to initialize Vercel database path: {e}")
 else:
     DB_PATH = os.path.join(BASE_DIR, 'database.db')
     UPLOAD_DIR = os.path.join(BASE_DIR, 'uploads')
@@ -112,10 +116,11 @@ def load_user(user_id):
 # ─── Database Helpers ────────────────────────────────────────────────────────
 
 def get_db():
-    """Create a database connection with WAL mode for concurrency."""
+    """Create a database connection. Bypasses WAL mode on Vercel."""
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA journal_mode=WAL")
+    if not IS_VERCEL:
+        conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA foreign_keys=ON")
     return conn
 
