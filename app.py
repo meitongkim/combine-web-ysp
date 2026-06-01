@@ -37,8 +37,25 @@ if os.path.exists(env_path):
                 key, val = line.strip().split('=', 1)
                 os.environ[key.strip()] = val.strip()
 
-DB_PATH = os.path.join(BASE_DIR, 'database.db')
-UPLOAD_DIR = os.path.join(BASE_DIR, 'uploads')
+# Detect if running in Vercel serverless environment
+IS_VERCEL = os.environ.get('VERCEL') == '1' or 'VERCEL' in os.environ
+
+if IS_VERCEL:
+    DB_PATH = '/tmp/database.db'
+    UPLOAD_DIR = '/tmp/uploads'
+    
+    # Copy seed database to writeable /tmp folder if not present
+    original_db = os.path.join(BASE_DIR, 'database.db')
+    if not os.path.exists(DB_PATH) and os.path.exists(original_db):
+        import shutil
+        shutil.copy2(original_db, DB_PATH)
+        try:
+            os.chmod(DB_PATH, 0o666)
+        except Exception:
+            pass
+else:
+    DB_PATH = os.path.join(BASE_DIR, 'database.db')
+    UPLOAD_DIR = os.path.join(BASE_DIR, 'uploads')
 ALLOWED_EXTENSIONS = {
     'pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx',
     'txt', 'zip', 'rar', 'png', 'jpg', 'jpeg', 'gif', 'mp4', 'py', 'java', 'c', 'cpp'
