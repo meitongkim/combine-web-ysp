@@ -1,11 +1,15 @@
 import os
 import sys
 
+# Add parent (root) directory to Python path
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, BASE_DIR)
+
 startup_error = None
 tb_str = ""
 
 try:
-    # Try importing the main app.py file
+    # Try importing the main app.py file from root
     from app import app
 except Exception as e:
     import traceback
