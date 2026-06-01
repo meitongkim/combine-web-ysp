@@ -1,0 +1,9 @@
+.env
+__pycache__/
+*.pyc
+database.db
+database.db-shm
+database.db-wal
+instance/
+.pytest_cache/
+*.log
