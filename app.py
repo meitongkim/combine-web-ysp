@@ -28,38 +28,11 @@ from werkzeug.utils import secure_filename
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Manually load local .env file if present
-env_path = os.path.join(BASE_DIR, '.env')
-if os.path.exists(env_path):
-    with open(env_path, 'r', encoding='utf-8') as f:
-        for line in f:
-            if '=' in line and not line.strip().startswith('#'):
-                key, val = line.strip().split('=', 1)
-                os.environ[key.strip()] = val.strip()
-
-# Detect if running in Vercel serverless environment
-IS_VERCEL = os.environ.get('VERCEL') == '1' or 'VERCEL' in os.environ
-
-if IS_VERCEL:
-    DB_PATH = '/tmp/database.db'
-    UPLOAD_DIR = '/tmp/uploads'
-    
-    try:
-        # Copy seed database to writeable /tmp folder if not present
-        original_db = os.path.join(BASE_DIR, 'database.db')
-        if not os.path.exists(DB_PATH) and os.path.exists(original_db):
-            import shutil
-            # Use copyfile instead of copy2 to prevent copying OS metadata, which fails on Vercel
-            shutil.copyfile(original_db, DB_PATH)
-            try:
-                os.chmod(DB_PATH, 0o666)
-            except Exception:
-                pass
-    except Exception as e:
-        print(f"Failed to initialize Vercel database path: {e}")
-else:
-    DB_PATH = os.path.join(BASE_DIR, 'database.db')
-    UPLOAD_DIR = os.path.join(BASE_DIR, 'uploads')
+startup_error = None
+tb_str = ""
+IS_VERCEL = False
+DB_PATH = ""
+UPLOAD_DIR = ""
 ALLOWED_EXTENSIONS = {
     'pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx',
     'txt', 'zip', 'rar', 'png', 'jpg', 'jpeg', 'gif', 'mp4', 'py', 'java', 'c', 'cpp'
@@ -71,11 +44,50 @@ app = Flask(
     template_folder=os.path.join(BASE_DIR, 'templates'),
     static_folder=os.path.join(BASE_DIR, 'static')
 )
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'ysp-learns-lms-secret-key-change-in-production')
-app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
-app.config['GEMINI_API_KEY'] = os.environ.get('GEMINI_API_KEY', '')
 
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+try:
+    # Manually load local .env file if present
+    env_path = os.path.join(BASE_DIR, '.env')
+    if os.path.exists(env_path):
+        with open(env_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                if '=' in line and not line.strip().startswith('#'):
+                    key, val = line.strip().split('=', 1)
+                    os.environ[key.strip()] = val.strip()
+
+    # Detect if running in Vercel serverless environment
+    IS_VERCEL = os.environ.get('VERCEL') == '1' or 'VERCEL' in os.environ
+
+    if IS_VERCEL:
+        DB_PATH = '/tmp/database.db'
+        UPLOAD_DIR = '/tmp/uploads'
+        
+        try:
+            # Copy seed database to writeable /tmp folder if not present
+            original_db = os.path.join(BASE_DIR, 'database.db')
+            if not os.path.exists(DB_PATH) and os.path.exists(original_db):
+                import shutil
+                # Use copyfile instead of copy2 to prevent copying OS metadata, which fails on Vercel
+                shutil.copyfile(original_db, DB_PATH)
+                try:
+                    os.chmod(DB_PATH, 0o666)
+                except Exception:
+                    pass
+        except Exception as e:
+            print(f"Failed to initialize Vercel database path: {e}")
+    else:
+        DB_PATH = os.path.join(BASE_DIR, 'database.db')
+        UPLOAD_DIR = os.path.join(BASE_DIR, 'uploads')
+
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'ysp-learns-lms-secret-key-change-in-production')
+    app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
+    app.config['GEMINI_API_KEY'] = os.environ.get('GEMINI_API_KEY', '')
+
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+except Exception as e:
+    import traceback
+    startup_error = e
+    tb_str = traceback.format_exc()
 
 # ─── Flask-Login Setup ───────────────────────────────────────────────────────
 
@@ -276,7 +288,44 @@ def migrate_db():
     conn.close()
 
 # Run migration at import time
-migrate_db()
+try:
+    if startup_error is None:
+        migrate_db()
+except Exception as e:
+    import traceback
+    startup_error = e
+    tb_str = traceback.format_exc()
+    print(f"Migration error: {tb_str}")
+
+# Intercept all requests if startup failed
+@app.before_request
+def check_startup_status():
+    if startup_error is not None:
+        return f"""
+        <html>
+            <head>
+                <title>Startup / Migration Error</title>
+                <style>
+                    body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; background: #fff5f5; color: #2d3748; line-height: 1.6; }}
+                    .container {{ max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.1); border-top: 4px solid #e53e3e; }}
+                    h1 {{ color: #c53030; margin-top: 0; font-size: 24px; }}
+                    p {{ color: #4a5568; margin-bottom: 20px; }}
+                    pre {{ background: #f7fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 6px; overflow-x: auto; font-family: SFMono-Regular, Consolas, Monaco, monospace; font-size: 14px; color: #4a5568; }}
+                    .info {{ margin-top: 20px; font-size: 12px; color: #a0aec0; border-top: 1px solid #edf2f7; padding-top: 15px; }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>Application Startup Error</h1>
+                    <p>The Flask application encountered an error during import or database migration on Vercel:</p>
+                    <pre>{tb_str}</pre>
+                    <div class="info">
+                        Running on Vercel: {IS_VERCEL} | Database Path: {DB_PATH} | Uploads Dir: {UPLOAD_DIR}
+                    </div>
+                </div>
+            </body>
+        </html>
+        """, 500
 
 
 # ─── Public Routes ───────────────────────────────────────────────────────────
