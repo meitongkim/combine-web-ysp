@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Manage Resources — Admin{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Admin Panel</div>
+      <a href="{{ url_for('admin_dashboard') }}" class="sidebar-link">
+        <span class="icon">📊</span> Dashboard
+      </a>
+      <a href="{{ url_for('admin_modules') }}" class="sidebar-link">
+        <span class="icon">📚</span> Modules
+      </a>
+      <a href="{{ url_for('admin_submissions') }}" class="sidebar-link">
+        <span class="icon">📝</span> Submissions
+      </a>
+      <a href="{{ url_for('admin_announcements') }}" class="sidebar-link">
+        <span class="icon">📢</span> Announcements
+      </a>
+      <a href="{{ url_for('admin_resources') }}" class="sidebar-link active">
+        <span class="icon">📄</span> Resources
+      </a>
+    </div>
+    <div class="sidebar-section" style="margin-top:auto; padding-top:16px; border-top:1px solid var(--line)">
+      <div style="padding:10px 14px">
+        <div style="font-size:13px; font-weight:500; color:var(--ink)">{{ current_user.full_name }}</div>
+        <div style="font-size:12px; color:var(--ink-mute)">{{ current_user.email }}</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Mobile sidebar toggle -->
+  <button class="mobile-menu-btn" id="sidebarToggle"><span>☰</span></button>
+
+  <!-- Main Content -->
+  <main class="dashboard-main" style="background:linear-gradient(180deg, #f0f5e6 0%, var(--paper) 60%)">
+    <div class="page-header apple-reveal">
+      <span class="eyebrow"><span class="leaf"></span> Resource Management</span>
+      <h2 class="section-title serif" style="font-size:clamp(24px, 3.5vw, 38px)">
+        Manage <em>Resources</em>
+      </h2>
+    </div>
+
+    <!-- Add Resource Form -->
+    <div class="apple-reveal" style="transition-delay:.1s; margin-bottom:32px">
+      <div style="background:rgba(255,255,255,0.75); backdrop-filter:blur(12px); border:1px solid var(--line); border-radius:20px; padding:28px">
+        <h3 class="serif" style="font-size:18px; margin:0 0 20px">Add New <em>Resource</em></h3>
+
+        <form method="POST" action="{{ url_for('admin_resources') }}" enctype="multipart/form-data" style="display:grid; gap:16px">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
+            <div>
+              <label style="display:block; font-size:12px; font-weight:600; color:var(--ink-mute); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em">Title *</label>
+              <input type="text" name="title" required placeholder="Resource title"
+                     style="width:100%; padding:10px 14px; border:1px solid var(--line); border-radius:10px; font-size:14px; box-sizing:border-box; outline:none" />
+            </div>
+            <div>
+              <label style="display:block; font-size:12px; font-weight:600; color:var(--ink-mute); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em">Category</label>
+              <select name="category" style="width:100%; padding:10px 14px; border:1px solid var(--line); border-radius:10px; font-size:14px; box-sizing:border-box; outline:none; background:white">
+                <option value="Article">📰 Article</option>
+                <option value="Research Paper">📑 Research Paper</option>
+                <option value="Template">📋 Template</option>
+                <option value="News">🗞️ News</option>
+                <option value="Video">🎬 Video</option>
+                <option value="Other">📎 Other</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label style="display:block; font-size:12px; font-weight:600; color:var(--ink-mute); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em">Description</label>
+            <textarea name="description" rows="2" placeholder="Brief description of the resource..."
+                      style="width:100%; padding:10px 14px; border:1px solid var(--line); border-radius:10px; font-size:14px; box-sizing:border-box; outline:none; resize:vertical; font-family:inherit"></textarea>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
+            <div>
+              <label style="display:block; font-size:12px; font-weight:600; color:var(--ink-mute); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em">External URL</label>
+              <input type="url" name="url" placeholder="https://..."
+                     style="width:100%; padding:10px 14px; border:1px solid var(--line); border-radius:10px; font-size:14px; box-sizing:border-box; outline:none" />
+            </div>
+            <div>
+              <label style="display:block; font-size:12px; font-weight:600; color:var(--ink-mute); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em">Or Upload File</label>
+              <input type="file" name="resource_file"
+                     style="width:100%; padding:8px 14px; border:1px solid var(--line); border-radius:10px; font-size:13px; box-sizing:border-box; outline:none; background:white" />
+            </div>
+          </div>
+          <button type="submit" class="btn btn-forest" style="justify-self:start">
+            Add Resource <span class="arr">+</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Resource List -->
+    <div class="apple-reveal" style="transition-delay:.15s">
+      <h3 class="serif" style="font-size:20px; margin:0 0 16px">All <em>Resources</em> ({{ resources|length }})</h3>
+
+      {% if resources %}
+      <div style="display:grid; gap:12px">
+        {% for r in resources %}
+        <div style="background:rgba(255,255,255,0.75); backdrop-filter:blur(12px); border:1px solid var(--line); border-radius:14px; padding:16px 20px; display:flex; align-items:center; gap:16px; flex-wrap:wrap">
+          <span style="font-size:24px; flex-shrink:0">
+            {% if r.category == 'Article' %}📰{% elif r.category == 'Research Paper' %}📑{% elif r.category == 'Template' %}📋{% elif r.category == 'News' %}🗞️{% elif r.category == 'Video' %}🎬{% else %}📎{% endif %}
+          </span>
+          <div style="flex:1; min-width:200px">
+            <div style="font-size:14px; font-weight:600; color:var(--ink)">{{ r.title }}</div>
+            <div style="font-size:12px; color:var(--ink-mute)">{{ r.category }} · {{ r.created_at[:10] }} · {{ r.author or 'Admin' }}</div>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center">
+            {% if r.url %}
+            <a href="{{ r.url }}" target="_blank" style="font-size:12px; color:#89a36c; text-decoration:none">Open ↗</a>
+            {% endif %}
+            {% if r.file_filename %}
+            <a href="{{ url_for('uploaded_file', filename=r.file_filename) }}" style="font-size:12px; color:#89a36c; text-decoration:none">📥</a>
+            {% endif %}
+            <form method="POST" action="{{ url_for('delete_resource', res_id=r.id) }}" style="margin:0" onsubmit="return confirm('Delete this resource?')">
+              <button type="submit" style="background:none; border:none; color:#e74c3c; cursor:pointer; font-size:14px; padding:4px 8px">🗑</button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="background:rgba(255,255,255,0.7); border:1px solid var(--line); border-radius:14px; padding:40px; text-align:center">
+        <div style="font-size:36px; margin-bottom:12px">📄</div>
+        <p style="color:var(--ink-mute); font-size:14px">No resources yet. Add one using the form above.</p>
+      </div>
+      {% endif %}
+    </div>
+  </main>
+</div>
+{% endblock %}

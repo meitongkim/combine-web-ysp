@@ -15,7 +15,7 @@ from functools import wraps
 
 from flask import (
     Flask, render_template, request, redirect, url_for,
-    flash, send_from_directory, abort, session
+    flash, send_from_directory, abort, session, jsonify
 )
 from flask_login import (
     LoginManager, UserMixin, login_user, logout_user,
@@ -42,6 +42,7 @@ app = Flask(
 )
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'ysp-learns-lms-secret-key-change-in-production')
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
+app.config['GEMINI_API_KEY'] = os.environ.get('GEMINI_API_KEY', '')
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
@@ -108,6 +109,23 @@ def save_upload(file):
     return None, None
 
 
+# ─── Calendar Secure Tokens ──────────────────────────────────────────────────
+
+def get_calendar_token(user_id):
+    """Generate a secure HMAC token for user's iCalendar subscription feed."""
+    import hmac
+    import hashlib
+    secret = app.config['SECRET_KEY'].encode('utf-8')
+    message = f"cal_{user_id}".encode('utf-8')
+    return hmac.new(secret, message, hashlib.sha256).hexdigest()[:16]
+
+
+def verify_calendar_token(user_id, token):
+    """Verify that the user's feed subscription token is valid."""
+    import hmac
+    return hmac.compare_digest(get_calendar_token(user_id), token)
+
+
 # ─── Role Decorators ─────────────────────────────────────────────────────────
 
 def admin_required(f):
@@ -117,7 +135,7 @@ def admin_required(f):
     def decorated(*args, **kwargs):
         if not current_user.is_admin():
             flash('Access denied. Admin privileges required.', 'error')
-            return redirect(url_for('index'))
+            return redirect(url_for('learn_landing'))
         return f(*args, **kwargs)
     return decorated
 
@@ -129,7 +147,7 @@ def student_required(f):
     def decorated(*args, **kwargs):
         if current_user.role != 'student':
             flash('Access denied. Student access only.', 'error')
-            return redirect(url_for('index'))
+            return redirect(url_for('learn_landing'))
         return f(*args, **kwargs)
     return decorated
 
@@ -138,15 +156,108 @@ def student_required(f):
 
 @app.context_processor
 def inject_now():
-    """Make current datetime available in all templates."""
-    return {'now': datetime.now()}
+    """Make current datetime and calendar helper available in all templates."""
+    return {
+        'now': datetime.now(),
+        'get_calendar_token': get_calendar_token
+    }
+
+
+# ─── Database Migration (add new tables to existing DB safely) ───────────────
+
+def migrate_db():
+    """Create new tables if they don't exist. Safe to call on existing DB."""
+    conn = get_db()
+    c = conn.cursor()
+
+    c.execute('''CREATE TABLE IF NOT EXISTS route_enrollments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        student_id INTEGER NOT NULL,
+        route_name TEXT NOT NULL CHECK(route_name IN ('Research', 'Policy', 'Business', 'Diplomacy', 'Environment', 'Community')),
+        current_phase TEXT NOT NULL DEFAULT 'Foundations' CHECK(current_phase IN ('Foundations', 'Deep Dive', 'Capstone')),
+        current_week INTEGER NOT NULL DEFAULT 1,
+        start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+        UNIQUE(student_id, route_name)
+    )''')
+
+    c.execute('''CREATE TABLE IF NOT EXISTS capstone_milestones (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        student_id INTEGER NOT NULL,
+        route_enrollment_id INTEGER NOT NULL,
+        draft_submitted_at TIMESTAMP,
+        feedback_received_at TIMESTAMP,
+        revised_draft_at TIMESTAMP,
+        published_at TIMESTAMP,
+        project_title TEXT,
+        notes TEXT,
+        FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (route_enrollment_id) REFERENCES route_enrollments(id) ON DELETE CASCADE,
+        UNIQUE(student_id, route_enrollment_id)
+    )''')
+
+    c.execute('''CREATE TABLE IF NOT EXISTS mentor_sessions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        student_id INTEGER NOT NULL,
+        session_date TIMESTAMP NOT NULL,
+        duration_minutes INTEGER DEFAULT 60,
+        notes TEXT,
+        mentor_name TEXT,
+        next_session_date TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
+    )''')
+
+    c.execute('''CREATE TABLE IF NOT EXISTS certificates (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        student_id INTEGER NOT NULL,
+        module_id INTEGER NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending', 'issued')),
+        issued_at TIMESTAMP,
+        certificate_code TEXT,
+        FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE,
+        UNIQUE(student_id, module_id)
+    )''')
+
+    c.execute('''CREATE TABLE IF NOT EXISTS resources (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        description TEXT,
+        category TEXT NOT NULL DEFAULT 'Article' CHECK(category IN ('Article', 'Research Paper', 'Template', 'News', 'Video', 'Other')),
+        url TEXT,
+        file_filename TEXT,
+        file_original_name TEXT,
+        admin_id INTEGER,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (admin_id) REFERENCES users(id) ON DELETE SET NULL
+    )''')
+
+    # Indexes
+    c.execute('CREATE INDEX IF NOT EXISTS idx_route_enrollments_student ON route_enrollments(student_id)')
+    c.execute('CREATE INDEX IF NOT EXISTS idx_capstone_student ON capstone_milestones(student_id)')
+    c.execute('CREATE INDEX IF NOT EXISTS idx_mentor_sessions_student ON mentor_sessions(student_id)')
+    c.execute('CREATE INDEX IF NOT EXISTS idx_certificates_student ON certificates(student_id)')
+    c.execute('CREATE INDEX IF NOT EXISTS idx_resources_category ON resources(category)')
+
+    conn.commit()
+    conn.close()
+
+# Run migration at import time
+migrate_db()
 
 
 # ─── Public Routes ───────────────────────────────────────────────────────────
 
 @app.route('/')
 def index():
-    """Landing page with featured modules and stats."""
+    """Main homepage of YSP Website."""
+    return render_template('index.html')
+
+
+@app.route('/learn')
+def learn_landing():
+    """Landing page with featured modules and stats for YSP Learns."""
     conn = get_db()
     modules = conn.execute(
         "SELECT * FROM modules ORDER BY created_at DESC LIMIT 6"
@@ -294,7 +405,7 @@ def login():
 def signup():
     """Student registration."""
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('learn_landing'))
 
     if request.method == 'POST':
         full_name = request.form.get('full_name', '').strip()
@@ -349,7 +460,7 @@ def logout():
     """Log out the current user."""
     logout_user()
     flash('You have been logged out successfully.', 'info')
-    return redirect(url_for('index'))
+    return redirect(url_for('learn_landing'))
 
 
 # ─── Student Routes ──────────────────────────────────────────────────────────
@@ -386,7 +497,7 @@ def enroll(module_id):
 @app.route('/student/dashboard')
 @student_required
 def student_dashboard():
-    """Student dashboard: enrolled modules, announcements, stats."""
+    """Student dashboard: enrolled modules, announcements, stats, progress overview."""
     conn = get_db()
     enrollments = conn.execute(
         "SELECT e.*, m.title, m.programme_area, m.cluster, m.delivery_mode, m.description "
@@ -407,11 +518,45 @@ def student_dashboard():
         (current_user.id,)
     ).fetchone()[0]
 
+    # New: Route enrollment summary
+    route_enrollment = conn.execute(
+        "SELECT * FROM route_enrollments WHERE student_id = ?",
+        (current_user.id,)
+    ).fetchone()
+
+    # New: Certificate counts
+    certs_issued = conn.execute(
+        "SELECT COUNT(*) FROM certificates WHERE student_id = ? AND status = 'issued'",
+        (current_user.id,)
+    ).fetchone()[0]
+    certs_pending = conn.execute(
+        "SELECT COUNT(*) FROM certificates WHERE student_id = ? AND status = 'pending'",
+        (current_user.id,)
+    ).fetchone()[0]
+
+    # New: Upcoming mentor session
+    next_mentor = conn.execute(
+        "SELECT * FROM mentor_sessions WHERE student_id = ? AND next_session_date IS NOT NULL "
+        "ORDER BY next_session_date DESC LIMIT 1",
+        (current_user.id,)
+    ).fetchone()
+
+    # New: Mentor sessions count
+    mentor_count = conn.execute(
+        "SELECT COUNT(*) FROM mentor_sessions WHERE student_id = ?",
+        (current_user.id,)
+    ).fetchone()[0]
+
     conn.close()
     return render_template('student/dashboard.html',
                            enrollments=enrollments,
                            announcements=announcements,
-                           submissions_count=submissions_count)
+                           submissions_count=submissions_count,
+                           route_enrollment=route_enrollment,
+                           certs_issued=certs_issued,
+                           certs_pending=certs_pending,
+                           next_mentor=next_mentor,
+                           mentor_count=mentor_count)
 
 
 @app.route('/student/module/<int:module_id>', methods=['GET', 'POST'])
@@ -475,6 +620,417 @@ def student_module(module_id):
                            module=module,
                            enrollment=enrollment,
                            submissions=submissions)
+
+
+@app.route('/student/calendar')
+@student_required
+def student_calendar():
+    """Render student calendar page."""
+    from datetime import timedelta
+    conn = get_db()
+    
+    # Query all student's enrollments and their latest submissions
+    rows = conn.execute(
+        "SELECT e.*, m.title, m.description, m.programme_area, m.delivery_mode, m.cluster, MAX(s.submitted_at) as submitted_at "
+        "FROM enrollments e "
+        "JOIN modules m ON e.module_id = m.id "
+        "LEFT JOIN submissions s ON e.student_id = s.student_id AND e.module_id = s.module_id "
+        "WHERE e.student_id = ? "
+        "GROUP BY e.id "
+        "ORDER BY e.enrolled_at DESC",
+        (current_user.id,)
+    ).fetchall()
+    
+    # Also fetch standard announcements to show platform events in the calendar!
+    announcements = conn.execute(
+        "SELECT * FROM announcements ORDER BY created_at DESC LIMIT 10"
+    ).fetchall()
+    
+    events = []
+    
+    # Process enrollment events
+    for row in rows:
+        title = row['title']
+        enrolled_dt = datetime.strptime(row['enrolled_at'][:19], "%Y-%m-%d %H:%M:%S")
+        
+        # 1. Started event
+        events.append({
+            'id': f"start_{row['module_id']}",
+            'title': f"🌱 Started: {title}",
+            'date': enrolled_dt.strftime('%Y-%m-%d'),
+            'type': 'start',
+            'desc': f"You enrolled in the module '{title}'."
+        })
+        
+        # 2. Target deadline (30 days from enrollment)
+        target_dt = enrolled_dt + timedelta(days=30)
+        events.append({
+            'id': f"target_{row['module_id']}",
+            'title': f"⏰ Target: {title}",
+            'date': target_dt.strftime('%Y-%m-%d'),
+            'type': 'target',
+            'desc': f"Target date to complete '{title}' (30 days limit)."
+        })
+        
+        # 3. Completed event (if completed)
+        if row['progress'] == 'completed' and row['submitted_at']:
+            sub_dt = datetime.strptime(row['submitted_at'][:19], "%Y-%m-%d %H:%M:%S")
+            events.append({
+                'id': f"completed_{row['module_id']}",
+                'title': f"✅ Completed: {title}",
+                'date': sub_dt.strftime('%Y-%m-%d'),
+                'type': 'completed',
+                'desc': f"You submitted the assignment and completed '{title}'!"
+            })
+            
+    # Process announcements as platform events
+    for ann in announcements:
+        ann_dt = datetime.strptime(ann['created_at'][:19], "%Y-%m-%d %H:%M:%S")
+        events.append({
+            'id': f"ann_{ann['id']}",
+            'title': f"📢 Note: {ann['title']}",
+            'date': ann_dt.strftime('%Y-%m-%d'),
+            'type': 'announcement',
+            'desc': ann['content'][:150] + ('...' if len(ann['content']) > 150 else '')
+        })
+
+    # Get sidebar list of enrollments (needed for sidebar rendering in dashboard layout)
+    enrollments_sidebar = conn.execute(
+        "SELECT e.*, m.title FROM enrollments e JOIN modules m ON e.module_id = m.id "
+        "WHERE e.student_id = ? ORDER BY e.enrolled_at DESC",
+        (current_user.id,)
+    ).fetchall()
+    
+    conn.close()
+    
+    return render_template(
+        'student/calendar.html',
+        events=events,
+        enrollments=enrollments_sidebar
+    )
+
+
+@app.route('/learn/calendar/feed/<int:user_id>/<token>.ics')
+def calendar_feed(user_id, token):
+    """Serve dynamically generated iCalendar (RFC 5545) subscription feed for a user."""
+    from flask import Response
+    from datetime import timedelta
+    
+    # Verify the token
+    if not verify_calendar_token(user_id, token):
+        abort(403)
+        
+    conn = get_db()
+    
+    # Verify user exists
+    user = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+    if not user:
+        conn.close()
+        abort(404)
+        
+    # Query student's enrollments and submissions
+    rows = conn.execute(
+        "SELECT e.*, m.title, m.description, m.programme_area, MAX(s.submitted_at) as submitted_at "
+        "FROM enrollments e "
+        "JOIN modules m ON e.module_id = m.id "
+        "LEFT JOIN submissions s ON e.student_id = s.student_id AND e.module_id = s.module_id "
+        "WHERE e.student_id = ? "
+        "GROUP BY e.id",
+        (user_id,)
+    ).fetchall()
+    
+    conn.close()
+    
+    # Construct iCalendar content
+    ical_lines = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//YSP Learns//Calendar Feed//EN",
+        "CALSCALE:GREGORIAN",
+        "METHOD:PUBLISH",
+        f"X-WR-CALNAME:YSP Learns - {user['full_name']}",
+        "X-WR-TIMEZONE:UTC"
+    ]
+    
+    now_str = datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')
+    
+    for row in rows:
+        title = row['title']
+        clean_title = title.replace(",", "\\,").replace(";", "\\;")
+        enrolled_dt = datetime.strptime(row['enrolled_at'][:19], "%Y-%m-%d %H:%M:%S")
+        
+        # 1. Started event
+        start_date_str = enrolled_dt.strftime('%Y%m%d')
+        ical_lines.extend([
+            "BEGIN:VEVENT",
+            f"UID:ysp_start_{user_id}_{row['module_id']}",
+            f"DTSTAMP:{now_str}",
+            f"DTSTART;VALUE=DATE:{start_date_str}",
+            f"SUMMARY:Started: {clean_title}",
+            f"DESCRIPTION:You enrolled in the module '{clean_title}' in {row['programme_area']}.",
+            "STATUS:CONFIRMED",
+            "END:VEVENT"
+        ])
+        
+        # 2. Target deadline
+        target_dt = enrolled_dt + timedelta(days=30)
+        target_date_str = target_dt.strftime('%Y%m%d')
+        ical_lines.extend([
+            "BEGIN:VEVENT",
+            f"UID:ysp_target_{user_id}_{row['module_id']}",
+            f"DTSTAMP:{now_str}",
+            f"DTSTART;VALUE=DATE:{target_date_str}",
+            f"SUMMARY:Target: {clean_title}",
+            f"DESCRIPTION:Target completion date for the module '{clean_title}'. Please submit your assignment.",
+            "STATUS:CONFIRMED",
+            "END:VEVENT"
+        ])
+        
+        # 3. Completed event (if completed)
+        if row['progress'] == 'completed' and row['submitted_at']:
+            sub_dt = datetime.strptime(row['submitted_at'][:19], "%Y-%m-%d %H:%M:%S")
+            sub_date_str = sub_dt.strftime('%Y%m%d')
+            ical_lines.extend([
+                "BEGIN:VEVENT",
+                f"UID:ysp_comp_{user_id}_{row['module_id']}",
+                f"DTSTAMP:{now_str}",
+                f"DTSTART;VALUE=DATE:{sub_date_str}",
+                f"SUMMARY:Completed: {clean_title}",
+                f"DESCRIPTION:You completed and submitted the assignment for '{clean_title}'. Great job!",
+                "STATUS:CONFIRMED",
+                "END:VEVENT"
+            ])
+            
+    ical_lines.append("END:VCALENDAR")
+    ical_content = "\r\n".join(ical_lines) + "\r\n"
+    
+    return Response(
+        ical_content,
+        mimetype='text/calendar',
+        headers={
+            'Content-Disposition': f'attachment; filename=ysp_learns_calendar_{user_id}.ics',
+            'Cache-Control': 'no-cache, no-store, must-revalidate'
+        }
+    )
+
+
+# ─── Student Resources Route ────────────────────────────────────────────────
+
+@app.route('/student/resources')
+@student_required
+def student_resources():
+    """Browse curated resources: articles, papers, templates, news, videos."""
+    conn = get_db()
+    category = request.args.get('category', '')
+    search = request.args.get('search', '')
+
+    query = "SELECT r.*, u.full_name as author FROM resources r LEFT JOIN users u ON r.admin_id = u.id WHERE 1=1"
+    params = []
+
+    if category:
+        query += " AND r.category = ?"
+        params.append(category)
+    if search:
+        query += " AND (r.title LIKE ? OR r.description LIKE ?)"
+        params.extend([f'%{search}%', f'%{search}%'])
+
+    query += " ORDER BY r.created_at DESC"
+    resources = conn.execute(query, params).fetchall()
+
+    categories = conn.execute(
+        "SELECT DISTINCT category FROM resources ORDER BY category"
+    ).fetchall()
+
+    # Sidebar enrollments
+    enrollments = conn.execute(
+        "SELECT e.*, m.title FROM enrollments e JOIN modules m ON e.module_id = m.id "
+        "WHERE e.student_id = ? ORDER BY e.enrolled_at DESC",
+        (current_user.id,)
+    ).fetchall()
+
+    conn.close()
+    return render_template('student/resources.html',
+                           resources=resources,
+                           categories=categories,
+                           current_category=category,
+                           current_search=search,
+                           enrollments=enrollments)
+
+
+# ─── Student Progress Route (Route, Capstone, Mentoring, Certificates) ──────
+
+@app.route('/student/progress')
+@student_required
+def student_progress():
+    """Student progress hub: route enrollment, capstone tracker, mentor log, certificates."""
+    conn = get_db()
+
+    # Route enrollment
+    route_enrollment = conn.execute(
+        "SELECT * FROM route_enrollments WHERE student_id = ?",
+        (current_user.id,)
+    ).fetchone()
+
+    # Capstone milestone
+    capstone = None
+    if route_enrollment:
+        capstone = conn.execute(
+            "SELECT * FROM capstone_milestones WHERE student_id = ? AND route_enrollment_id = ?",
+            (current_user.id, route_enrollment['id'])
+        ).fetchone()
+
+    # Mentor sessions
+    mentor_sessions = conn.execute(
+        "SELECT * FROM mentor_sessions WHERE student_id = ? ORDER BY session_date DESC",
+        (current_user.id,)
+    ).fetchall()
+
+    # Certificates
+    certificates = conn.execute(
+        "SELECT c.*, m.title as module_title, m.programme_area "
+        "FROM certificates c JOIN modules m ON c.module_id = m.id "
+        "WHERE c.student_id = ? ORDER BY c.issued_at DESC NULLS LAST",
+        (current_user.id,)
+    ).fetchall()
+
+    # Sidebar enrollments
+    enrollments = conn.execute(
+        "SELECT e.*, m.title FROM enrollments e JOIN modules m ON e.module_id = m.id "
+        "WHERE e.student_id = ? ORDER BY e.enrolled_at DESC",
+        (current_user.id,)
+    ).fetchall()
+
+    conn.close()
+    return render_template('student/progress.html',
+                           route_enrollment=route_enrollment,
+                           capstone=capstone,
+                           mentor_sessions=mentor_sessions,
+                           certificates=certificates,
+                           enrollments=enrollments)
+
+
+# ─── Student Mentor Session Log (CRUD) ──────────────────────────────────────
+
+@app.route('/student/mentor-session/add', methods=['POST'])
+@student_required
+def add_mentor_session():
+    """Log a new mentor session."""
+    session_date = request.form.get('session_date', '').strip()
+    duration = request.form.get('duration_minutes', '60').strip()
+    notes = request.form.get('notes', '').strip()
+    mentor_name = request.form.get('mentor_name', '').strip()
+    next_session = request.form.get('next_session_date', '').strip()
+
+    if not session_date or not mentor_name:
+        flash('Session date and mentor name are required.', 'error')
+        return redirect(url_for('student_progress'))
+
+    conn = get_db()
+    conn.execute(
+        "INSERT INTO mentor_sessions (student_id, session_date, duration_minutes, notes, mentor_name, next_session_date) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        (current_user.id, session_date, int(duration) if duration else 60,
+         notes or None, mentor_name, next_session or None)
+    )
+    conn.commit()
+    conn.close()
+    flash('Mentor session logged successfully!', 'success')
+    return redirect(url_for('student_progress'))
+
+
+# ─── Admin Resources CRUD ───────────────────────────────────────────────────
+
+@app.route('/admin/resources', methods=['GET', 'POST'])
+@admin_required
+def admin_resources():
+    """Manage resources: create and list."""
+    conn = get_db()
+
+    if request.method == 'POST':
+        title = request.form.get('title', '').strip()
+        description = request.form.get('description', '').strip()
+        category = request.form.get('category', 'Article')
+        url_link = request.form.get('url', '').strip()
+        file = request.files.get('resource_file')
+
+        if not title:
+            flash('Title is required.', 'error')
+        else:
+            file_filename, file_original = save_upload(file) if file and file.filename else (None, None)
+            conn.execute(
+                "INSERT INTO resources (title, description, category, url, file_filename, file_original_name, admin_id) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (title, description, category, url_link or None, file_filename, file_original, current_user.id)
+            )
+            conn.commit()
+            flash(f'Resource "{title}" added successfully!', 'success')
+            return redirect(url_for('admin_resources'))
+
+    resources = conn.execute(
+        "SELECT r.*, u.full_name as author FROM resources r "
+        "LEFT JOIN users u ON r.admin_id = u.id "
+        "ORDER BY r.created_at DESC"
+    ).fetchall()
+    conn.close()
+    return render_template('admin/resources.html', resources=resources)
+
+
+@app.route('/admin/delete-resource/<int:res_id>', methods=['POST'])
+@admin_required
+def delete_resource(res_id):
+    """Delete a resource."""
+    conn = get_db()
+    resource = conn.execute("SELECT * FROM resources WHERE id = ?", (res_id,)).fetchone()
+    if resource and resource['file_filename']:
+        fpath = os.path.join(UPLOAD_DIR, resource['file_filename'])
+        if os.path.exists(fpath):
+            os.remove(fpath)
+    conn.execute("DELETE FROM resources WHERE id = ?", (res_id,))
+    conn.commit()
+    conn.close()
+    flash('Resource deleted.', 'success')
+    return redirect(url_for('admin_resources'))
+
+
+# ─── Admin Certificates Management ──────────────────────────────────────────
+
+@app.route('/admin/issue-certificate', methods=['POST'])
+@admin_required
+def issue_certificate():
+    """Issue a certificate to a student for a completed module."""
+    student_id = request.form.get('student_id', type=int)
+    module_id = request.form.get('module_id', type=int)
+
+    if not student_id or not module_id:
+        flash('Student ID and Module ID are required.', 'error')
+        return redirect(url_for('admin_submissions'))
+
+    conn = get_db()
+    # Generate certificate code
+    cert_code = f"YSP-{datetime.now().year}-{uuid.uuid4().hex[:6].upper()}"
+
+    existing = conn.execute(
+        "SELECT * FROM certificates WHERE student_id = ? AND module_id = ?",
+        (student_id, module_id)
+    ).fetchone()
+
+    if existing:
+        conn.execute(
+            "UPDATE certificates SET status = 'issued', issued_at = ?, certificate_code = ? "
+            "WHERE student_id = ? AND module_id = ?",
+            (datetime.now().strftime('%Y-%m-%d %H:%M:%S'), cert_code, student_id, module_id)
+        )
+    else:
+        conn.execute(
+            "INSERT INTO certificates (student_id, module_id, status, issued_at, certificate_code) "
+            "VALUES (?, ?, 'issued', ?, ?)",
+            (student_id, module_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), cert_code)
+        )
+
+    conn.commit()
+    conn.close()
+    flash(f'Certificate {cert_code} issued successfully!', 'success')
+    return redirect(url_for('admin_submissions'))
 
 
 # ─── Admin Routes ────────────────────────────────────────────────────────────
@@ -685,13 +1241,173 @@ def admin_submissions():
     return render_template('admin/submissions.html', submissions=submissions)
 
 
+# ─── Chatbot API ─────────────────────────────────────────────────────────────
+
+@app.route('/api/chat', methods=['POST'])
+def api_chat():
+    """Chat endpoint communicating with Gemini API."""
+    import json
+    import urllib.request
+    import urllib.error
+
+    data = request.get_json() or {}
+    messages = data.get('messages', [])
+
+    if not messages:
+        return jsonify({'status': 'error', 'message': 'No messages provided'}), 400
+
+    # Map message roles to Gemini's expected roles ('user', 'model')
+    gemini_contents = []
+    for msg in messages:
+        role = msg.get('role', 'user')
+        content = msg.get('content', '')
+        gemini_role = 'model' if role in ('assistant', 'model') else 'user'
+        gemini_contents.append({
+            'role': gemini_role,
+            'parts': [{'text': content}]
+        })
+
+    # Gemini requires the conversation to start with a 'user' turn.
+    # Discard any initial 'model' turns (like the welcome message).
+    while gemini_contents and gemini_contents[0]['role'] == 'model':
+        gemini_contents.pop(0)
+
+    # Helper for generating Demo Mode fallback responses
+    def get_demo_response(messages_list):
+        last_msg = messages_list[-1].get('content', '') if messages_list else ''
+        last_msg_lower = last_msg.lower()
+
+        if any(w in last_msg_lower for w in ['program', 'route', 'research', 'policy', 'business', 'diplomacy', 'environment', 'community']):
+            return "We offer 6 specialized Programme Routes: **Research, Policy, Business, Diplomacy, Environment, and Community**. Each route is designed to help fellows develop publishable capstones or real-world policy briefs. 🌿 Which track interests you most?"
+        elif any(w in last_msg_lower for w in ['learn', 'module', 'portal', 'course', 'lms']):
+            return "YSP Learns is our dynamic learning platform where you can sign up for self-paced modules in policy, research, climate, and more! Click on the **YSP Learns** menu link at the top to check out the module catalog! 📚"
+        elif any(w in last_msg_lower for w in ['join', 'apply', 'volunteer', 'hiring', 'intake']):
+            return "You can apply for our next intake by clicking the **Apply for the next intake** button on the homepage, or contact us directly. We'd love to have you onboard! 🌱"
+        elif any(w in last_msg_lower for w in ['who are you', 'your name', 'mascot', 'verdi']):
+            return "I'm **Verdi**, the official mascot and AI assistant for Youth for Sustainable Policy! 🌍💚 I represent curiosity, empathy, and evidence-based action."
+        else:
+            return (
+                f"Hi! I'm Verdi, your friendly YSP mascot. 🌿\n\n"
+                f"I'm here to help answer questions about Youth for Sustainable Policy (YSP) and YSP Learns modules. "
+                f"Feel free to ask me about our programmes, how to apply, or how YSP Learns works!"
+            )
+
+    # Map message roles to Gemini's expected roles ('user', 'model')
+    gemini_contents = []
+    for msg in messages:
+        role = msg.get('role', 'user')
+        content = msg.get('content', '')
+        gemini_role = 'model' if role in ('assistant', 'model') else 'user'
+        gemini_contents.append({
+            'role': gemini_role,
+            'parts': [{'text': content}]
+        })
+
+    # Gemini requires the conversation to start with a 'user' turn.
+    # Discard any initial 'model' turns (like the welcome message).
+    while gemini_contents and gemini_contents[0]['role'] == 'model':
+        gemini_contents.pop(0)
+
+    api_key = os.environ.get('GEMINI_API_KEY') or app.config.get('GEMINI_API_KEY')
+    if not api_key:
+        return jsonify({
+            'status': 'success',
+            'message': get_demo_response(messages),
+            'demo': True
+        })
+
+    # Prepare request payload for Gemini 2.5 Flash
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+    payload = {
+        "contents": gemini_contents,
+        "systemInstruction": {
+            "parts": [
+                {
+                    "text": (
+                        "You are Verdi, the official AI mascot and assistant for Youth for Sustainable Policy (YSP). "
+                        "Your tone is warm, curious, encouraging, intellectually rigorous, and helpful. "
+                        "You represent youth leadership in sustainability and policy. "
+                        "When answering questions about YSP, explain that YSP is a global youth-led initiative that empowers "
+                        "the next generation to engage with global challenges through research, storytelling, and policy dialogue. "
+                        "Recommend our 'YSP Learns' portal for dynamic learning modules. "
+                        "Keep your responses concise, engaging, and friendly. Use green emojis like 🌿, 🌱, 🍀, 🌲 where appropriate."
+                    )
+                }
+            ]
+        },
+        "generationConfig": {
+            "temperature": 0.7,
+            "maxOutputTokens": 800
+        }
+    }
+
+    try:
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode('utf-8'),
+            headers={'Content-Type': 'application/json'},
+            method='POST'
+        )
+        with urllib.request.urlopen(req, timeout=10) as response:
+            res_data = json.loads(response.read().decode('utf-8'))
+            candidates = res_data.get('candidates', [])
+            if candidates:
+                content_parts = candidates[0].get('content', {}).get('parts', [])
+                if content_parts:
+                    reply_text = content_parts[0].get('text', '')
+                    return jsonify({
+                        'status': 'success',
+                        'message': reply_text
+                    })
+            print("Gemini API returned empty response. Falling back to Demo Mode.")
+            return jsonify({
+                'status': 'success',
+                'message': get_demo_response(messages),
+                'demo': True
+            })
+    except urllib.error.HTTPError as e:
+        error_msg = e.read().decode('utf-8', errors='ignore')
+        print(f"Gemini API HTTPError {e.code}: {error_msg}. Falling back to Demo Mode.")
+        return jsonify({
+            'status': 'success',
+            'message': get_demo_response(messages) + "\n\n*(Note: I'm currently running in Demo Mode fallback due to temporary Gemini rate limiting or quota limits.)*",
+            'demo': True
+        })
+    except Exception as e:
+        print(f"Gemini API Exception: {e}. Falling back to Demo Mode.")
+        return jsonify({
+            'status': 'success',
+            'message': get_demo_response(messages) + "\n\n*(Note: I'm currently running in Demo Mode fallback due to a temporary connection issue.)*",
+            'demo': True
+        })
+
+
 # ─── File Serving ────────────────────────────────────────────────────────────
 
 @app.route('/uploads/<filename>')
-@login_required
 def uploaded_file(filename):
-    """Serve uploaded files (authenticated users only)."""
+    """Serve uploaded files (publicly accessible)."""
     return send_from_directory(UPLOAD_DIR, filename)
+
+
+@app.route('/assets/<path:filename>')
+def serve_assets(filename):
+    """Serve main website assets (images, team pictures, etc.)."""
+    return send_from_directory(os.path.join(BASE_DIR, 'assets'), filename)
+
+
+# ─── Generic Page Serving ───────────────────────────────────────────────────
+
+@app.route('/<page>')
+@app.route('/<page>.html')
+def serve_html_page(page):
+    """Serve main website static pages from templates folder."""
+    if '..' in page or page.startswith('/') or page.startswith('.'):
+        abort(404)
+    template_name = f"{page}.html"
+    if os.path.exists(os.path.join(app.template_folder, template_name)):
+        return render_template(template_name)
+    abort(404)
 
 
 # ─── Error Handlers ──────────────────────────────────────────────────────────
@@ -703,7 +1419,7 @@ def not_found(e):
 @app.errorhandler(413)
 def too_large(e):
     flash('File too large. Maximum upload size is 16 MB.', 'error')
-    return redirect(request.referrer or url_for('index'))
+    return redirect(request.referrer or url_for('learn_landing'))
 
 @app.errorhandler(500)
 def server_error(e):

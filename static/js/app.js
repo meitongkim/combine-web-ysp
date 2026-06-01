@@ -231,4 +231,19 @@
   document.querySelectorAll(".module-grid, .stats-grid").forEach((grid) => {
     gridObserver.observe(grid);
   });
+
+  // Mobile Menu Toggle (Hamburger)
+  const menuToggle = document.getElementById("menuToggle");
+  const nav = document.querySelector(".nav");
+  if (menuToggle && nav) {
+    menuToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      nav.classList.toggle("menu-open");
+    });
+    document.addEventListener("click", (e) => {
+      if (!nav.contains(e.target)) {
+        nav.classList.remove("menu-open");
+      }
+    });
+  }
 })();

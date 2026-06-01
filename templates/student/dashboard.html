@@ -11,6 +11,15 @@
       <a href="{{ url_for('student_dashboard') }}" class="sidebar-link active">
         <span class="icon">📊</span> Dashboard
       </a>
+      <a href="{{ url_for('student_progress') }}" class="sidebar-link">
+        <span class="icon">🛤️</span> My Progress
+      </a>
+      <a href="{{ url_for('student_resources') }}" class="sidebar-link">
+        <span class="icon">📄</span> Resources
+      </a>
+      <a href="{{ url_for('student_calendar') }}" class="sidebar-link">
+        <span class="icon">📅</span> Calendar
+      </a>
       <a href="{{ url_for('catalog') }}" class="sidebar-link">
         <span class="icon">📚</span> Browse Modules
       </a>
@@ -49,18 +58,99 @@
     </div>
 
     <!-- Stats -->
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:14px; margin-bottom:32px">
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:14px; margin-bottom:32px">
       <div class="stat-card apple-reveal" style="transition-delay:.1s">
         <div class="stat-number"><span data-counter="{{ enrollments|length }}">0</span></div>
         <div class="stat-label">Enrolled Modules</div>
       </div>
-      <div class="stat-card apple-reveal" style="transition-delay:.2s">
+      <div class="stat-card apple-reveal" style="transition-delay:.15s">
         <div class="stat-number"><span data-counter="{{ submissions_count }}">0</span></div>
         <div class="stat-label">Submissions</div>
       </div>
-      <div class="stat-card apple-reveal" style="transition-delay:.3s">
-        <div class="stat-number"><span data-counter="{{ announcements|length }}">0</span></div>
-        <div class="stat-label">Announcements</div>
+      <div class="stat-card apple-reveal" style="transition-delay:.2s">
+        <div class="stat-number"><span data-counter="{{ certs_issued }}">0</span></div>
+        <div class="stat-label">Certificates</div>
+      </div>
+      <div class="stat-card apple-reveal" style="transition-delay:.25s">
+        <div class="stat-number"><span data-counter="{{ mentor_count }}">0</span></div>
+        <div class="stat-label">Mentor Sessions</div>
+      </div>
+    </div>
+
+    <!-- Route Progress Card -->
+    {% if route_enrollment %}
+    <div class="apple-reveal" style="transition-delay:.12s; margin-bottom:32px">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px">
+        <h3 class="serif" style="font-size:22px; margin:0">Route <em>Progress</em></h3>
+        <a href="{{ url_for('student_progress') }}" class="btn btn-outline btn-sm">View Details →</a>
+      </div>
+      <div style="background:rgba(255,255,255,0.7); backdrop-filter:blur(12px); border:1px solid var(--line); border-radius:16px; padding:24px; position:relative; overflow:hidden">
+        <div style="position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg, #89a36c, #4ade80, #c8e6a0)"></div>
+        <div style="display:flex; align-items:center; gap:16px; margin-bottom:20px">
+          <div style="width:48px; height:48px; border-radius:14px; background:linear-gradient(135deg, #e8f0d8, #d4e4b8); display:flex; align-items:center; justify-content:center; font-size:22px">🛤️</div>
+          <div>
+            <div style="font-size:18px; font-weight:600; color:var(--ink); font-family:'Fraunces',serif">{{ route_enrollment.route_name }} Route</div>
+            <div style="font-size:13px; color:var(--ink-mute)">Week {{ route_enrollment.current_week }} · {{ route_enrollment.current_phase }} Phase</div>
+          </div>
+        </div>
+        <!-- Phase Progress Bar -->
+        <div style="display:flex; gap:4px; margin-bottom:8px">
+          {% set phases = ['Foundations', 'Deep Dive', 'Capstone'] %}
+          {% set phase_idx = phases.index(route_enrollment.current_phase) if route_enrollment.current_phase in phases else 0 %}
+          {% for phase in phases %}
+          <div style="flex:1; position:relative">
+            <div style="height:6px; border-radius:3px; background:{{ '#89a36c' if loop.index0 <= phase_idx else 'rgba(0,0,0,0.08)' }}; transition:background 0.3s"></div>
+          </div>
+          {% endfor %}
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--ink-mute)">
+          {% for phase in phases %}
+          <span style="{{ 'font-weight:600; color:var(--ink)' if loop.index0 == phase_idx else '' }}">{{ phase }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Quick Actions: Certificates & Mentor -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:16px; margin-bottom:32px">
+      <!-- Certificate Summary -->
+      <div class="apple-reveal" style="transition-delay:.18s; background:rgba(255,255,255,0.7); backdrop-filter:blur(12px); border:1px solid var(--line); border-radius:16px; padding:20px">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px">
+          <span style="font-size:20px">🏆</span>
+          <h4 style="margin:0; font-size:15px; font-weight:600">Certificates</h4>
+        </div>
+        <div style="display:flex; gap:16px">
+          <div style="text-align:center; flex:1">
+            <div style="font-size:28px; font-weight:700; color:#89a36c">{{ certs_issued }}</div>
+            <div style="font-size:11px; color:var(--ink-mute); text-transform:uppercase; letter-spacing:0.05em">Issued</div>
+          </div>
+          <div style="width:1px; background:var(--line)"></div>
+          <div style="text-align:center; flex:1">
+            <div style="font-size:28px; font-weight:700; color:#d4a843">{{ certs_pending }}</div>
+            <div style="font-size:11px; color:var(--ink-mute); text-transform:uppercase; letter-spacing:0.05em">Pending</div>
+          </div>
+        </div>
+        <a href="{{ url_for('student_progress') }}" style="display:block; text-align:center; margin-top:14px; font-size:12px; color:var(--ink-mute); text-decoration:none">View all →</a>
+      </div>
+
+      <!-- Mentor Session Summary -->
+      <div class="apple-reveal" style="transition-delay:.22s; background:rgba(255,255,255,0.7); backdrop-filter:blur(12px); border:1px solid var(--line); border-radius:16px; padding:20px">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px">
+          <span style="font-size:20px">🧑‍🏫</span>
+          <h4 style="margin:0; font-size:15px; font-weight:600">Mentoring</h4>
+        </div>
+        {% if next_mentor and next_mentor.next_session_date %}
+        <div style="font-size:13px; color:var(--ink-mute); margin-bottom:4px">Next Session</div>
+        <div style="font-size:16px; font-weight:600; color:var(--ink)">{{ next_mentor.next_session_date[:10] }}</div>
+        <div style="font-size:12px; color:var(--ink-mute); margin-top:2px">with {{ next_mentor.mentor_name }}</div>
+        {% else %}
+        <div style="font-size:13px; color:var(--ink-mute)">No upcoming sessions</div>
+        {% endif %}
+        <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--line); font-size:12px; color:var(--ink-mute)">
+          {{ mentor_count }} session{{ 's' if mentor_count != 1 else '' }} completed
+        </div>
+        <a href="{{ url_for('student_progress') }}" style="display:block; text-align:center; margin-top:10px; font-size:12px; color:var(--ink-mute); text-decoration:none">View log →</a>
       </div>
     </div>
 
@@ -129,5 +219,6 @@
     </div>
     {% endif %}
   </main>
+
 </div>
 {% endblock %}

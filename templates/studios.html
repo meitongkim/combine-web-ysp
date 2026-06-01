@@ -1,0 +1,1341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Studios — YSP · Youth for Sustainable Policy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,0,500;9..144,1,300;9..144,1,400&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sage:#9ab078; --sage-deep:#89a36c; --sage-soft:#b9c99e;
+    --mist:#cfdfd8; --mist-pale:#e6efe9; --paper:#fbfdfa;
+    --ink:#1f2a22; --ink-soft:#3d4b40; --ink-mute:#67756a;
+    --line:rgba(31,42,34,.10);
+    --shadow-1: 0 1px 2px rgba(31,42,34,.04), 0 8px 24px -8px rgba(31,42,34,.10);
+    --shadow-2: 0 1px 2px rgba(31,42,34,.06), 0 24px 60px -20px rgba(122,150,108,.30);
+    --ease: cubic-bezier(.2,.7,.2,1);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color:var(--ink); background:var(--paper);
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    overflow-x:hidden; font-size:16px; line-height:1.55; letter-spacing:-0.005em;
+  }
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  .serif{font-family:"Fraunces", Georgia, serif; font-weight:400; letter-spacing:-0.02em}
+  .mono{font-family: ui-monospace, "SF Mono", Menlo, monospace}
+
+  /* Grain */
+  .grain{
+    position:fixed; inset:0; pointer-events:none; z-index:9999;
+    opacity:.06; mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.12  0 0 0 0 0.16  0 0 0 0 0.13  0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  /* Mesh */
+  .mesh{ position:absolute; inset:-10%; pointer-events:none; z-index:0; filter:blur(60px) saturate(1.05); opacity:.85 }
+  .mesh::before, .mesh::after, .mesh > span{ content:""; position:absolute; border-radius:50% }
+  .mesh::before{ width:55%; aspect-ratio:1; left:-8%; top:-12%; background:radial-gradient(circle at 50% 50%, rgba(207,223,216,.95), rgba(207,223,216,0) 70%) }
+  .mesh::after{ width:60%; aspect-ratio:1; right:-12%; bottom:-18%; background:radial-gradient(circle at 50% 50%, rgba(137,163,108,.78), rgba(137,163,108,0) 70%) }
+  .mesh > span{ width:48%; aspect-ratio:1; left:30%; top:25%; background:radial-gradient(circle at 50% 50%, rgba(154,176,120,.55), rgba(154,176,120,0) 70%) }
+
+  /* Nav */
+  .nav-wrap{ position:fixed; top:18px; left:0; right:0; z-index:100; display:flex; justify-content:center; pointer-events:none; transition: top .35s var(--ease) }
+  .nav{
+    pointer-events:auto; display:flex; align-items:center; gap:8px;
+    padding:8px 8px 8px 18px;
+    background:rgba(255,255,255,.42);
+    backdrop-filter: blur(14px) saturate(1.4); -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    border:1px solid rgba(255,255,255,.55); border-radius:999px;
+    box-shadow: 0 1px 1px rgba(255,255,255,.6) inset, 0 10px 30px -12px rgba(31,42,34,.18);
+    transition: all .35s var(--ease);
+  }
+  .scrolled .nav{
+    background:rgba(255,255,255,.65);
+    backdrop-filter: blur(22px) saturate(1.6);
+    box-shadow: 0 1px 1px rgba(255,255,255,.7) inset, 0 18px 50px -18px rgba(31,42,34,.22);
+  }
+  .nav .brand{ display:flex; align-items:center; gap:10px; padding-right:14px; border-right:1px solid var(--line) }
+  .nav .brand img{ width:28px; height:28px; border-radius:8px; object-fit:cover; box-shadow:0 2px 6px rgba(31,42,34,.15) }
+  .nav .brand .word{ font-weight:600; letter-spacing:.02em; font-size:14px }
+  .nav .brand .word i{ font-style:normal; color:var(--sage-deep) }
+  .nav-links{ display:flex; align-items:center; gap:2px; padding:0 6px }
+  .nav-links a{ padding:8px 14px; border-radius:999px; font-size:13.5px; font-weight:500; color:var(--ink-soft); transition: background .25s, color .25s }
+  .nav-links a:hover, .nav-links a.active{ background:rgba(255,255,255,.7); color:var(--ink) }
+  .btn{ display:inline-flex; align-items:center; gap:8px; padding:10px 18px; border-radius:999px; font-size:13.5px; font-weight:500; transition: transform .25s var(--ease), box-shadow .25s, background .25s, filter .25s }
+  .btn-primary{ background:var(--ink); color:#fbfdfa; box-shadow: 0 1px 1px rgba(255,255,255,.18) inset, 0 8px 22px -8px rgba(31,42,34,.45) }
+  .btn-primary:hover{ background:#0f1612 }
+  .btn-forest{ background: linear-gradient(180deg, var(--sage), var(--sage-deep)); color:#fbfdfa; box-shadow: 0 1px 1px rgba(255,255,255,.35) inset, 0 10px 26px -10px rgba(137,163,108,.6) }
+  .btn-forest:hover{ filter:brightness(1.04) }
+  .btn-ghost{ color:var(--ink); background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.7); backdrop-filter:blur(10px) }
+  .btn-ghost:hover{ background:rgba(255,255,255,.8) }
+  .btn .arr{ display:inline-block; transition: transform .25s var(--ease) }
+  .btn:hover .arr{ transform: translate(2px,-2px) }
+
+  /* ── Hero ── */
+  .hero{
+    position:relative; padding: 160px 24px 80px; overflow:hidden; isolation:isolate;
+    background:
+      radial-gradient(120% 70% at 50% 0%, var(--mist) 0%, rgba(207,223,216,0) 60%),
+      linear-gradient(180deg, #f3f8ef 0%, #fbfdfa 70%);
+  }
+  .hero-wrap{ position:relative; z-index:2; max-width:1180px; margin: 0 auto; }
+  .crumbs{
+    display:inline-flex; align-items:center; gap:10px;
+    padding:6px 14px; border-radius:999px;
+    background:rgba(255,255,255,.55); backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,.75);
+    font-size:11.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-soft);
+  }
+  .crumbs .sep{ color:var(--ink-mute) }
+  .crumbs b{ color:var(--sage-deep); font-weight:500 }
+  h1.title{
+    margin: 28px 0 18px;
+    font-family:"Fraunces", Georgia, serif; font-weight:400;
+    font-size: clamp(54px, 8vw, 124px);
+    line-height:1.0; letter-spacing:-0.035em; max-width: 15ch;
+  }
+  h1.title em{ font-style:italic; font-weight:300; color:var(--sage-deep) }
+  .lede{
+    max-width: 60ch; color: var(--ink-soft); font-size: 18px; line-height:1.55;
+    margin: 0 0 32px;
+  }
+  .hero-meta{
+    display:flex; gap:8px; flex-wrap:wrap;
+  }
+  .chip{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:8px 14px; border-radius:999px;
+    background:rgba(255,255,255,.6); backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,.7);
+    font-size:12.5px; color:var(--ink-soft);
+  }
+  .chip .dot{ width:6px; height:6px; border-radius:50%; background:var(--sage) }
+
+  /* Hero quick-index */
+  .hero-index{
+    margin-top: 56px;
+    display:grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+    padding: 14px;
+    background: rgba(255,255,255,.55); backdrop-filter: blur(16px) saturate(1.3);
+    border:1px solid rgba(255,255,255,.75);
+    border-radius: 22px;
+    box-shadow: var(--shadow-1);
+  }
+  .hero-index a{
+    display:flex; flex-direction:column; gap:6px;
+    padding: 16px 16px 18px; border-radius: 14px;
+    transition: background .25s, transform .25s var(--ease);
+  }
+  .hero-index a:hover{ background: rgba(255,255,255,.7); transform: translateY(-2px) }
+  .hero-index .n{ font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size:11px; letter-spacing:.16em; color:var(--sage-deep) }
+  .hero-index .t{ font-family:"Fraunces", serif; font-size: 19px; letter-spacing:-0.015em; line-height:1.15 }
+  .hero-index .t em{ font-style:italic; color:var(--sage-deep); font-weight:300 }
+
+  /* ── Sections ── */
+  section{ position:relative; padding: 110px 24px; isolation:isolate }
+  .container{ max-width:1180px; margin:0 auto; position:relative; z-index:2 }
+  .eyebrow{ display:inline-flex; align-items:center; gap:10px; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--sage-deep); font-weight:500 }
+  .eyebrow .leaf{ width:6px; height:6px; border-radius:50%; background:var(--sage) }
+  h2.section-title{
+    font-family:"Fraunces", Georgia, serif; font-weight:400;
+    font-size: clamp(36px, 5vw, 64px);
+    line-height:1.04; letter-spacing:-0.028em;
+    margin:16px 0 18px; max-width:22ch;
+  }
+  h2.section-title em{ font-style:italic; color:var(--sage-deep); font-weight:300 }
+  p.section-sub{ max-width:60ch; color:var(--ink-soft); font-size:17px; margin:0 0 48px }
+
+  /* ── Studio detail rows (one per format) ── */
+  .studios{ background: linear-gradient(180deg, #fbfdfa 0%, #f3f8ef 100%); padding-top: 120px }
+  .studio{
+    position: relative;
+    padding: 56px;
+    margin-bottom: 22px;
+    border-radius: 28px;
+    background: rgba(255,255,255,.65); backdrop-filter: blur(18px) saturate(1.3);
+    border: 1px solid rgba(255,255,255,.8);
+    box-shadow: var(--shadow-1);
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 48px;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .studio.flagship{
+    background:
+      linear-gradient(140deg, rgba(154,176,120,.16), rgba(207,223,216,.45) 60%, rgba(255,255,255,.55));
+    box-shadow: var(--shadow-2);
+  }
+  .studio .left{ display:flex; flex-direction:column; }
+  .studio .num-row{
+    display:flex; align-items:center; gap:14px; margin-bottom: 22px;
+  }
+  .studio .num{
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px; letter-spacing:.18em; text-transform: uppercase;
+    color: var(--sage-deep); font-weight:500;
+  }
+  .studio .num em{ font-style:normal; color: var(--ink-mute) }
+  .studio .badge{
+    display:inline-flex; align-items:center; gap:6px;
+    padding: 4px 10px; border-radius:999px;
+    background: var(--ink); color: #fbfdfa;
+    font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; font-weight:500;
+  }
+  .studio .badge .dot{ width:5px; height:5px; border-radius:50%; background: var(--sage); animation: pulse 1.8s ease-in-out infinite }
+  @keyframes pulse{ 0%,100%{opacity:.5; transform:scale(.9)} 50%{opacity:1; transform:scale(1.15)} }
+  .studio h3{
+    font-family:"Fraunces", Georgia, serif; font-weight:400;
+    font-size: clamp(36px, 4.4vw, 56px); letter-spacing:-0.028em; line-height:1.0;
+    margin: 0 0 22px; max-width:14ch;
+  }
+  .studio h3 em{ font-style: italic; color: var(--sage-deep); font-weight:300 }
+  .studio p.lead{
+    color: var(--ink); font-size: 18px; line-height:1.55; max-width:50ch;
+    margin: 0 0 16px;
+  }
+  .studio p.body{
+    color: var(--ink-soft); font-size: 14.5px; line-height:1.6; max-width:52ch; margin: 0 0 28px;
+  }
+  .studio .facts{
+    display:grid; grid-template-columns: repeat(2, 1fr); gap: 0;
+    margin: 0 0 28px;
+    border-top: 1px solid var(--line);
+  }
+  .studio .fact{
+    padding: 14px 0; border-bottom: 1px solid var(--line);
+    display:flex; justify-content: space-between; align-items:baseline; gap: 12px;
+  }
+  .studio .fact:nth-child(odd){ padding-right: 18px; border-right: 1px solid var(--line) }
+  .studio .fact:nth-child(even){ padding-left: 18px }
+  .studio .fact .k{ font-size: 11.5px; letter-spacing:.14em; text-transform:uppercase; color: var(--ink-mute) }
+  .studio .fact .v{ font-family:"Fraunces", serif; font-weight:400; font-size: 16.5px; letter-spacing:-0.012em; color: var(--ink); text-align: right }
+  .studio .fact .v em{ font-style:italic; color: var(--sage-deep); font-weight:300 }
+  .studio .cta-row{
+    display:flex; gap: 10px; flex-wrap: wrap; margin-top: auto;
+  }
+
+  /* Right column "card" — different visual per studio */
+  .studio .right{
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    min-height: 420px;
+    background:
+      repeating-linear-gradient(135deg, rgba(154,176,120,.10) 0 14px, rgba(207,223,216,.16) 14px 28px),
+      linear-gradient(180deg, rgba(207,223,216,.45), rgba(154,176,120,.22));
+    border: 1px solid rgba(255,255,255,.7);
+    padding: 28px;
+  }
+  .studio .right .card-eyebrow{
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 10.5px; letter-spacing:.16em; text-transform:uppercase;
+    color: var(--ink-mute);
+  }
+  .studio .right .card-title{
+    margin: 10px 0 22px; font-family:"Fraunces", serif; font-weight:400;
+    font-size: 20px; letter-spacing:-0.012em; line-height:1.2; color: var(--ink);
+  }
+  .studio .right .card-title em{ font-style:italic; color: var(--sage-deep); font-weight:300 }
+
+  /* Flagship — pillar list */
+  .pillars{ display:flex; flex-direction:column; gap: 10px }
+  .pillar{
+    display:grid; grid-template-columns: 36px 1fr auto; gap: 14px; align-items:center;
+    padding: 14px 16px; border-radius: 14px;
+    background: rgba(255,255,255,.7); border: 1px solid rgba(255,255,255,.85);
+    box-shadow: 0 1px 1px rgba(255,255,255,.7) inset;
+  }
+  .pillar .ix{
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(140deg, var(--mist), var(--sage));
+    color: var(--ink); font-family:"Fraunces", serif; font-style:italic; font-weight:300; font-size: 17px;
+    display:inline-flex; align-items:center; justify-content:center;
+    box-shadow: 0 1px 1px rgba(255,255,255,.7) inset;
+  }
+  .pillar .topic{ font-family:"Fraunces", serif; font-weight:400; font-size: 17px; letter-spacing:-0.012em; color: var(--ink) }
+  .pillar .topic em{ font-style:italic; color: var(--sage-deep); font-weight:300 }
+  .pillar .meta{ font-size: 11.5px; color: var(--ink-mute); font-family: ui-monospace, "SF Mono", Menlo, monospace; letter-spacing:.06em }
+
+  /* Fellowships — host list */
+  .hosts{ display:flex; flex-direction:column; gap: 8px }
+  .host{
+    display:flex; align-items:center; justify-content: space-between; gap: 12px;
+    padding: 14px 16px; border-radius: 12px;
+    background: rgba(255,255,255,.7); border:1px solid rgba(255,255,255,.85);
+  }
+  .host .who{
+    display:flex; align-items:center; gap: 12px;
+  }
+  .host .seal{
+    width: 30px; height: 30px; border-radius: 8px;
+    display:inline-flex; align-items:center; justify-content:center;
+    background: linear-gradient(140deg, rgba(207,223,216,.7), rgba(154,176,120,.5));
+    border: 1px solid rgba(255,255,255,.8);
+    font-family:"Fraunces", serif; font-style:italic; font-weight:300; font-size: 13px; color: var(--ink);
+  }
+  .host .name{ font-size: 14px; color: var(--ink); font-weight: 500 }
+  .host .name span{ display:block; font-size: 11.5px; color: var(--ink-mute); font-weight:400 }
+  .host .kind{ font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 10.5px; letter-spacing:.14em; text-transform:uppercase; color: var(--ink-mute) }
+
+  /* Brief Sprints — recent briefs marquee-ish */
+  .briefs{ display:flex; flex-direction:column; gap: 8px }
+  .brief{
+    padding: 16px; border-radius: 14px;
+    background: rgba(255,255,255,.7); border:1px solid rgba(255,255,255,.85);
+  }
+  .brief .qline{
+    font-family:"Fraunces", serif; font-weight:400; font-size: 16.5px; letter-spacing:-0.012em; line-height:1.3; color:var(--ink);
+  }
+  .brief .qline em{ font-style:italic; color: var(--sage-deep); font-weight:300 }
+  .brief .footline{ margin-top: 8px; display:flex; justify-content: space-between; align-items:center; gap: 10px; font-size: 11.5px; color: var(--ink-mute); font-family: ui-monospace, "SF Mono", Menlo, monospace; letter-spacing:.06em; text-transform: uppercase }
+  .brief .footline .author{ color: var(--sage-deep) }
+
+  /* Reading Rooms — calendar */
+  .calendar{ display:flex; flex-direction:column; gap: 10px }
+  .session{
+    display:grid; grid-template-columns: 56px 1fr auto; gap: 16px; align-items:center;
+    padding: 14px 14px; border-radius: 14px;
+    background: rgba(255,255,255,.7); border:1px solid rgba(255,255,255,.85);
+  }
+  .session .date{
+    text-align:center;
+    padding: 6px 0;
+    border-radius: 10px;
+    background: rgba(255,255,255,.8);
+    border: 1px solid var(--line);
+  }
+  .session .date .m{ font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 10px; letter-spacing:.14em; text-transform:uppercase; color: var(--sage-deep) }
+  .session .date .d{ font-family:"Fraunces", serif; font-weight:400; font-size: 22px; line-height:1; letter-spacing:-0.02em; color: var(--ink) }
+  .session .title-row .t{ font-family:"Fraunces", serif; font-weight:400; font-size: 16px; letter-spacing:-0.012em; color: var(--ink); line-height:1.25 }
+  .session .title-row .t em{ font-style:italic; color: var(--sage-deep); font-weight:300 }
+  .session .title-row .sub{ display:block; font-size: 11.5px; color: var(--ink-mute); margin-top: 4px }
+  .session .where{ font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 10.5px; letter-spacing:.14em; text-transform:uppercase; color: var(--ink-mute) }
+
+  /* Open Studio — "what you bring" cards */
+  .yours{ display: grid; grid-template-columns: 1fr 1fr; gap: 8px }
+  .yours .y{
+    padding: 16px; border-radius: 14px;
+    background: rgba(255,255,255,.7); border:1px solid rgba(255,255,255,.85);
+    display:flex; flex-direction:column; gap: 6px; min-height: 110px;
+  }
+  .yours .y .k{ font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 10px; letter-spacing:.16em; text-transform:uppercase; color: var(--sage-deep) }
+  .yours .y .v{ font-family:"Fraunces", serif; font-weight:400; font-size: 17px; letter-spacing:-0.012em; line-height:1.2; color: var(--ink); }
+  .yours .y .v em{ font-style:italic; color: var(--sage-deep); font-weight:300 }
+  .yours .y .h{ font-size: 12.5px; color: var(--ink-soft); margin-top:auto; line-height:1.5 }
+
+  /* ── How a studio runs (timeline) ── */
+  .how{ background: linear-gradient(180deg, #f3f8ef 0%, #eaf1e3 100%) }
+  .timeline{
+    margin-top: 32px;
+    display:grid; grid-template-columns: repeat(6, 1fr); gap: 10px;
+    position: relative;
+  }
+  .step{
+    position: relative;
+    padding: 24px 20px;
+    background: rgba(255,255,255,.65); backdrop-filter: blur(12px);
+    border:1px solid rgba(255,255,255,.8);
+    border-radius: 18px;
+    min-height: 200px;
+    display:flex; flex-direction:column; gap: 10px;
+  }
+  .step .wk{
+    font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 10.5px; letter-spacing:.14em; text-transform:uppercase;
+    color: var(--sage-deep);
+  }
+  .step .h{
+    font-family:"Fraunces", serif; font-weight:400; font-size: 22px; letter-spacing:-0.018em; line-height:1.15; color: var(--ink);
+    margin: 2px 0 8px;
+  }
+  .step .h em{ font-style:italic; color: var(--sage-deep); font-weight:300 }
+  .step p{ color: var(--ink-soft); font-size: 13px; line-height:1.5; margin: 0 }
+  .step .dot{
+    position:absolute; top: -7px; left: 22px;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: linear-gradient(140deg, var(--sage), var(--sage-deep));
+    border: 3px solid var(--paper);
+    box-shadow: 0 0 0 1px rgba(122,150,108,.35);
+  }
+  .step .dot.full{ background: var(--ink) }
+
+  /* ── Upcoming cohorts ── */
+  .cohorts{ background: linear-gradient(180deg, #eaf1e3 0%, #fbfdfa 100%) }
+  .cohort-table{
+    margin-top: 24px;
+    background: rgba(255,255,255,.6); backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,.75);
+    border-radius: 22px;
+    overflow: hidden;
+  }
+  .cohort-row{
+    display:grid; grid-template-columns: 180px 1.5fr 180px 160px 140px; gap: 18px;
+    align-items: center;
+    padding: 20px 28px;
+    border-top: 1px solid var(--line);
+    transition: background .25s;
+  }
+  .cohort-row:first-child{ border-top: 0 }
+  .cohort-row.head{
+    background: rgba(255,255,255,.4);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 10.5px; letter-spacing:.18em; text-transform:uppercase;
+    color: var(--ink-mute); padding: 14px 28px;
+  }
+  .cohort-row:not(.head):hover{ background: rgba(255,255,255,.5) }
+  .cohort-row .prog{
+    font-family:"Fraunces", serif; font-weight:400; font-size: 18px; letter-spacing:-0.012em; line-height:1.2;
+  }
+  .cohort-row .prog em{ font-style:italic; color: var(--sage-deep); font-weight:300 }
+  .cohort-row .focus{ font-size: 14px; color: var(--ink-soft); line-height:1.45 }
+  .cohort-row .dates{ font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px; color: var(--ink); letter-spacing:.04em }
+  .cohort-row .seats{ font-size: 13px; color: var(--ink-soft) }
+  .cohort-row .seats b{ font-family:"Fraunces", serif; font-weight:400; font-style:italic; color: var(--sage-deep); font-size: 16px; margin-right: 4px }
+  .cohort-row .apply{
+    justify-self: end;
+    display:inline-flex; align-items:center; gap: 8px;
+    padding: 8px 14px; border-radius: 999px;
+    background: var(--ink); color: #fbfdfa;
+    font-size: 12px; font-weight:500;
+    transition: transform .25s var(--ease);
+  }
+  .cohort-row .apply:hover{ transform: translate(2px,-2px) }
+  .cohort-row .apply.open{ background: linear-gradient(180deg, var(--sage), var(--sage-deep)) }
+  .cohort-row .apply.soon{ background: rgba(255,255,255,.6); color: var(--ink-soft); border: 1px solid var(--line) }
+
+  /* ── FAQ ── */
+  .faq{ background: linear-gradient(180deg, #fbfdfa 0%, #f3f8ef 100%) }
+  .faq-list{ margin-top: 24px; max-width: 880px }
+  details.q{
+    border-top: 1px solid var(--line);
+    padding: 22px 0;
+  }
+  details.q:last-child{ border-bottom: 1px solid var(--line) }
+  details.q summary{
+    list-style: none;
+    cursor: pointer;
+    display:flex; justify-content: space-between; align-items: baseline; gap: 24px;
+    font-family:"Fraunces", serif; font-weight:400;
+    font-size: clamp(20px, 2.2vw, 26px); letter-spacing:-0.015em; line-height:1.25; color: var(--ink);
+  }
+  details.q summary em{ font-style:italic; color: var(--sage-deep); font-weight:300 }
+  details.q summary::-webkit-details-marker{ display:none }
+  details.q summary .plus{
+    flex-shrink:0; width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(255,255,255,.7); border: 1px solid var(--line);
+    display:inline-flex; align-items:center; justify-content:center;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--ink-soft);
+    transition: transform .35s var(--ease), background .25s, color .25s;
+  }
+  details.q[open] summary .plus{ transform: rotate(45deg); background: var(--ink); color: #fbfdfa }
+  details.q .a{
+    margin-top: 14px; max-width: 60ch;
+    color: var(--ink-soft); font-size: 15px; line-height:1.6;
+  }
+
+  /* ── Final CTA ── */
+  .final{
+    padding: 130px 24px 150px;
+    background: linear-gradient(180deg, #f3f8ef 0%, #d9e6cf 100%);
+    overflow:hidden;
+  }
+  .final .container{ text-align: center }
+  .final h2{
+    font-family:"Fraunces", Georgia, serif; font-weight:400;
+    font-size: clamp(44px, 6.4vw, 84px); line-height:1.02; letter-spacing:-0.03em;
+    margin: 16px auto 18px; max-width: 18ch;
+  }
+  .final h2 em{ font-style:italic; color: var(--sage-deep); font-weight:300 }
+  .final p{ color: var(--ink-soft); font-size: 17px; max-width: 56ch; margin: 0 auto 32px }
+  .final-cta{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap }
+
+  /* ── Footer (matches index) ── */
+  .footer{ background:var(--ink); color:#d6dcd2; padding:72px 24px 36px }
+  .footer-grid{ max-width:1180px; margin:0 auto; display:grid; grid-template-columns: 2fr 1fr 1fr; gap:48px }
+  .footer .brand{ display:flex; align-items:center; gap:12px; margin-bottom:18px }
+  .footer .brand img{ width:36px; height:36px; border-radius:10px}
+  .footer .brand .word{ font-weight:600; font-size:16px; letter-spacing:.02em; color:#fbfdfa }
+  .footer .brand .word i{ font-style:normal; color:var(--sage-soft) }
+  .footer .blurb{ color:#aab1a3; font-size:14px; max-width:38ch; line-height:1.55 }
+  .footer h5{ color:#fbfdfa; font-size:12px; letter-spacing:.18em; text-transform:uppercase; margin:0 0 14px; font-weight:500 }
+  .footer ul{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px; font-size:14px }
+  .footer ul a{ color:#aab1a3; transition: color .2s }
+  .footer ul a:hover{ color:#fbfdfa }
+  .safe-band{
+    max-width:1180px; margin:56px auto 0; padding:18px 22px; border-radius:16px;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
+    display:flex; gap:14px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+    font-size:13px; color:#d6dcd2;
+  }
+  .safe-band .left{ display:flex; align-items:center; gap:12px }
+  .safe-band .leaf{ width:24px; height:24px; border-radius:50%; background:linear-gradient(140deg, var(--sage), var(--sage-deep)); display:inline-flex; align-items:center; justify-content:center; color:#fbfdfa; font-size:12px; flex-shrink:0 }
+  .safe-band a{ color:#fbfdfa; text-decoration:underline; text-decoration-color:rgba(251,253,250,.4); text-underline-offset:3px }
+  .safe-band a:hover{ text-decoration-color:var(--sage-soft) }
+  .copy{ max-width:1180px; margin:24px auto 0; display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; font-size:12px; color:#7d857a; letter-spacing:.04em }
+
+  /* Reveals */
+  .apple-reveal{ opacity:0; transform: translateY(28px); transition: opacity .9s var(--ease), transform .9s var(--ease) }
+  .is-in.apple-reveal{ opacity:1; transform: none }
+
+  @media (max-width: 980px){
+    .nav-links{ display:none }
+    .hero-index{ grid-template-columns: repeat(2, 1fr) }
+    .studio{ grid-template-columns: 1fr; padding: 36px }
+    .timeline{ grid-template-columns: repeat(2, 1fr) }
+    .cohort-row{ grid-template-columns: 1fr; gap: 6px; padding: 18px 20px }
+    .cohort-row.head{ display:none }
+    .cohort-row .apply{ justify-self: start; margin-top: 6px }
+    .footer-grid{ grid-template-columns: 1fr 1fr; gap:32px }
+    .yours{ grid-template-columns: 1fr }
+  }
+  @media (max-width: 640px){
+    .studio .facts{ grid-template-columns: 1fr }
+    .studio .fact:nth-child(odd){ padding-right: 0; border-right: 0 }
+    .studio .fact:nth-child(even){ padding-left: 0 }
+    h1.title{ font-size: clamp(44px, 12vw, 64px) }
+  }
+
+  /* Hamburger button styling */
+  .menu-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    width: 24px;
+    height: 18px;
+    justify-content: space-between;
+    cursor: pointer;
+    z-index: 101;
+    margin-left: 12px;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+  .menu-toggle span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background-color: var(--ink);
+    border-radius: 2px;
+    transition: transform .3s var(--ease, ease), opacity .3s var(--ease, ease);
+  }
+
+  @media (max-width: 980px) {
+    .menu-toggle {
+      display: flex;
+    }
+    
+    /* Responsive navbar dropdown layout */
+    .nav.menu-open {
+      border-radius: 28px !important;
+      flex-wrap: wrap;
+      padding: 16px 20px !important;
+      width: calc(100vw - 32px) !important;
+      max-width: 480px !important;
+      transition: all 0.3s cubic-bezier(.2,.7,.2,1);
+    }
+    
+    .nav.menu-open .nav-links {
+      display: flex !important;
+      flex-direction: column;
+      width: 100%;
+      gap: 6px;
+      margin-top: 16px;
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+      align-items: flex-start;
+    }
+    
+    .nav.menu-open .nav-links a {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      display: block;
+      text-align: left;
+    }
+    
+    .nav.menu-open .nav-links a:hover {
+      background: rgba(255,255,255,0.7);
+    }
+    
+    /* Transform hamburger into an X when open */
+    .nav.menu-open .menu-toggle span:nth-child(1) {
+      transform: translateY(8px) rotate(45deg);
+    }
+    .nav.menu-open .menu-toggle span:nth-child(2) {
+      opacity: 0;
+    }
+    .nav.menu-open .menu-toggle span:nth-child(3) {
+      transform: translateY(-8px) rotate(-45deg);
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+
+<!-- Nav -->
+<div class="nav-wrap" id="navWrap">
+  <nav class="nav">
+    <a class="brand" href="index.html">
+      <img src="assets/ysp-logo.png" alt="" />
+      <span class="word">Y<i>S</i>P</span>
+    </a>
+    <div class="nav-links">
+      <a href="programmes.html">Programmes</a>
+      <a href="research.html">Research</a>
+      <a href="team.html">Team</a>
+      <a href="careers.html">Careers</a>
+      <a href="about.html">About</a>
+      <a href="/learn">YSP Learns</a>
+    </div>
+    <a href="#apply" class="btn btn-primary" data-magnetic>Apply <span class="arr">↗</span></a>
+      <button class="menu-toggle" id="menuToggle" aria-label="Toggle Menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </nav>
+</div>
+
+<!-- Hero -->
+<section class="hero" data-screen-label="Studios Hero">
+  <div class="mesh" aria-hidden="true"><span></span></div>
+  <div class="hero-wrap">
+    <div class="crumbs apple-reveal">
+      <a href="index.html">YSP</a><span class="sep">/</span><b>Studios</b>
+    </div>
+
+    <h1 class="title apple-reveal" style="transition-delay:.08s">
+      Five formats.<br/>
+      <em>One outcome:</em> policy<br/>
+      you can point at.
+    </h1>
+
+    <p class="lede apple-reveal" style="transition-delay:.18s">
+      Studios are how YSP fellows do the actual work. Each one is a small, mentored
+      container — eight to twelve people, a real question, a real deliverable, a
+      real audience. Pick the format that fits the stage of the question you're on.
+    </p>
+
+    <div class="hero-meta apple-reveal" style="transition-delay:.28s">
+      <span class="chip"><span class="dot"></span>Fellows-only · apply per studio</span>
+      <span class="chip"><span class="dot"></span>Stipends on Field &amp; Flagship</span>
+      <span class="chip"><span class="dot"></span>Published openly, under your byline</span>
+    </div>
+
+    <nav class="hero-index apple-reveal" style="transition-delay:.4s" aria-label="Studio jump links">
+      <a href="#flagship">
+        <span class="n">01 — Flagship</span>
+        <span class="t" >Policy <em>Studios</em></span>
+      </a>
+      <a href="#field">
+        <span class="n">02</span>
+        <span class="t" ><em>Field</em> Fellowships</span>
+      </a>
+      <a href="#sprints">
+        <span class="n">03</span>
+        <span class="t" >Brief <em>Sprints</em></span>
+      </a>
+      <a href="#rooms">
+        <span class="n">04</span>
+        <span class="t" ><em>Reading</em> Rooms</span>
+      </a>
+      <a href="#open">
+        <span class="n">05</span>
+        <span class="t" >Open <em>Studio</em></span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- Studios detail -->
+<section class="studios">
+  <div class="container">
+    <span class="eyebrow apple-reveal"><span class="leaf"></span> The five formats</span>
+    <h2 class="section-title apple-reveal" style="transition-delay:.08s">
+      Pick the format that fits<br/>
+      the <em>question you're on.</em>
+    </h2>
+    <p class="section-sub apple-reveal" style="transition-delay:.16s">
+      Studios are sized to the work. A flagship lasts six months because shipping a pilot does. A sprint
+      lasts two weeks because a short brief should. Same standards, different tempos.
+    </p>
+
+    <!-- 01 ── Flagship Policy Studios -->
+    <article class="studio flagship apple-reveal" id="flagship" data-screen-label="Flagship Policy Studios">
+      <div class="left">
+        <div class="num-row">
+          <span class="num">01 ─ <em>Flagship</em></span>
+          <span class="badge"><span class="dot"></span>Applications open</span>
+        </div>
+        <h3 class="serif">Policy <em>Studios</em></h3>
+        <p class="lead">
+          Six‑month studios on housing, climate adaptation, and digital rights. Pair with a
+          senior advisor, draft a brief, ship a pilot.
+        </p>
+        <p class="body">
+          Twelve fellows per pillar, three pillars per cohort. You spend the first eight weeks
+          inside the literature and the people doing the work, the next eight building, and
+          the last eight pushing the output into a room where it matters. Output is whatever
+          the question demands — usually a policy brief, sometimes a working pilot, occasionally
+          model legislation. Everything ships under your name.
+        </p>
+
+        <div class="facts">
+          <div class="fact"><span class="k">Length</span><span class="v">Six <em>months</em></span></div>
+          <div class="fact"><span class="k">Cohort</span><span class="v">12 fellows × <em>3 pillars</em></span></div>
+          <div class="fact"><span class="k">Time</span><span class="v">~10 hrs / week</span></div>
+          <div class="fact"><span class="k">Stipend</span><span class="v"><em>Yes</em> — £2,400</span></div>
+          <div class="fact"><span class="k">Mentor</span><span class="v">1:1, weekly</span></div>
+          <div class="fact"><span class="k">Output</span><span class="v">Brief + pilot</span></div>
+        </div>
+
+        <div class="cta-row">
+          <a href="#apply" class="btn btn-forest" data-magnetic>Apply for Spring 2027 <span class="arr">↗</span></a>
+          <a href="#how" class="btn btn-ghost">See how it runs ▸</a>
+        </div>
+      </div>
+
+      <aside class="right">
+        <div class="card-eyebrow">Spring 2027 · pillars</div>
+        <div class="card-title">Three <em>pillars</em>, twelve seats each. Pick one when you apply.</div>
+        <div class="pillars">
+          <div class="pillar">
+            <span class="ix">H</span>
+            <span class="topic"><em>Housing</em> after the freeze</span>
+            <span class="meta">12 / 12</span>
+          </div>
+          <div class="pillar">
+            <span class="ix">C</span>
+            <span class="topic">Climate <em>adaptation</em> finance</span>
+            <span class="meta">8 / 12</span>
+          </div>
+          <div class="pillar">
+            <span class="ix">D</span>
+            <span class="topic"><em>Digital</em> rights &amp; AI rulemaking</span>
+            <span class="meta">5 / 12</span>
+          </div>
+        </div>
+
+        <div class="card-eyebrow" style="margin-top:22px">Advisors this cycle</div>
+        <div class="card-title" style="font-size:15px; margin-top:8px; color: var(--ink-soft); font-family: 'Inter', sans-serif; letter-spacing:0">
+          A municipal housing director, two climate‑finance economists, and a former regulator on the digital rights pillar. Names shared with shortlisted applicants.
+        </div>
+      </aside>
+    </article>
+
+    <!-- 02 ── Field Fellowships -->
+    <article class="studio apple-reveal" id="field" data-screen-label="Field Fellowships">
+      <div class="left">
+        <div class="num-row">
+          <span class="num">02 ─ <em>Field</em></span>
+          <span class="badge" style="background: rgba(255,255,255,.7); color: var(--ink-soft);"><span class="dot" style="background: var(--ink-mute); animation:none"></span>Summer · regional</span>
+        </div>
+        <h3 class="serif"><em>Field</em> Fellowships</h3>
+        <p class="lead">
+          Embed with a city office, a non‑profit, or a regulator for ten weeks. Stipend included.
+        </p>
+        <p class="body">
+          Fellowships are how you find out whether the brief you wrote actually meets the desk
+          it was meant for. You sit inside a host organisation, in the room where decisions
+          take shape — drafting memos, sitting in on consultations, learning what gets cut and
+          why. We place the cohort across four regions every summer and pair each fellow with
+          a senior staffer on the host side and a YSP advisor outside it.
+        </p>
+
+        <div class="facts">
+          <div class="fact"><span class="k">Length</span><span class="v">Ten <em>weeks</em></span></div>
+          <div class="fact"><span class="k">Cohort</span><span class="v">24 fellows</span></div>
+          <div class="fact"><span class="k">Time</span><span class="v">Full‑time</span></div>
+          <div class="fact"><span class="k">Stipend</span><span class="v"><em>Yes</em> — £4,800</span></div>
+          <div class="fact"><span class="k">Format</span><span class="v">In‑person at host</span></div>
+          <div class="fact"><span class="k">Output</span><span class="v">Host‑defined</span></div>
+        </div>
+
+        <div class="cta-row">
+          <a href="#apply" class="btn btn-primary" data-magnetic>Join the 2027 waitlist <span class="arr">↗</span></a>
+          <a href="#hosts" class="btn btn-ghost">See past hosts ▸</a>
+        </div>
+      </div>
+
+      <aside class="right" id="hosts">
+        <div class="card-eyebrow">Recent hosts</div>
+        <div class="card-title">Placements <em>change every year.</em> Past hosts have included:</div>
+        <div class="hosts">
+          <div class="host">
+            <div class="who">
+              <span class="seal">M</span>
+              <span class="name">Manchester City Council<span>Climate &amp; Adaptation Office</span></span>
+            </div>
+            <span class="kind">City · UK</span>
+          </div>
+          <div class="host">
+            <div class="who">
+              <span class="seal">R</span>
+              <span class="name">Reset Tech<span>Algorithmic accountability lab</span></span>
+            </div>
+            <span class="kind">Non‑profit · EU</span>
+          </div>
+          <div class="host">
+            <div class="who">
+              <span class="seal">N</span>
+              <span class="name">Nairobi Metropolitan Services<span>Housing &amp; informal settlements</span></span>
+            </div>
+            <span class="kind">City · KE</span>
+          </div>
+          <div class="host">
+            <div class="who">
+              <span class="seal">O</span>
+              <span class="name">Ofcom<span>Online safety policy team</span></span>
+            </div>
+            <span class="kind">Regulator · UK</span>
+          </div>
+          <div class="host">
+            <div class="who">
+              <span class="seal">C</span>
+              <span class="name">Climate Outreach<span>Public engagement research</span></span>
+            </div>
+            <span class="kind">Non‑profit · UK</span>
+          </div>
+          <div class="host">
+            <div class="who">
+              <span class="seal">B</span>
+              <span class="name">Boston Mayor's Office of New Urban Mechanics<span>Civic R&amp;D</span></span>
+            </div>
+            <span class="kind">City · US</span>
+          </div>
+        </div>
+      </aside>
+    </article>
+
+    <!-- 03 ── Brief Sprints -->
+    <article class="studio apple-reveal" id="sprints" data-screen-label="Brief Sprints">
+      <div class="left">
+        <div class="num-row">
+          <span class="num">03 ─ <em>Sprints</em></span>
+          <span class="badge"><span class="dot"></span>Rolling</span>
+        </div>
+        <h3 class="serif">Brief <em>Sprints</em></h3>
+        <p class="lead">
+          Two‑week intensives. One question, one brief, published openly.
+        </p>
+        <p class="body">
+          Sprints are the smallest viable unit of policy work. A question lands on a Monday
+          — usually one that's broken on a journalist's desk that week — and a brief is
+          published the second Friday after. Eight fellows work in pairs, each pair on a
+          different angle. A senior reviewer reads everything on day nine and the strongest
+          three drafts go through final polish. The rest go in the working notebook.
+        </p>
+
+        <div class="facts">
+          <div class="fact"><span class="k">Length</span><span class="v">Two <em>weeks</em></span></div>
+          <div class="fact"><span class="k">Cohort</span><span class="v">8 fellows · 4 pairs</span></div>
+          <div class="fact"><span class="k">Time</span><span class="v">~12 hrs / week</span></div>
+          <div class="fact"><span class="k">Stipend</span><span class="v">No — open</span></div>
+          <div class="fact"><span class="k">Cadence</span><span class="v">Monthly</span></div>
+          <div class="fact"><span class="k">Output</span><span class="v">~1,800‑word brief</span></div>
+        </div>
+
+        <div class="cta-row">
+          <a href="#apply" class="btn btn-primary" data-magnetic>Join the next sprint <span class="arr">↗</span></a>
+          <a href="research.html" class="btn btn-ghost">Read past briefs ▸</a>
+        </div>
+      </div>
+
+      <aside class="right">
+        <div class="card-eyebrow">Recent sprint questions</div>
+        <div class="card-title">Each one shipped as <em>a public brief.</em></div>
+        <div class="briefs">
+          <div class="brief">
+            <div class="qline">
+              Should second‑home <em>council tax</em> premiums fund local housing pipelines?
+            </div>
+            <div class="footline">
+              <span class="author">Saoirse N. &amp; Adaeze O.</span>
+              <span>March · 6,400 reads</span>
+            </div>
+          </div>
+          <div class="brief">
+            <div class="qline">
+              What does <em>"meaningful consultation"</em> mean in the AI Act, in practice?
+            </div>
+            <div class="footline">
+              <span class="author">Yusuf B. &amp; Mei L.</span>
+              <span>Feb · 4,100 reads</span>
+            </div>
+          </div>
+          <div class="brief">
+            <div class="qline">
+              The case for <em>route‑level</em> heat resilience budgets on city transit.
+            </div>
+            <div class="footline">
+              <span class="author">Priya R. &amp; Tomás F.</span>
+              <span>Jan · 3,300 reads</span>
+            </div>
+          </div>
+          <div class="brief">
+            <div class="qline">
+              Who pays when a <em>flood map</em> moves?
+            </div>
+            <div class="footline">
+              <span class="author">Lina K. &amp; Daniel J.</span>
+              <span>Dec · 5,900 reads</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </article>
+
+    <!-- 04 ── Reading Rooms -->
+    <article class="studio apple-reveal" id="rooms" data-screen-label="Reading Rooms">
+      <div class="left">
+        <div class="num-row">
+          <span class="num">04 ─ <em>Rooms</em></span>
+          <span class="badge" style="background: rgba(255,255,255,.7); color: var(--ink-soft);"><span class="dot" style="background: var(--ink-mute); animation:none"></span>Online + four cities</span>
+        </div>
+        <h3 class="serif"><em>Reading</em> Rooms</h3>
+        <p class="lead">
+          Slow, monthly seminars on the literature behind today's policy debates.
+        </p>
+        <p class="body">
+          The room is small on purpose. Twelve people, a chair, two papers, one conversation —
+          the kind of seminar policy people had before everything became a panel. We pick the
+          texts that the current debate is sitting on top of and read them properly. No slides,
+          no talks, no agenda beyond a question the chair will refuse to let you off the hook
+          for. London, Berlin, Nairobi, Singapore, and online.
+        </p>
+
+        <div class="facts">
+          <div class="fact"><span class="k">Length</span><span class="v">One <em>evening</em></span></div>
+          <div class="fact"><span class="k">Cohort</span><span class="v">12 per room</span></div>
+          <div class="fact"><span class="k">Cadence</span><span class="v">Monthly</span></div>
+          <div class="fact"><span class="k">Stipend</span><span class="v">No — free</span></div>
+          <div class="fact"><span class="k">Format</span><span class="v">In‑person · online</span></div>
+          <div class="fact"><span class="k">Output</span><span class="v">A better question</span></div>
+        </div>
+
+        <div class="cta-row">
+          <a href="#apply" class="btn btn-primary" data-magnetic>Reserve a seat <span class="arr">↗</span></a>
+          <a href="#calendar" class="btn btn-ghost">See the calendar ▸</a>
+        </div>
+      </div>
+
+      <aside class="right" id="calendar">
+        <div class="card-eyebrow">This quarter</div>
+        <div class="card-title">Five rooms across <em>four cities &amp; online.</em></div>
+        <div class="calendar">
+          <div class="session">
+            <div class="date"><div class="m">Jun</div><div class="d">04</div></div>
+            <div class="title-row"><div class="t">After <em>Hirschman</em>: exit, voice, and the platform</div><span class="sub">Chair · Dr. R. Aviles</span></div>
+            <span class="where">London</span>
+          </div>
+          <div class="session">
+            <div class="date"><div class="m">Jun</div><div class="d">18</div></div>
+            <div class="title-row"><div class="t"><em>Polanyi</em> reread for the energy transition</div><span class="sub">Chair · P. Wójcik</span></div>
+            <span class="where">Online</span>
+          </div>
+          <div class="session">
+            <div class="date"><div class="m">Jul</div><div class="d">02</div></div>
+            <div class="title-row"><div class="t">What <em>Ostrom</em> wanted from the commons</div><span class="sub">Chair · Prof. K. Mwangi</span></div>
+            <span class="where">Nairobi</span>
+          </div>
+          <div class="session">
+            <div class="date"><div class="m">Jul</div><div class="d">16</div></div>
+            <div class="title-row"><div class="t"><em>Scott</em> and the limits of legibility, on AI</div><span class="sub">Chair · J. Tan</span></div>
+            <span class="where">Singapore</span>
+          </div>
+          <div class="session">
+            <div class="date"><div class="m">Aug</div><div class="d">06</div></div>
+            <div class="title-row"><div class="t">Migration writing <em>since Sassen</em></div><span class="sub">Chair · A. Khoury</span></div>
+            <span class="where">Berlin</span>
+          </div>
+        </div>
+      </aside>
+    </article>
+
+    <!-- 05 ── Open Studio -->
+    <article class="studio apple-reveal" id="open" data-screen-label="Open Studio">
+      <div class="left">
+        <div class="num-row">
+          <span class="num">05 ─ <em>Open</em></span>
+          <span class="badge" style="background: rgba(255,255,255,.7); color: var(--ink-soft);"><span class="dot" style="background: var(--ink-mute); animation:none"></span>Year‑round</span>
+        </div>
+        <h3 class="serif">Open <em>Studio</em></h3>
+        <p class="lead">
+          Bring your own initiative. We provide critique, contacts, and a desk.
+        </p>
+        <p class="body">
+          Some of the best work walks in the door already half‑built — a campaign someone's been
+          running, a paper that needs sharpening, a coalition looking for a brief. Open Studio
+          is for those. We don't reshape what you're doing; we sit with it, ask the awkward
+          questions, open the doors we can open, and lend the room and the people. Twelve seats
+          held open all year. Roll in when you're ready.
+        </p>
+
+        <div class="facts">
+          <div class="fact"><span class="k">Length</span><span class="v">You decide</span></div>
+          <div class="fact"><span class="k">Cohort</span><span class="v">12 active seats</span></div>
+          <div class="fact"><span class="k">Time</span><span class="v">Self‑directed</span></div>
+          <div class="fact"><span class="k">Stipend</span><span class="v">Project‑based</span></div>
+          <div class="fact"><span class="k">Format</span><span class="v">Hybrid · async</span></div>
+          <div class="fact"><span class="k">Output</span><span class="v"><em>Yours.</em></span></div>
+        </div>
+
+        <div class="cta-row">
+          <a href="#apply" class="btn btn-forest" data-magnetic>Propose your initiative <span class="arr">↗</span></a>
+          <a href="about.html" class="btn btn-ghost">What we look for ▸</a>
+        </div>
+      </div>
+
+      <aside class="right">
+        <div class="card-eyebrow">What you bring · what we add</div>
+        <div class="card-title">Open Studio is <em>a frame around your work,</em> not a curriculum on top of it.</div>
+        <div class="yours">
+          <div class="y">
+            <span class="k">You bring</span>
+            <span class="v"><em>An initiative</em></span>
+            <span class="h">A campaign, a paper, a coalition, a thing you've already started.</span>
+          </div>
+          <div class="y">
+            <span class="k">We add</span>
+            <span class="v"><em>Critique</em></span>
+            <span class="h">A monthly review with two senior advisors. Honest, on the record.</span>
+          </div>
+          <div class="y">
+            <span class="k">You bring</span>
+            <span class="v"><em>A question</em></span>
+            <span class="h">Specific enough that we know what would change if you answered it.</span>
+          </div>
+          <div class="y">
+            <span class="k">We add</span>
+            <span class="v"><em>Contacts</em></span>
+            <span class="h">Warm introductions to the people we'd want reading your draft.</span>
+          </div>
+          <div class="y">
+            <span class="k">You bring</span>
+            <span class="v"><em>Time</em></span>
+            <span class="h">Roughly six hours a week, sustained. Less than that and the studio drifts.</span>
+          </div>
+          <div class="y">
+            <span class="k">We add</span>
+            <span class="v"><em>A desk</em></span>
+            <span class="h">A literal room at the King's Cross studio, plus shared infrastructure.</span>
+          </div>
+        </div>
+      </aside>
+    </article>
+  </div>
+</section>
+
+<!-- How a studio runs -->
+<section class="how" id="how">
+  <div class="mesh" aria-hidden="true" style="opacity:.4"><span></span></div>
+  <div class="container">
+    <span class="eyebrow apple-reveal"><span class="leaf"></span> How a studio runs</span>
+    <h2 class="section-title apple-reveal" style="transition-delay:.08s">
+      Same shape, <em>different tempo.</em>
+    </h2>
+    <p class="section-sub apple-reveal" style="transition-delay:.16s">
+      Whatever the length — two weeks or six months — every studio follows the same six
+      beats. Sprints compress them into a fortnight; flagships stretch them across half a year.
+    </p>
+
+    <div class="timeline">
+      <div class="step apple-reveal">
+        <span class="dot"></span>
+        <span class="wk">Beat 01</span>
+        <span class="h"><em>Frame</em></span>
+        <p>Land on the question. Strip it of jargon. Write the headline you'd want to see when the work is done.</p>
+      </div>
+      <div class="step apple-reveal" style="transition-delay:.06s">
+        <span class="dot"></span>
+        <span class="wk">Beat 02</span>
+        <span class="h"><em>Read</em></span>
+        <p>Cover the literature properly. Find the three pieces that quietly hold up the current debate.</p>
+      </div>
+      <div class="step apple-reveal" style="transition-delay:.12s">
+        <span class="dot"></span>
+        <span class="wk">Beat 03</span>
+        <span class="h"><em>Listen</em></span>
+        <p>Five conversations with people closer to the desk than you are. Notes shared with the cohort.</p>
+      </div>
+      <div class="step apple-reveal" style="transition-delay:.18s">
+        <span class="dot full"></span>
+        <span class="wk">Beat 04</span>
+        <span class="h"><em>Draft</em></span>
+        <p>Write the brief. Cut it in half. Show it to your mentor. Cut it again. Show it to a stranger.</p>
+      </div>
+      <div class="step apple-reveal" style="transition-delay:.24s">
+        <span class="dot full"></span>
+        <span class="wk">Beat 05</span>
+        <span class="h"><em>Test</em></span>
+        <p>Put it in front of someone who would actually use it. Take the awkward feedback. Revise.</p>
+      </div>
+      <div class="step apple-reveal" style="transition-delay:.30s">
+        <span class="dot full"></span>
+        <span class="wk">Beat 06</span>
+        <span class="h"><em>Ship</em></span>
+        <p>Publish openly, under your name. Send it to the rooms it was written for. Stay in the conversation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Upcoming cohorts -->
+<section class="cohorts" id="apply">
+  <div class="mesh" aria-hidden="true" style="opacity:.35"><span></span></div>
+  <div class="container">
+    <span class="eyebrow apple-reveal"><span class="leaf"></span> Upcoming cohorts</span>
+    <h2 class="section-title apple-reveal" style="transition-delay:.08s">
+      Five open seats <em>this season.</em>
+    </h2>
+    <p class="section-sub apple-reveal" style="transition-delay:.16s">
+      Most studios open applications four to eight weeks before they begin. We close them as
+      soon as the cohort is full — usually sooner than the deadline.
+    </p>
+
+    <div class="cohort-table apple-reveal" style="transition-delay:.22s">
+      <div class="cohort-row head">
+        <span>Studio</span>
+        <span>Focus</span>
+        <span>Dates</span>
+        <span>Seats</span>
+        <span></span>
+      </div>
+      <div class="cohort-row">
+        <span class="prog">Policy <em>Studios</em></span>
+        <span class="focus">Housing · climate adaptation · digital rights. Three pillars, one cohort.</span>
+        <span class="dates">Feb 02 → Jul 31, 2027</span>
+        <span class="seats"><b>17</b> / 36 open</span>
+        <a href="#" class="apply open">Apply ↗</a>
+      </div>
+      <div class="cohort-row">
+        <span class="prog"><em>Field</em> Fellowships</span>
+        <span class="focus">Ten‑week summer placements with city offices, non‑profits, and regulators.</span>
+        <span class="dates">Jun 15 → Aug 28, 2027</span>
+        <span class="seats"><b>Waitlist</b></span>
+        <a href="#" class="apply soon">Notify me</a>
+      </div>
+      <div class="cohort-row">
+        <span class="prog">Brief <em>Sprints</em></span>
+        <span class="focus">Next sprint question announced June 03. One brief in two weeks.</span>
+        <span class="dates">Jun 03 → Jun 17, 2026</span>
+        <span class="seats"><b>3</b> / 8 open</span>
+        <a href="#" class="apply open">Apply ↗</a>
+      </div>
+      <div class="cohort-row">
+        <span class="prog"><em>Reading</em> Rooms</span>
+        <span class="focus">Five sessions this quarter. London, Berlin, Nairobi, Singapore, online.</span>
+        <span class="dates">Jun 04 → Aug 06, 2026</span>
+        <span class="seats"><b>24</b> / 60 open</span>
+        <a href="#" class="apply open">Reserve ↗</a>
+      </div>
+      <div class="cohort-row">
+        <span class="prog">Open <em>Studio</em></span>
+        <span class="focus">Year‑round. Propose your initiative; we'll respond within two weeks.</span>
+        <span class="dates">Rolling, year‑round</span>
+        <span class="seats"><b>2</b> / 12 active</span>
+        <a href="#" class="apply open">Propose ↗</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq">
+  <div class="container">
+    <span class="eyebrow apple-reveal"><span class="leaf"></span> Questions, plainly</span>
+    <h2 class="section-title apple-reveal" style="transition-delay:.08s">
+      Things people <em>actually ask.</em>
+    </h2>
+
+    <div class="faq-list apple-reveal" style="transition-delay:.16s">
+      <details class="q">
+        <summary>How is a studio different from a <em>route</em>?<span class="plus">+</span></summary>
+        <div class="a">
+          A route is what you study — Research, Policy, Business, Diplomacy, Environment, Community.
+          A studio is how you study it: the format, the cadence, the people in the room. Most fellows
+          do a route once and pass through several studios.
+        </div>
+      </details>
+      <details class="q">
+        <summary>Do I have to be a YSP fellow to <em>apply</em>?<span class="plus">+</span></summary>
+        <div class="a">
+          Flagship, Field, and Open Studio are fellows‑only. Brief Sprints and Reading Rooms are
+          open to anyone 16–28; about half of every sprint cohort comes from outside YSP.
+        </div>
+      </details>
+      <details class="q">
+        <summary>Is there a <em>fee</em>?<span class="plus">+</span></summary>
+        <div class="a">
+          No. YSP studios are free. Flagship and Field also pay a stipend — £2,400 and £4,800
+          respectively for 2026/27. Travel for in‑person Reading Rooms is reimbursed if cost is a barrier;
+          ask, we mean it.
+        </div>
+      </details>
+      <details class="q">
+        <summary>How <em>competitive</em> are flagships?<span class="plus">+</span></summary>
+        <div class="a">
+          The last cohort received 380 applications for 36 seats. We optimise for range, not pedigree:
+          one in four fellows last cycle had no prior policy training. Show us a question you'd protect.
+        </div>
+      </details>
+      <details class="q">
+        <summary>Can I run a studio <em>at my university or city</em>?<span class="plus">+</span></summary>
+        <div class="a">
+          Reading Rooms travel well — we've stood them up in eight cities so far on local invitation.
+          Write to chapters@ysp.org with a chair, a venue, and a date that's at least eight weeks out.
+        </div>
+      </details>
+      <details class="q">
+        <summary>What about <em>time zones</em> and <em>language</em>?<span class="plus">+</span></summary>
+        <div class="a">
+          Studios are predominantly async; the live touchpoints (mentor 1:1s, the chair‑led reading rooms)
+          are scheduled per cohort. English is the working language but mentors are matched bilingually
+          where we can — currently in French, Mandarin, Spanish, Arabic, Swahili, and Portuguese.
+        </div>
+      </details>
+      <details class="q">
+        <summary>What happens to my <em>work</em> after a studio ends?<span class="plus">+</span></summary>
+        <div class="a">
+          You own it. We publish your final brief openly under your byline, with a YSP imprint
+          credit. Sprint and flagship briefs become part of the YSP working notebook and are
+          regularly cited in mainstream policy press.
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- Final CTA -->
+<section class="final">
+  <div class="mesh" aria-hidden="true" style="opacity:.5"><span></span></div>
+  <div class="container">
+    <span class="eyebrow apple-reveal" style="color:var(--ink-soft)"><span class="leaf"></span> Five formats, one door</span>
+    <h2 class="apple-reveal" style="transition-delay:.08s">Stop chasing titles.<br/><em>Pick a studio.</em></h2>
+    <p class="apple-reveal" style="transition-delay:.16s">
+      The next sprint announces its question on June 03. Reading Rooms open seats every Monday.
+      Flagship applications close August 14.
+    </p>
+    <div class="final-cta apple-reveal" style="transition-delay:.24s">
+      <a href="#apply" class="btn btn-forest" data-magnetic>See open cohorts <span class="arr">↗</span></a>
+      <a href="programmes.html" class="btn btn-ghost">Or explore the six routes ▸</a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div>
+      <div class="brand">
+        <img src="assets/ysp-logo.png" alt="" />
+        <span class="word">Y<i>S</i>P</span>
+      </div>
+      <p class="blurb" style="font-family: system-ui">
+        Youth for Sustainable Policy (YSP) is a youth-led initiative empowering the next generation to engage with global challenges through research, storytelling, and policy dialogue.
+      </p>
+    </div>
+    <div>
+      <h5>Studios</h5>
+      <ul>
+        <li><a href="#flagship">Policy Studios</a></li>
+        <li><a href="#field">Field Fellowships</a></li>
+        <li><a href="#sprints">Brief Sprints</a></li>
+        <li><a href="#rooms">Reading Rooms</a></li>
+        <li><a href="#open">Open Studio</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>Organisation</h5>
+      <ul>
+        <li><a href="about.html">About</a></li>
+        <li><a href="team.html">Team</a></li>
+        <li><a href="careers.html">Careers</a></li>
+        <li><a href="press.html">Press</a></li>
+        <li><a href="annual-reports.html">Annual Reports</a></li>
+        <li><a href="policies.html">Policies &amp; Declarations</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="safe-band">
+    <div class="left">
+      <span class="leaf">✦</span>
+      <span>This is a safe, moderated space for youth. For Youth, By Youth.</span>
+    </div>
+    <div>View our <a href="community-policy.html">Community Policy</a> · <a href="privacy-notice.html">Privacy Notice</a></div>
+  </div>
+
+  <div class="copy">
+    <span>© 2026 Youth for Sustainable Policy. A global youth organisation.</span>
+    <span>Made slowly, in good company.</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  // Nav scroll state
+  const navWrap = document.getElementById('navWrap');
+  function onScroll(){
+    const y = window.scrollY || window.pageYOffset;
+    if (y > 40) navWrap.classList.add('scrolled'); else navWrap.classList.remove('scrolled');
+  }
+  window.addEventListener('scroll', onScroll, { passive:true });
+
+  // Magnetic buttons
+  document.querySelectorAll('[data-magnetic]').forEach(el => {
+    let raf=null, tx=0, ty=0, cx=0, cy=0;
+    const STR = 14;
+    function loop(){
+      tx += (cx-tx)*0.18; ty += (cy-ty)*0.18;
+      el.style.transform = 'translate(' + tx.toFixed(2) + 'px,' + ty.toFixed(2) + 'px)';
+      if (Math.abs(cx-tx)>0.05 || Math.abs(cy-ty)>0.05) raf = requestAnimationFrame(loop); else raf=null;
+    }
+    el.addEventListener('mousemove', e => {
+      const r = el.getBoundingClientRect();
+      const dx = (e.clientX - (r.left + r.width/2)) / (r.width/2);
+      const dy = (e.clientY - (r.top + r.height/2)) / (r.height/2);
+      cx = dx*STR; cy = dy*STR;
+      if (!raf) raf = requestAnimationFrame(loop);
+    });
+    el.addEventListener('mouseleave', () => { cx=0; cy=0; if (!raf) raf = requestAnimationFrame(loop); });
+  });
+
+  // Apple-style reveals on scroll
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(en => {
+      if (en.isIntersecting){ en.target.classList.add('is-in'); io.unobserve(en.target); }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -10% 0px' });
+  document.querySelectorAll('.apple-reveal').forEach(el => io.observe(el));
+})();
+
+
+  // Mobile Menu Toggle
+  const menuToggle = document.getElementById('menuToggle');
+  const navElement = document.querySelector('.nav');
+  if (menuToggle && navElement) {
+    menuToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navElement.classList.toggle('menu-open');
+    });
+    document.addEventListener('click', (e) => {
+      if (!navElement.contains(e.target)) {
+        navElement.classList.remove('menu-open');
+      }
+    });
+  }
+</script>
+
+  <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
+</body>
+</html>

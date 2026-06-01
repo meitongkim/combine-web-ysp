@@ -23,13 +23,14 @@
   <!-- Navigation -->
   <div class="nav-wrap" id="navWrap">
     <nav class="nav">
-      <a class="brand" href="{{ url_for('index') }}">
+      <a class="brand" href="{{ url_for('learn_landing') }}">
         <span class="logo-icon">Y</span>
         <span class="word">YSP <i>Learns</i></span>
       </a>
 
       <div class="nav-links">
-        <a href="{{ url_for('index') }}" class="{{ 'active' if request.endpoint == 'index' else '' }}">Home</a>
+        <a href="{{ url_for('index') }}" class="{{ 'active' if request.endpoint == 'index' else '' }}">YSP Main</a>
+        <a href="{{ url_for('learn_landing') }}" class="{{ 'active' if request.endpoint == 'learn_landing' else '' }}">Portal Home</a>
         <a href="{{ url_for('catalog') }}" class="{{ 'active' if request.endpoint == 'catalog' else '' }}">Modules</a>
         {% if current_user.is_authenticated %}
           {% if current_user.role == 'student' %}
@@ -49,6 +50,11 @@
       {% else %}
         <a href="{{ url_for('login') }}" class="btn btn-sm btn-primary" data-magnetic>Sign In <span class="arr">↗</span></a>
       {% endif %}
+      <button class="menu-toggle" id="menuToggle" aria-label="Toggle Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
     </nav>
   </div>
 
@@ -76,7 +82,7 @@
         <div style="font-size:72px;font-family:'Fraunces',serif;font-weight:300;color:var(--sage-deep);margin-bottom:12px">{{ error_code }}</div>
         <h2 class="serif">{{ error_message }}</h2>
         <p class="text-mute mt-md">The page you're looking for doesn't exist or has been moved.</p>
-        <a href="{{ url_for('index') }}" class="btn btn-forest mt-md">Back to Home <span class="arr">↗</span></a>
+        <a href="{{ url_for('learn_landing') }}" class="btn btn-forest mt-md">Back to Home <span class="arr">↗</span></a>
       </div>
     </div>
   {% else %}
@@ -101,6 +107,7 @@
 
   <!-- JavaScript -->
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
   {% block extra_js %}{% endblock %}
 </body>
 </html>

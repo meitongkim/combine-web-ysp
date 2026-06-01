@@ -1,0 +1,607 @@
+{% extends "base.html" %}
+{% block title %}My Learning Calendar{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Student Portal</div>
+      <a href="{{ url_for('student_dashboard') }}" class="sidebar-link">
+        <span class="icon">📊</span> Dashboard
+      </a>
+      <a href="{{ url_for('student_calendar') }}" class="sidebar-link active">
+        <span class="icon">📅</span> Calendar
+      </a>
+      <a href="{{ url_for('catalog') }}" class="sidebar-link">
+        <span class="icon">📚</span> Browse Modules
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">My Modules</div>
+      {% for e in enrollments %}
+        <a href="{{ url_for('student_module', module_id=e.module_id) }}" class="sidebar-link">
+          <span class="icon">📖</span>
+          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ e.title }}</span>
+        </a>
+      {% endfor %}
+      {% if not enrollments %}
+        <div style="padding:10px 14px; font-size:13px; color:var(--ink-mute)">No modules enrolled yet</div>
+      {% endif %}
+    </div>
+    <div class="sidebar-section" style="margin-top:auto; padding-top:16px; border-top:1px solid var(--line)">
+      <div style="padding:10px 14px">
+        <div style="font-size:13px; font-weight:500; color:var(--ink)">{{ current_user.full_name }}</div>
+        <div style="font-size:12px; color:var(--ink-mute)">{{ current_user.email }}</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Mobile sidebar toggle -->
+  <button class="mobile-menu-btn" id="sidebarToggle"><span>☰</span></button>
+
+  <!-- Main Content -->
+  <main class="dashboard-main" style="background:linear-gradient(180deg, #f0f5e6 0%, var(--paper) 60%)">
+    <!-- Header -->
+    <div class="page-header apple-reveal" style="display:flex; justify-content:space-between; align-items:start; flex-wrap:wrap; gap:16px; margin-bottom:32px">
+      <div>
+        <span class="eyebrow"><span class="leaf"></span> My Schedule</span>
+        <h2 class="section-title serif" style="font-size:clamp(28px, 4vw, 42px); margin:0">
+          Learning <em>Calendar</em>
+        </h2>
+      </div>
+      <button class="btn btn-forest" id="openSyncModal" style="display:flex; align-items:center; gap:8px">
+        <span>📅</span> Sync to Google Calendar
+      </button>
+    </div>
+
+    <!-- Calendar Layout -->
+    <div class="calendar-container apple-reveal" style="transition-delay:.1s">
+      <div class="calendar-grid-layout">
+        <!-- Calendar Main Grid Card -->
+        <div class="calendar-card">
+          <!-- Calendar Header Navigation -->
+          <div class="cal-header">
+            <h3 id="currentMonthYear" class="serif">Month Year</h3>
+            <div class="cal-nav-btns">
+              <button class="btn-cal-nav" id="prevMonthBtn" aria-label="Previous Month">‹</button>
+              <button class="btn-cal-nav" id="nextMonthBtn" aria-label="Next Month">›</button>
+            </div>
+          </div>
+          
+          <!-- Month Day Grid -->
+          <div class="cal-month-grid">
+            <div class="cal-weekday">Sun</div>
+            <div class="cal-weekday">Mon</div>
+            <div class="cal-weekday">Tue</div>
+            <div class="cal-weekday">Wed</div>
+            <div class="cal-weekday">Thu</div>
+            <div class="cal-weekday">Fri</div>
+            <div class="cal-weekday">Sat</div>
+            <div id="calendarDays" class="days-container"></div>
+          </div>
+        </div>
+
+        <!-- Sidebar Event Details -->
+        <div class="calendar-details-card">
+          <h4 class="serif" style="margin:0 0 16px; font-size:18px; color:var(--sage-deep)">
+            Schedule for <em id="selectedDateLabel">Select a day</em>
+          </h4>
+          <div id="dayEventsList" class="events-list-container">
+            <div style="text-align:center; padding:32px; color:var(--ink-mute)">
+              Click on a calendar date to view module deadlines, starts, and completions.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- iCal Sync Modal -->
+<div class="modal-backdrop" id="syncModalBackdrop" aria-hidden="true" style="display:none"></div>
+<div class="modal" id="syncModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true" style="display:none">
+  <div class="modal-head">
+    <h3 id="modalTitle" class="serif">Sync with <em>Google Calendar</em></h3>
+    <button class="modal-close" id="closeSyncModal" aria-label="Close">✕</button>
+  </div>
+  <div class="modal-body">
+    <p class="text-mute" style="font-size:13.5px; line-height:1.5; margin-bottom:18px">
+      Subscribe to your personalized YSP Learns calendar feed. This dynamically syncs your module starts, target deadlines, and completions directly to Google Calendar, Apple Calendar, or Outlook in real-time.
+    </p>
+    
+    <label style="font-size:12px; font-weight:600; text-transform:uppercase; color:var(--sage-deep); display:block; margin-bottom:6px">Your Secure Feed URL</label>
+    <div style="display:flex; gap:8px; margin-bottom:20px">
+      <input type="text" id="feedUrlInput" readonly value="" style="flex:1; padding:10px 14px; border:1px solid rgba(31,42,34,.15); border-radius:10px; font-size:12.5px; font-family:monospace; background:#fbfdfa; outline:none" />
+      <button class="btn btn-forest" id="copyFeedUrlBtn" style="padding:0 16px; font-size:13px; border-radius:10px">Copy Link</button>
+    </div>
+
+    <h4 style="font-size:13.5px; font-weight:600; color:var(--ink); margin:0 0 10px">Google Calendar subscription steps:</h4>
+    <ol style="font-size:12.5px; line-height:1.6; color:#3d4b40; margin:0; padding-left:20px">
+      <li style="margin-bottom:6px">Copy the secure link above.</li>
+      <li style="margin-bottom:6px">Open <a href="https://calendar.google.com" target="_blank" rel="noopener" style="color:var(--sage-deep); font-weight:600">Google Calendar</a> in your web browser.</li>
+      <li style="margin-bottom:6px">On the left panel, click the plus sign (<strong>+</strong>) next to <strong>Other calendars</strong>, then choose <strong>From URL</strong>.</li>
+      <li style="margin-bottom:6px">Paste the copied URL in the text field and click <strong>Add calendar</strong>.</li>
+      <li>Google Calendar will now subscribe to your feed and update your events automatically!</li>
+    </ol>
+  </div>
+</div>
+
+<!-- Styles for Calendar -->
+<style>
+  .calendar-container {
+    margin-top: 12px;
+  }
+  .calendar-grid-layout {
+    display: grid;
+    grid-template-columns: 2.2fr 1fr;
+    gap: 24px;
+  }
+  .calendar-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px) saturate(1.5);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    border: 1px solid rgba(31, 42, 34, 0.12);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 4px 24px rgba(31, 42, 34, 0.05);
+  }
+  .cal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .cal-header h3 {
+    margin: 0;
+    font-size: 20px;
+    color: var(--sage-deep);
+  }
+  .cal-nav-btns {
+    display: flex;
+    gap: 8px;
+  }
+  .btn-cal-nav {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid rgba(31, 42, 34, 0.12);
+    background: #ffffff;
+    color: var(--ink);
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .btn-cal-nav:hover {
+    background: var(--sage-light);
+    border-color: #89a36c;
+    color: var(--sage-deep);
+  }
+  .cal-month-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+  }
+  .cal-weekday {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    padding: 10px 0;
+    letter-spacing: 0.1em;
+    border-bottom: 1px solid var(--line);
+  }
+  .days-container {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-column: span 7;
+    margin-top: 6px;
+  }
+  .cal-day {
+    aspect-ratio: 1.15;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: start;
+    border-bottom: 1px solid rgba(31, 42, 34, 0.05);
+    border-right: 1px solid rgba(31, 42, 34, 0.05);
+    cursor: pointer;
+    position: relative;
+    transition: background 0.2s;
+  }
+  .cal-day:nth-child(7n) {
+    border-right: none;
+  }
+  .cal-day:hover {
+    background: rgba(137, 163, 108, 0.08);
+  }
+  .cal-day.empty {
+    cursor: default;
+    background: transparent;
+    opacity: 0.35;
+    pointer-events: none;
+  }
+  .cal-day.today {
+    background: rgba(137, 163, 108, 0.12);
+  }
+  .cal-day.today .day-num {
+    background: #89a36c;
+    color: #ffffff;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+  }
+  .cal-day.selected {
+    background: rgba(31, 42, 34, 0.05);
+    box-shadow: 0 0 0 1.5px var(--sage-deep) inset;
+    border-radius: 8px;
+  }
+  .day-num {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  
+  /* Event Indicators in Grid Cells */
+  .cal-dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    width: 100%;
+    margin-top: auto;
+  }
+  .cal-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+  .cal-dot.start { background-color: #89a36c; }
+  .cal-dot.target { background-color: #f59e0b; }
+  .cal-dot.completed { background-color: #10b981; }
+  .cal-dot.announcement { background-color: #3b82f6; }
+
+  /* Details Panel Card */
+  .calendar-details-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px) saturate(1.5);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    border: 1px solid rgba(31, 42, 34, 0.12);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 4px 24px rgba(31, 42, 34, 0.05);
+    height: fit-content;
+  }
+  .events-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .event-item-detail {
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(31, 42, 34, 0.06);
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .event-item-detail.start { border-left: 4px solid #89a36c; }
+  .event-item-detail.target { border-left: 4px solid #f59e0b; }
+  .event-item-detail.completed { border-left: 4px solid #10b981; }
+  .event-item-detail.announcement { border-left: 4px solid #3b82f6; }
+
+  .event-title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .event-desc {
+    font-size: 12px;
+    color: var(--ink-mute);
+    line-height: 1.4;
+  }
+  .event-tag {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    width: fit-content;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+  }
+  .event-tag.start { background: #f0f5e6; color: #5f7446; }
+  .event-tag.target { background: #fef3c7; color: #b45309; }
+  .event-tag.completed { background: #d1fae5; color: #065f46; }
+  .event-tag.announcement { background: #dbeafe; color: #1e40af; }
+
+  /* Modal Styles */
+  .modal-backdrop {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(31, 42, 34, 0.4);
+    backdrop-filter: blur(8px);
+    z-index: 10000;
+    animation: yspFadeIn 0.25s ease;
+  }
+  .modal {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    max-width: 520px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(24px) saturate(1.8);
+    -webkit-backdrop-filter: blur(24px) saturate(1.8);
+    border: 1px solid rgba(31, 42, 34, 0.15);
+    border-radius: 24px;
+    box-shadow: 0 24px 64px rgba(31, 42, 34, 0.25);
+    z-index: 10001;
+    overflow: hidden;
+    animation: yspSlideUp 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  }
+  @keyframes yspFadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes yspSlideUp { from { opacity: 0; transform: translate(-50%, -40%); } to { opacity: 1; transform: translate(-50%, -50%); } }
+
+  .modal-head {
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(31, 42, 34, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-head h3 {
+    margin: 0;
+    font-size: 20px;
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--ink-mute);
+  }
+  .modal-close:hover {
+    color: var(--ink);
+  }
+  .modal-body {
+    padding: 24px;
+  }
+
+  @media (max-width: 820px) {
+    .calendar-grid-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<!-- JavaScript Calendar Logic -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Parse events from Flask
+  const rawEvents = {{ events | tojson | safe }};
+  
+  // Date state
+  let currentMonth = new Date().getMonth();
+  let currentYear = new Date().getFullYear();
+  let selectedDate = new Date();
+  
+  // DOM Elements
+  const currentMonthYearLabel = document.getElementById("currentMonthYear");
+  const calendarDaysContainer = document.getElementById("calendarDays");
+  const prevMonthBtn = document.getElementById("prevMonthBtn");
+  const nextMonthBtn = document.getElementById("nextMonthBtn");
+  const selectedDateLabel = document.getElementById("selectedDateLabel");
+  const dayEventsListContainer = document.getElementById("dayEventsList");
+
+  // Format Helper: date to YYYY-MM-DD
+  function formatDateString(year, month, day) {
+    const mm = String(month + 1).padStart(2, "0");
+    const dd = String(day).padStart(2, "0");
+    return `${year}-${mm}-${dd}`;
+  }
+
+  // Render Calendar Days
+  function renderCalendar() {
+    calendarDaysContainer.innerHTML = "";
+    
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    
+    currentMonthYearLabel.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+    
+    // First day of current month
+    const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
+    // Total days in current month
+    const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+    // Total days in previous month
+    const prevTotalDays = new Date(currentYear, currentMonth, 0).getDate();
+
+    // Render empty spaces for previous month's trailing days
+    for (let i = firstDayIndex; i > 0; i--) {
+      const dayEl = document.createElement("div");
+      dayEl.className = "cal-day empty";
+      dayEl.innerHTML = `<span class="day-num">${prevTotalDays - i + 1}</span>`;
+      calendarDaysContainer.appendChild(dayEl);
+    }
+
+    // Render current month days
+    const today = new Date();
+    for (let day = 1; day <= totalDays; day++) {
+      const dateStr = formatDateString(currentYear, currentMonth, day);
+      const dayEl = document.createElement("div");
+      dayEl.className = "cal-day";
+      dayEl.setAttribute("data-date", dateStr);
+      
+      // Highlight today
+      if (today.getDate() === day && today.getMonth() === currentMonth && today.getFullYear() === currentYear) {
+        dayEl.classList.add("today");
+      }
+      
+      // Highlight selected
+      if (selectedDate.getDate() === day && selectedDate.getMonth() === currentMonth && selectedDate.getFullYear() === currentYear) {
+        dayEl.classList.add("selected");
+      }
+
+      dayEl.innerHTML = `<span class="day-num">${day}</span>`;
+
+      // Filter events on this specific date
+      const dateEvents = rawEvents.filter(e => e.date === dateStr);
+      if (dateEvents.length > 0) {
+        const dotsContainer = document.createElement("div");
+        dotsContainer.className = "cal-dots";
+        
+        dateEvents.forEach(e => {
+          const dot = document.createElement("span");
+          dot.className = `cal-dot ${e.type}`;
+          dotsContainer.appendChild(dot);
+        });
+        
+        dayEl.appendChild(dotsContainer);
+      }
+
+      // Add click handler
+      dayEl.addEventListener("click", () => {
+        document.querySelectorAll(".cal-day").forEach(el => el.classList.remove("selected"));
+        dayEl.classList.add("selected");
+        selectedDate = new Date(currentYear, currentMonth, day);
+        showEventsForDate(dateStr);
+      });
+
+      calendarDaysContainer.appendChild(dayEl);
+    }
+    
+    // Autofill selected day events on load/navigation
+    const activeSelectedDateStr = formatDateString(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+    showEventsForDate(activeSelectedDateStr);
+  }
+
+  // Show Events List for a specific Date
+  function showEventsForDate(dateStr) {
+    // Format label
+    const parsedDate = new Date(dateStr + "T00:00:00");
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    selectedDateLabel.textContent = parsedDate.toLocaleDateString('en-US', options);
+
+    dayEventsListContainer.innerHTML = "";
+    
+    const dateEvents = rawEvents.filter(e => e.date === dateStr);
+    
+    if (dateEvents.length === 0) {
+      dayEventsListContainer.innerHTML = `
+        <div style="text-align:center; padding:32px; color:var(--ink-mute); font-size:13.5px">
+          No module starts, deadlines, or completions scheduled on this date.
+        </div>
+      `;
+      return;
+    }
+
+    dateEvents.forEach(e => {
+      const item = document.createElement("div");
+      item.className = `event-item-detail ${e.type}`;
+      
+      const tagText = e.type === 'start' ? 'Started' : (e.type === 'target' ? 'Target' : (e.type === 'completed' ? 'Completed' : 'Announcement'));
+      
+      item.innerHTML = `
+        <span class="event-tag ${e.type}">${tagText}</span>
+        <div class="event-title">${e.title}</div>
+        <div class="event-desc">${e.desc}</div>
+      `;
+      dayEventsListContainer.appendChild(item);
+    });
+  }
+
+  // Nav Handlers
+  prevMonthBtn.addEventListener("click", () => {
+    currentMonth--;
+    if (currentMonth < 0) {
+      currentMonth = 11;
+      currentYear--;
+    }
+    renderCalendar();
+  });
+
+  nextMonthBtn.addEventListener("click", () => {
+    currentMonth++;
+    if (currentMonth > 11) {
+      currentMonth = 0;
+      currentYear++;
+    }
+    renderCalendar();
+  });
+
+  // Render on load
+  renderCalendar();
+
+  // Sync Modal Dialog Logic
+  const openSyncModal = document.getElementById("openSyncModal");
+  const closeSyncModal = document.getElementById("closeSyncModal");
+  const syncModal = document.getElementById("syncModal");
+  const syncModalBackdrop = document.getElementById("syncModalBackdrop");
+  const feedUrlInput = document.getElementById("feedUrlInput");
+  const copyFeedUrlBtn = document.getElementById("copyFeedUrlBtn");
+
+  // Construct secure link based on current domain dynamically
+  const user_id = "{{ current_user.id }}";
+  const token = "{{ get_calendar_token(current_user.id) }}";
+  const protocol = window.location.protocol;
+  const host = window.location.host;
+  const feedUrl = `${protocol}//${host}/learn/calendar/feed/${user_id}/${token}.ics`;
+  feedUrlInput.value = feedUrl;
+
+  function showModal() {
+    syncModal.style.display = "block";
+    syncModal.setAttribute("aria-hidden", "false");
+    syncModalBackdrop.style.display = "block";
+    document.body.style.overflow = "hidden";
+  }
+
+  function hideModal() {
+    syncModal.style.display = "none";
+    syncModal.setAttribute("aria-hidden", "true");
+    syncModalBackdrop.style.display = "none";
+    document.body.style.overflow = "";
+  }
+
+  openSyncModal.addEventListener("click", showModal);
+  closeSyncModal.addEventListener("click", hideModal);
+  syncModalBackdrop.addEventListener("click", hideModal);
+
+  // Close on Escape key
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && syncModal.style.display === "block") {
+      hideModal();
+    }
+  });
+
+  // Copy Link action
+  copyFeedUrlBtn.addEventListener("click", () => {
+    feedUrlInput.select();
+    feedUrlInput.setSelectionRange(0, 99999); // For mobile devices
+    navigator.clipboard.writeText(feedUrlInput.value).then(() => {
+      // Toggle button text as visual confirmation
+      const originalText = copyFeedUrlBtn.textContent;
+      copyFeedUrlBtn.textContent = "Copied!";
+      copyFeedUrlBtn.style.background = "#10b981";
+      setTimeout(() => {
+        copyFeedUrlBtn.textContent = originalText;
+        copyFeedUrlBtn.style.background = "";
+      }, 1800);
+    }).catch(err => {
+      console.error("Could not copy text: ", err);
+    });
+  });
+});
+</script>
+{% endblock %}

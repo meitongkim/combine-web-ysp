@@ -1,0 +1,791 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Press — YSP · Youth for Sustainable Policy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sage:#9ab078; --sage-deep:#89a36c; --sage-soft:#b9c99e;
+    --mist:#cfdfd8; --mist-pale:#e6efe9;
+    --paper:#fbfdfa; --ink:#1f2a22; --ink-soft:#3d4b40; --ink-mute:#67756a;
+    --line:rgba(31,42,34,.10);
+    --shadow-1: 0 1px 2px rgba(31,42,34,.04), 0 8px 24px -8px rgba(31,42,34,.10);
+    --shadow-2: 0 1px 2px rgba(31,42,34,.06), 0 24px 60px -20px rgba(122,150,108,.30);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color:var(--ink); background:var(--paper);
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    overflow-x:hidden; font-size:16px; line-height:1.55; letter-spacing:-0.005em;
+  }
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  .serif{font-family:"Fraunces", Georgia, serif; font-weight:400; letter-spacing:-0.02em}
+  .mono{font-family: ui-monospace, "SF Mono", Menlo, monospace}
+
+  /* Grain */
+  .grain{
+    position:fixed; inset:0; pointer-events:none; z-index:9999;
+    opacity:.06; mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.12  0 0 0 0 0.16  0 0 0 0 0.13  0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+  .mesh{ position:absolute; inset:-10%; pointer-events:none; z-index:0; filter:blur(60px) saturate(1.05); opacity:.7 }
+  .mesh::before, .mesh::after, .mesh > span{ content:""; position:absolute; border-radius:50% }
+  .mesh::before{ width:55%; aspect-ratio:1; left:-8%; top:-12%; background:radial-gradient(circle at 50% 50%, rgba(207,223,216,.95), rgba(207,223,216,0) 70%) }
+  .mesh::after{ width:60%; aspect-ratio:1; right:-12%; bottom:-18%; background:radial-gradient(circle at 50% 50%, rgba(137,163,108,.78), rgba(137,163,108,0) 70%) }
+  .mesh > span{ width:48%; aspect-ratio:1; left:30%; top:25%; background:radial-gradient(circle at 50% 50%, rgba(154,176,120,.55), rgba(154,176,120,0) 70%) }
+
+  /* Nav */
+  .nav-wrap{ position:fixed; top:18px; left:0; right:0; z-index:100; display:flex; justify-content:center; pointer-events:none; transition: top .35s cubic-bezier(.2,.7,.2,1) }
+  .nav{
+    pointer-events:auto; display:flex; align-items:center; gap:8px;
+    padding:8px 8px 8px 18px;
+    background:rgba(255,255,255,.42);
+    backdrop-filter: blur(14px) saturate(1.4); -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    border:1px solid rgba(255,255,255,.55); border-radius:999px;
+    box-shadow: 0 1px 1px rgba(255,255,255,.6) inset, 0 10px 30px -12px rgba(31,42,34,.18);
+  }
+  .scrolled .nav{
+    background:rgba(255,255,255,.62);
+    backdrop-filter: blur(22px) saturate(1.6);
+    box-shadow: 0 1px 1px rgba(255,255,255,.7) inset, 0 18px 50px -18px rgba(31,42,34,.22);
+    border-color: rgba(255,255,255,.7);
+  }
+  .nav .brand{ display:flex; align-items:center; gap:10px; padding-right:14px; border-right:1px solid var(--line) }
+  .nav .brand img{ width:28px; height:28px; border-radius:8px; object-fit:cover; box-shadow:0 2px 6px rgba(31,42,34,.15)}
+  .nav .brand .word{ font-weight:600; letter-spacing:.02em; font-size:14px }
+  .nav .brand .word i{ font-style:normal; color:var(--sage-deep) }
+  .nav-links{ display:flex; align-items:center; gap:2px; padding:0 6px }
+  .nav-links a{ padding:8px 14px; border-radius:999px; font-size:13.5px; font-weight:500; color:var(--ink-soft); transition: background .25s, color .25s }
+  .nav-links a:hover{ background:rgba(255,255,255,.6); color:var(--ink) }
+
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:10px 18px; border-radius:999px; font-size:13.5px; font-weight:500;
+    transition: transform .25s cubic-bezier(.2,.7,.2,1), box-shadow .25s, background .25s, filter .25s;
+  }
+  .btn-primary{ background:var(--ink); color:#fbfdfa; box-shadow: 0 1px 1px rgba(255,255,255,.18) inset, 0 8px 22px -8px rgba(31,42,34,.45) }
+  .btn-primary:hover{ background:#0f1612 }
+  .btn-forest{ background: linear-gradient(180deg, var(--sage), var(--sage-deep)); color:#fbfdfa; box-shadow: 0 1px 1px rgba(255,255,255,.35) inset, 0 10px 26px -10px rgba(137,163,108,.6) }
+  .btn-forest:hover{ filter:brightness(1.04) }
+  .btn-ghost{ color:var(--ink); background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.7); backdrop-filter: blur(10px) }
+  .btn-ghost:hover{ background:rgba(255,255,255,.8) }
+  .btn .arr{ display:inline-block; transition: transform .25s }
+  .btn:hover .arr{ transform: translate(2px,-2px) }
+
+  /* Hero */
+  .hero{
+    position:relative; padding: 160px 24px 80px; overflow:hidden; isolation:isolate;
+    background:
+      radial-gradient(120% 60% at 50% 0%, var(--mist) 0%, rgba(207,223,216,0) 60%),
+      linear-gradient(180deg, #f3f8ef 0%, #fbfdfa 70%);
+  }
+  .hero .container{ max-width:1180px; margin:0 auto; position:relative; z-index:2 }
+  .crumbs{
+    display:inline-flex; align-items:center; gap:10px;
+    font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-mute); margin-bottom:18px;
+  }
+  .crumbs .leaf{ width:5px; height:5px; border-radius:50%; background:var(--sage)}
+  .crumbs a{ color:var(--ink-mute); transition:color .2s }
+  .crumbs a:hover{ color:var(--ink) }
+  .crumbs .sep{ opacity:.4 }
+
+  .hero-grid{ display:grid; grid-template-columns: 1.5fr 1fr; gap:56px; align-items:end }
+  .hero h1{
+    font-family:"Fraunces", serif; font-weight:400;
+    font-size: clamp(54px, 8.4vw, 124px);
+    line-height:.98; letter-spacing:-0.038em; margin:0 0 22px; color:var(--ink);
+  }
+  .hero h1 em{ font-style:italic; font-weight:300; color:var(--sage-deep) }
+  .hero .lede{ font-size:18px; line-height:1.55; max-width:60ch; color:var(--ink-soft); margin:0 0 32px }
+  .hero .lede b{ font-weight:600; color:var(--ink) }
+  .hero .cta-row{ display:flex; gap:10px; flex-wrap:wrap }
+
+  .press-card-aside{
+    padding:28px; border-radius:22px;
+    background: linear-gradient(140deg, rgba(255,255,255,.7), rgba(207,223,216,.4));
+    backdrop-filter: blur(16px);
+    border:1px solid rgba(255,255,255,.85);
+    box-shadow: 0 1px 1px rgba(255,255,255,.9) inset, var(--shadow-2);
+    display:flex; flex-direction:column; gap:14px;
+  }
+  .press-card-aside .tag{
+    display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:999px;
+    background:var(--ink); color:#fbfdfa; font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; width:fit-content;
+  }
+  .press-card-aside .tag .dot{ width:5px; height:5px; border-radius:50%; background:var(--sage) }
+  .press-card-aside h3{ margin:0; font-family:"Fraunces", serif; font-weight:400; font-size:22px; line-height:1.2; letter-spacing:-0.018em }
+  .press-card-aside h3 em{ font-style:italic; color:var(--sage-deep); font-weight:300 }
+  .press-card-aside .row{ display:flex; justify-content:space-between; gap:12px; padding:10px 0; border-top:1px solid var(--line); font-size:13px }
+  .press-card-aside .row:first-of-type{ border-top:0 }
+  .press-card-aside .row .k{ color:var(--ink-mute) }
+  .press-card-aside .row .v{ color:var(--ink); font-weight:500; text-align:right }
+  .press-card-aside .row .v a{ color:var(--sage-deep); border-bottom:1px solid rgba(137,163,108,.4) }
+
+  /* Sections */
+  section{ position:relative; padding:110px 24px; isolation:isolate }
+  .container{ max-width:1180px; margin:0 auto; position:relative; z-index:2 }
+  .eyebrow{ display:inline-flex; align-items:center; gap:10px; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--sage-deep); font-weight:500 }
+  .eyebrow .leaf{ width:6px; height:6px; border-radius:50%; background:var(--sage) }
+  h2.section-title{
+    font-family:"Fraunces", serif; font-weight:400;
+    font-size: clamp(36px, 5vw, 62px); line-height:1.04; letter-spacing:-0.028em;
+    margin:16px 0 18px; max-width:22ch;
+  }
+  h2.section-title em{ font-style:italic; color:var(--sage-deep); font-weight:300 }
+  p.section-sub{ max-width:60ch; color:var(--ink-soft); font-size:17px; margin:0 0 36px }
+
+  /* Coverage */
+  .coverage{ background: linear-gradient(180deg, #fbfdfa 0%, #f3f8ef 100%) }
+  .cov-list{ display:flex; flex-direction:column; gap:0; margin-top:8px }
+  .cov-row{
+    display:grid; grid-template-columns: 90px 1fr 200px 60px;
+    gap:24px; align-items:center;
+    padding: 24px 8px; border-top: 1px solid var(--line);
+    transition: background .25s, padding .25s; cursor:pointer;
+  }
+  .cov-row:last-child{ border-bottom: 1px solid var(--line) }
+  .cov-row:hover{ background: rgba(255,255,255,.5); padding-left:18px }
+  .cov-row .yr{ font-family: ui-monospace, Menlo, monospace; font-weight:500; font-size: 13.5px; color:var(--sage-deep); letter-spacing:.06em }
+  .cov-row h4{
+    margin:0; font-family:"Fraunces", serif; font-weight:400;
+    font-size: clamp(20px, 2vw, 26px); line-height:1.22; letter-spacing:-0.018em; color:var(--ink);
+  }
+  .cov-row h4 em{ font-style:italic; color:var(--sage-deep); font-weight:300 }
+  .cov-row .outlet{
+    font-family: ui-monospace, Menlo, monospace; font-size:11px;
+    color:var(--ink-mute); letter-spacing:.14em; text-transform:uppercase;
+  }
+  .cov-row .outlet b{ color:var(--ink); font-weight:500 }
+  .cov-row .arrow{
+    width:36px; height:36px; border-radius:50%;
+    background:rgba(255,255,255,.7); border:1px solid var(--line);
+    display:inline-flex; align-items:center; justify-content:center;
+    transition: transform .25s, background .25s, color .25s;
+  }
+  .cov-row:hover .arrow{ background:var(--ink); color:#fbfdfa; transform: translate(2px,-2px) }
+
+  /* Releases */
+  .releases{ background: linear-gradient(180deg, #f3f8ef 0%, #eaf1e3 100%) }
+  .rel-grid{ display:grid; grid-template-columns: repeat(2, 1fr); gap:14px; margin-top:8px }
+  .rel-card{
+    padding:32px; border-radius:22px;
+    background:rgba(255,255,255,.65); backdrop-filter:blur(16px);
+    border:1px solid rgba(255,255,255,.75);
+    box-shadow: var(--shadow-1);
+    display:flex; flex-direction:column; gap:14px;
+    transition: transform .3s cubic-bezier(.2,.7,.2,1), box-shadow .3s;
+  }
+  .rel-card:hover{ transform: translateY(-3px); box-shadow: var(--shadow-2) }
+  .rel-head{
+    display:flex; justify-content:space-between; align-items:center;
+    font-family: ui-monospace, Menlo, monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+  }
+  .rel-head .date{ color:var(--sage-deep); font-weight:500 }
+  .rel-head .embargo{ color:var(--ink-mute) }
+  .rel-card h3{
+    margin:0; font-family:"Fraunces", serif; font-weight:400;
+    font-size: 26px; line-height:1.15; letter-spacing:-0.02em;
+  }
+  .rel-card h3 em{ font-style:italic; color:var(--sage-deep); font-weight:300 }
+  .rel-card p{ color:var(--ink-soft); font-size:14.5px; line-height:1.55; margin:0; max-width:46ch }
+  .rel-card .foot{
+    margin-top:auto; padding-top:16px; border-top:1px solid var(--line);
+    display:flex; justify-content:space-between; align-items:center; font-size:13px;
+  }
+  .rel-card .foot a{ color:var(--ink); font-weight:500; display:inline-flex; align-items:center; gap:6px }
+  .rel-card .foot .pdf{ color:var(--ink-mute); font-family: ui-monospace, Menlo, monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase }
+
+  /* Speakers */
+  .speakers{ background: linear-gradient(180deg, #eaf1e3 0%, #d9e6cf 100%) }
+  .spk-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; margin-top:8px }
+  .spk-card{
+    padding:26px; border-radius:20px;
+    background:rgba(255,255,255,.65); backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,.75);
+    box-shadow: var(--shadow-1);
+    display:flex; flex-direction:column; gap:14px;
+  }
+  .spk-card .av{ width:64px; height:64px; border-radius:50%; border:2px solid #fff; box-shadow: 0 2px 6px rgba(31,42,34,.12) }
+  .spk-card .av.a{ background: linear-gradient(135deg, var(--mist), var(--sage)) }
+  .spk-card .av.b{ background: linear-gradient(135deg, var(--sage-soft), var(--sage-deep)) }
+  .spk-card .av.c{ background: linear-gradient(135deg, var(--mist-pale), var(--mist)) }
+  .spk-card h4{ margin:0; font-family:"Fraunces", serif; font-weight:400; font-size: 22px; letter-spacing:-0.018em; line-height:1.2 }
+  .spk-card .role{ font-size:12.5px; color:var(--ink-mute); letter-spacing:.04em }
+  .spk-card p{ color:var(--ink-soft); font-size:14px; line-height:1.55; margin:0 }
+  .spk-card .topics{ margin-top:auto; padding-top:14px; border-top:1px solid var(--line); display:flex; gap:6px; flex-wrap:wrap }
+  .spk-card .topics span{
+    font-family: ui-monospace, Menlo, monospace; font-size:10.5px;
+    padding:4px 10px; border-radius:999px;
+    background:rgba(31,42,34,.04); color:var(--ink-mute);
+    letter-spacing:.1em; text-transform:uppercase;
+  }
+
+  /* Kit */
+  .kit{ background: linear-gradient(180deg, #d9e6cf 0%, #fbfdfa 100%) }
+  .kit-grid{ display:grid; grid-template-columns: 1.1fr 1fr; gap:32px; align-items:start; margin-top:8px }
+  .kit-card{
+    padding:36px; border-radius:24px;
+    background:rgba(255,255,255,.7); backdrop-filter:blur(16px);
+    border:1px solid rgba(255,255,255,.8);
+    box-shadow: var(--shadow-2);
+  }
+  .kit-card h3{ margin:0 0 8px; font-family:"Fraunces", serif; font-weight:400; font-size:28px; letter-spacing:-0.02em }
+  .kit-card h3 em{ font-style:italic; color:var(--sage-deep); font-weight:300 }
+  .kit-card p{ color:var(--ink-soft); font-size:14.5px; margin:0 0 22px }
+  .dl-list{ display:flex; flex-direction:column; gap:10px }
+  .dl{
+    display:flex; align-items:center; gap:14px;
+    padding:16px 18px; border-radius:14px;
+    background: rgba(255,255,255,.65); border:1px solid var(--line);
+    transition: background .2s, transform .2s;
+  }
+  .dl:hover{ background:rgba(255,255,255,.95); transform: translateX(2px) }
+  .dl .ic{
+    width:36px; height:36px; border-radius:10px;
+    background: linear-gradient(140deg, var(--mist), var(--sage));
+    display:inline-flex; align-items:center; justify-content:center;
+    color:#fbfdfa; font-size:14px; flex-shrink:0;
+  }
+  .dl b{ font-family:"Fraunces", serif; font-weight:400; font-size:17px; letter-spacing:-0.015em }
+  .dl .sub{ display:block; font-size:12px; color:var(--ink-mute); letter-spacing:.04em; margin-top:2px }
+  .dl .arr{ margin-left:auto; font-family: ui-monospace, Menlo, monospace; font-size:11px; color:var(--ink-mute); letter-spacing:.14em }
+
+  .logo-card{
+    padding:36px; border-radius:24px;
+    background:
+      radial-gradient(80% 60% at 30% 30%, rgba(255,255,255,.7), transparent 65%),
+      linear-gradient(140deg, var(--mist), var(--sage));
+    border:1px solid rgba(255,255,255,.8);
+    box-shadow: var(--shadow-2);
+    display:flex; flex-direction:column; gap:24px; min-height:380px;
+  }
+  .logo-card .badge{
+    display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:999px;
+    background:rgba(255,255,255,.8); width:fit-content;
+    font-family: ui-monospace, Menlo, monospace; font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-soft);
+  }
+  .logo-card .preview{
+    flex:1; display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,.55); border-radius:18px; border:1px solid rgba(255,255,255,.8);
+    padding:32px;
+  }
+  .logo-card .preview img{ width:80px; height:80px; border-radius:18px }
+  .logo-card .preview .word{
+    font-family:"Fraunces", serif; font-weight:400; font-size:64px; letter-spacing:.04em; color:var(--ink); margin-left:18px;
+  }
+  .logo-card .preview .word i{ font-style:normal; color:var(--sage-deep) }
+  .logo-card .notes{ font-size:13px; color:var(--ink-soft); line-height:1.55 }
+  .logo-card .notes b{ color:var(--ink); font-weight:500 }
+
+  /* Facts */
+  .facts{ background: linear-gradient(180deg, #fbfdfa 0%, #f3f8ef 100%) }
+  .fact-grid{ display:grid; grid-template-columns: repeat(4, 1fr); gap:14px; margin-top:8px }
+  .fact{
+    padding:28px; border-radius:18px;
+    background:rgba(255,255,255,.6); backdrop-filter:blur(12px);
+    border:1px solid rgba(255,255,255,.7);
+  }
+  .fact .num{ font-family:"Fraunces", serif; font-weight:300; font-size:52px; letter-spacing:-0.025em; line-height:1 }
+  .fact .num em{ font-style:italic; color:var(--sage-deep); font-size:.6em }
+  .fact .lbl{ margin-top:10px; font-size:13px; color:var(--ink-soft); line-height:1.45 }
+
+  /* Contact CTA */
+  .contact-cta{
+    padding: 130px 24px 150px;
+    background: linear-gradient(180deg, #f3f8ef 0%, #d9e6cf 100%);
+    overflow:hidden; text-align:center;
+  }
+  .contact-cta .container{ max-width:920px }
+  .contact-cta h2{
+    margin:0 0 22px; font-family:"Fraunces", serif; font-weight:400;
+    font-size: clamp(44px, 6vw, 80px); line-height:1.02; letter-spacing:-0.03em;
+  }
+  .contact-cta h2 em{ font-style:italic; color:var(--sage-deep); font-weight:300 }
+  .contact-cta p{ color:var(--ink-soft); font-size:17px; max-width:56ch; margin:0 auto 36px }
+  .contact-cta .row{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap }
+  .contact-cta .micro{ margin-top:20px; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-mute) }
+
+  /* Footer */
+  .footer{ background:var(--ink); color:#d6dcd2; padding:72px 24px 36px }
+  .footer-grid{ max-width:1180px; margin:0 auto; display:grid; grid-template-columns: 2fr 1fr 1fr; gap:48px }
+  .footer .brand{ display:flex; align-items:center; gap:12px; margin-bottom:18px }
+  .footer .brand img{ width:36px; height:36px; border-radius:10px}
+  .footer .brand .word{ font-weight:600; font-size:16px; letter-spacing:.02em; color:#fbfdfa }
+  .footer .brand .word i{ font-style:normal; color:var(--sage-soft) }
+  .footer .blurb{ color:#aab1a3; font-size:14px; max-width:38ch; line-height:1.55 }
+  .footer h5{ color:#fbfdfa; font-size:12px; letter-spacing:.18em; text-transform:uppercase; margin:0 0 14px; font-weight:500 }
+  .footer ul{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px; font-size:14px }
+  .footer ul a{ color:#aab1a3; transition: color .2s }
+  .footer ul a:hover{ color:#fbfdfa }
+  .safe-band{
+    max-width:1180px; margin:56px auto 0; padding:18px 22px; border-radius:16px;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
+    display:flex; gap:14px; align-items:center; justify-content:space-between; flex-wrap:wrap; font-size:13px;
+  }
+  .safe-band .left{ display:flex; align-items:center; gap:12px }
+  .safe-band .leaf{ width:24px; height:24px; border-radius:50%; background:linear-gradient(140deg, var(--sage), var(--sage-deep)); display:inline-flex; align-items:center; justify-content:center; color:#fbfdfa; font-size:12px }
+  .safe-band a{ color:#fbfdfa; text-decoration:underline; text-decoration-color:rgba(251,253,250,.4); text-underline-offset:3px }
+  .copy{ max-width:1180px; margin:24px auto 0; display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; font-size:12px; color:#7d857a; letter-spacing:.04em }
+
+  .apple-reveal{ opacity:0; transform: translateY(24px); transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1) }
+  .is-in.apple-reveal{ opacity:1; transform: translateY(0) }
+  .apple-slide-left{ opacity:0; transform: translateX(-24px); transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1) }
+  .is-in.apple-slide-left{ opacity:1; transform: translateX(0) }
+
+  @media (max-width:980px){
+    .nav-links{ display:none }
+    .hero-grid{ grid-template-columns:1fr; gap:32px }
+    .rel-grid, .kit-grid, .spk-grid{ grid-template-columns: 1fr }
+    .fact-grid{ grid-template-columns: 1fr 1fr }
+    .cov-row{ grid-template-columns: 60px 1fr 40px; gap:14px }
+    .cov-row .outlet{ display:none }
+    .footer-grid{ grid-template-columns:1fr 1fr; gap:32px }
+  }
+
+  /* Hamburger button styling */
+  .menu-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    width: 24px;
+    height: 18px;
+    justify-content: space-between;
+    cursor: pointer;
+    z-index: 101;
+    margin-left: 12px;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+  .menu-toggle span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background-color: var(--ink);
+    border-radius: 2px;
+    transition: transform .3s var(--ease, ease), opacity .3s var(--ease, ease);
+  }
+
+  @media (max-width: 980px) {
+    .menu-toggle {
+      display: flex;
+    }
+    
+    /* Responsive navbar dropdown layout */
+    .nav.menu-open {
+      border-radius: 28px !important;
+      flex-wrap: wrap;
+      padding: 16px 20px !important;
+      width: calc(100vw - 32px) !important;
+      max-width: 480px !important;
+      transition: all 0.3s cubic-bezier(.2,.7,.2,1);
+    }
+    
+    .nav.menu-open .nav-links {
+      display: flex !important;
+      flex-direction: column;
+      width: 100%;
+      gap: 6px;
+      margin-top: 16px;
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+      align-items: flex-start;
+    }
+    
+    .nav.menu-open .nav-links a {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      display: block;
+      text-align: left;
+    }
+    
+    .nav.menu-open .nav-links a:hover {
+      background: rgba(255,255,255,0.7);
+    }
+    
+    /* Transform hamburger into an X when open */
+    .nav.menu-open .menu-toggle span:nth-child(1) {
+      transform: translateY(8px) rotate(45deg);
+    }
+    .nav.menu-open .menu-toggle span:nth-child(2) {
+      opacity: 0;
+    }
+    .nav.menu-open .menu-toggle span:nth-child(3) {
+      transform: translateY(-8px) rotate(-45deg);
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+
+<!-- Nav -->
+<div class="nav-wrap" id="navWrap">
+  <nav class="nav">
+    <a class="brand" href="index.html">
+      <img src="assets/ysp-logo.png" alt="" />
+      <span class="word">Y<i>S</i>P</span>
+    </a>
+    <div class="nav-links">
+      <a href="programmes.html">Programmes</a>
+      <a href="research.html">Research</a>
+      <a href="team.html">Team</a>
+      <a href="careers.html">Careers</a>
+      <a href="about.html">About</a>
+      <a href="/learn">YSP Learns</a>
+    </div>
+    <a href="mailto:youthforsustainablepolicy@gmail.com?subject=Press%20enquiry" class="btn btn-primary" data-magnetic>Press enquiry <span class="arr">↗</span></a>
+      <button class="menu-toggle" id="menuToggle" aria-label="Toggle Menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </nav>
+</div>
+
+<!-- Hero -->
+<section class="hero" data-screen-label="01 Press Hero">
+  <div class="mesh" aria-hidden="true"><span></span></div>
+  <div class="container">
+    <div class="crumbs apple-reveal">
+      <span class="leaf"></span>
+      <a href="index.html">YSP</a>
+      <span class="sep">/</span>
+      <span>Press</span>
+    </div>
+    <div class="hero-grid">
+      <div>
+        <h1 class="apple-reveal" style="transition-delay:.08s">Talk to <em>us first.</em></h1>
+        <p class="lede apple-reveal" style="transition-delay:.18s">For interviews, research collaborations, op‑ed commissions, and broadcast bookings. <b>YSP is a small, careful press office</b> — we read every enquiry, we reply within two working days, and we are honest about what we can and can't speak to.</p>
+        <div class="cta-row apple-reveal" style="transition-delay:.28s">
+          <a href="mailto:youthforsustainablepolicy@gmail.com?subject=Press%20enquiry" class="btn btn-forest" data-magnetic>Email the press office <span class="arr">↗</span></a>
+          <a href="#kit" class="btn btn-ghost">Brand &amp; press kit ▸</a>
+        </div>
+      </div>
+      <aside class="press-card-aside apple-reveal" style="transition-delay:.22s">
+        <span class="tag"><span class="dot"></span>Press desk</span>
+        <h3 class="serif">Direct line · <em>2 working days</em></h3>
+        <div class="row"><span class="k">Press contact</span><span class="v">Communications Lead</span></div>
+        <div class="row"><span class="k">Email</span><span class="v"><a href="mailto:youthforsustainablepolicy@gmail.com?subject=Press%20enquiry">press at YSP</a></span></div>
+        <div class="row"><span class="k">Region</span><span class="v">SG · ASEAN</span></div>
+        <div class="row"><span class="k">Languages</span><span class="v">EN · 中文 (limited)</span></div>
+        <div class="row"><span class="k">After‑hours</span><span class="v">Email only</span></div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- Recent Coverage -->
+<section class="coverage" data-screen-label="02 Recent Coverage">
+  <div class="container">
+    <span class="eyebrow apple-reveal"><span class="leaf"></span> 01 / Recent coverage</span>
+    <h2 class="section-title apple-reveal" style="transition-delay:.08s">What outlets have <em>said about us.</em></h2>
+    <p class="section-sub apple-reveal" style="transition-delay:.16s">A small selection of recent mentions. We do not chase press for its own sake — these are stories the work earned.</p>
+
+    <div class="cov-list">
+      <a class="cov-row apple-slide-left" href="#">
+        <span class="yr">2026</span>
+        <h4 class="serif">A youth policy lab takes a <em>quieter</em> approach to climate briefs</h4>
+        <span class="outlet"><b>The Straits Times</b> · Feature</span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="cov-row apple-slide-left" href="#" style="transition-delay:.06s">
+        <span class="yr">2026</span>
+        <h4 class="serif">Reading rooms: where Southeast Asian youth study <em>policy slowly</em></h4>
+        <span class="outlet"><b>CNA Insider</b> · Documentary</span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="cov-row apple-slide-left" href="#" style="transition-delay:.12s">
+        <span class="yr">2025</span>
+        <h4 class="serif">Op‑ed: Why the case for free, structured youth programmes <em>is mostly an evidence one</em></h4>
+        <span class="outlet"><b>TODAY</b> · Op‑ed</span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="cov-row apple-slide-left" href="#" style="transition-delay:.18s">
+        <span class="yr">2025</span>
+        <h4 class="serif">YSP's adaptive cooling pilot <em>cited</em> in three regional submissions</h4>
+        <span class="outlet"><b>Eco-Business</b> · News</span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="cov-row apple-slide-left" href="#" style="transition-delay:.24s">
+        <span class="yr">2025</span>
+        <h4 class="serif">Inside the YSP Pledge: <em>a standing commitment</em>, not a one‑off signature</h4>
+        <span class="outlet"><b>Mothership</b> · Profile</span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="cov-row apple-slide-left" href="#" style="transition-delay:.30s">
+        <span class="yr">2024</span>
+        <h4 class="serif">A youth‑led research lab on <em>what ASEAN climate policy gets wrong</em></h4>
+        <span class="outlet"><b>Channel News Asia</b> · Interview</span>
+        <span class="arrow">↗</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Press Releases -->
+<section class="releases" data-screen-label="03 Press Releases">
+  <div class="container">
+    <span class="eyebrow apple-reveal"><span class="leaf"></span> 02 / Press releases</span>
+    <h2 class="section-title apple-reveal" style="transition-delay:.08s">Statements, on the <em>record.</em></h2>
+    <p class="section-sub apple-reveal" style="transition-delay:.16s">Releases are versioned and timestamped. The PDF and the page never drift apart — corrections are visible in the changelog at the bottom of each release.</p>
+
+    <div class="rel-grid">
+      <article class="rel-card apple-reveal">
+        <div class="rel-head"><span class="date">14 May 2026</span><span class="embargo">For immediate release</span></div>
+        <h3 class="serif">YSP opens its <em>Spring 2026</em> intake across six routes.</h3>
+        <p>Applications are open for the next sixteen‑week cohort of YSP's six asynchronous policy routes — Research, Policy, Business, Diplomacy, Environment, and Community. Free and open to youth aged 16–28.</p>
+        <div class="foot">
+          <a href="#">Read the release <span>→</span></a>
+          <span class="pdf">PDF · 2 pages</span>
+        </div>
+      </article>
+      <article class="rel-card apple-reveal" style="transition-delay:.08s">
+        <div class="rel-head"><span class="date">02 Apr 2026</span><span class="embargo">For immediate release</span></div>
+        <h3 class="serif">A statement on the <em>SG Climate Reporting</em> Bill amendment.</h3>
+        <p>YSP submits a one‑page brief to the public consultation on the SG Climate Reporting Bill amendment. Full submission and methodology note attached.</p>
+        <div class="foot">
+          <a href="#">Read the release <span>→</span></a>
+          <span class="pdf">PDF · 4 pages</span>
+        </div>
+      </article>
+      <article class="rel-card apple-reveal" style="transition-delay:.16s">
+        <div class="rel-head"><span class="date">18 Feb 2026</span><span class="embargo">For immediate release</span></div>
+        <h3 class="serif">Annual report <em>2025</em> published.</h3>
+        <p>The 2025 annual report covers the work of 412 fellows across eight cohorts, 63 published briefs, and the financial position of the organisation. Audited accounts and a methods note are included.</p>
+        <div class="foot">
+          <a href="annual-reports.html">Read the release <span>→</span></a>
+          <span class="pdf">PDF · 42 pages</span>
+        </div>
+      </article>
+      <article class="rel-card apple-reveal" style="transition-delay:.24s">
+        <div class="rel-head"><span class="date">11 Dec 2025</span><span class="embargo">For immediate release</span></div>
+        <h3 class="serif">YSP's <em>community policy</em> is updated.</h3>
+        <p>Changes to the YSP community policy, effective immediately. A redlined version is attached and the changelog is published on the policies page.</p>
+        <div class="foot">
+          <a href="community-policy.html">Read the release <span>→</span></a>
+          <span class="pdf">PDF · 6 pages</span>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Available Spokespeople -->
+<section class="speakers" data-screen-label="04 Spokespeople">
+  <div class="container">
+    <span class="eyebrow apple-reveal"><span class="leaf"></span> 03 / On the record</span>
+    <h2 class="section-title apple-reveal" style="transition-delay:.08s">Spokespeople you can <em>book.</em></h2>
+    <p class="section-sub apple-reveal" style="transition-delay:.16s">The leads below are available for interviews, panels, and broadcast bookings. We aim to confirm within two working days. Briefing notes available on request.</p>
+
+    <div class="spk-grid">
+      <article class="spk-card apple-reveal">
+        <span class="av a"></span>
+        <h4 class="serif">Programme Director</h4>
+        <span class="role">YSP · Singapore</span>
+        <p>Programme design, the case for free structured youth programmes, the YSP Pledge.</p>
+        <div class="topics"><span>Programmes</span><span>Youth policy</span></div>
+      </article>
+      <article class="spk-card apple-reveal" style="transition-delay:.08s">
+        <span class="av b"></span>
+        <h4 class="serif">Research Lead</h4>
+        <span class="role">YSP · Asynchronous</span>
+        <p>Climate adaptation, housing, and the methods debate behind the YSP brief format.</p>
+        <div class="topics"><span>Climate</span><span>Housing</span><span>Methods</span></div>
+      </article>
+      <article class="spk-card apple-reveal" style="transition-delay:.16s">
+        <span class="av c"></span>
+        <h4 class="serif">Community Lead</h4>
+        <span class="role">YSP · ASEAN region</span>
+        <p>Grassroots policy work, ethical storytelling, the read‑back process behind the Community Route.</p>
+        <div class="topics"><span>Community</span><span>Storytelling</span></div>
+      </article>
+    </div>
+    <p class="section-sub apple-reveal" style="margin: 32px 0 0; font-size:13px; color:var(--ink-mute); letter-spacing:.04em">
+      ↗ The full roster of practitioners and advisors is on the <a href="team.html" style="color:var(--sage-deep); border-bottom: 1px solid rgba(137,163,108,.3)">Team page</a>. Names listed here are illustrative — substitute with real leads as press cycles move.
+    </p>
+  </div>
+</section>
+
+<!-- Press Kit -->
+<section class="kit" id="kit" data-screen-label="05 Press Kit">
+  <div class="container">
+    <span class="eyebrow apple-reveal"><span class="leaf"></span> 04 / Press kit</span>
+    <h2 class="section-title apple-reveal" style="transition-delay:.08s">Brand, logo, and <em>boilerplate.</em></h2>
+    <p class="section-sub apple-reveal" style="transition-delay:.16s">Everything a producer or sub‑editor needs in one pack. If something isn't here, write to us — we will get it to you the same day.</p>
+
+    <div class="kit-grid">
+      <div class="kit-card apple-reveal">
+        <h3 class="serif">Press <em>downloads</em></h3>
+        <p>Versioned and timestamped. If you are looking at an older PDF, the page is authoritative.</p>
+        <div class="dl-list">
+          <a class="dl" href="#"><span class="ic">↓</span><div><b>YSP Press Kit</b><span class="sub">PDF · brand, history, boilerplate</span></div><span class="arr">12 PAGES</span></a>
+          <a class="dl" href="#"><span class="ic">↓</span><div><b>Logo &amp; wordmark pack</b><span class="sub">ZIP · SVG / PNG / clearspace</span></div><span class="arr">ZIP</span></a>
+          <a class="dl" href="#"><span class="ic">↓</span><div><b>Photography &amp; b‑roll</b><span class="sub">High‑resolution stills + raw clips</span></div><span class="arr">2.1 GB</span></a>
+          <a class="dl" href="#"><span class="ic">↓</span><div><b>Fact sheet (one‑pager)</b><span class="sub">PDF · key numbers + boilerplate</span></div><span class="arr">1 PAGE</span></a>
+          <a class="dl" href="annual-reports.html"><span class="ic">↗</span><div><b>Annual Reports</b><span class="sub">2023 · 2024 · 2025</span></div><span class="arr">PDF</span></a>
+        </div>
+      </div>
+      <div class="logo-card apple-reveal" style="transition-delay:.08s">
+        <span class="badge"><span style="width:5px;height:5px;border-radius:50%;background:var(--sage);display:inline-block"></span> Wordmark</span>
+        <div class="preview">
+          <img src="assets/ysp-logo.png" alt="YSP logo" />
+          <span class="word">Y<i>S</i>P</span>
+        </div>
+        <div class="notes">
+          <b>Clearspace:</b> 1× the height of the wordmark on every side. <br/>
+          <b>Minimum size:</b> 24px on screen, 12mm in print. <br/>
+          <b>Do not</b> stretch, recolour outside the brand palette, or set on photography without the clearspace plate.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Quick Facts -->
+<section class="facts" data-screen-label="06 Quick Facts">
+  <div class="container">
+    <span class="eyebrow apple-reveal"><span class="leaf"></span> 05 / Quick facts</span>
+    <h2 class="section-title apple-reveal" style="transition-delay:.08s">In a <em>sub‑editor's</em> pinch.</h2>
+
+    <div class="fact-grid">
+      <div class="fact apple-reveal">
+        <div class="num">2019</div>
+        <div class="lbl">Founded as a youth‑led policy initiative.</div>
+      </div>
+      <div class="fact apple-reveal" style="transition-delay:.08s">
+        <div class="num">412<em></em></div>
+        <div class="lbl">Fellows trained across eight cohorts.</div>
+      </div>
+      <div class="fact apple-reveal" style="transition-delay:.16s">
+        <div class="num">63<em> briefs</em></div>
+        <div class="lbl">Published in partnership with civic institutions.</div>
+      </div>
+      <div class="fact apple-reveal" style="transition-delay:.24s">
+        <div class="num">16<em>wk</em></div>
+        <div class="lbl">Asynchronous curriculum per route, four intakes / year.</div>
+      </div>
+    </div>
+
+    <div class="apple-reveal" style="transition-delay:.32s; margin-top:48px; padding: 32px 36px; border-radius:20px; background:rgba(255,255,255,.55); backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,.75)">
+      <p style="font-family:'Fraunces', serif; font-weight:400; font-size: clamp(20px, 2.2vw, 28px); line-height:1.3; letter-spacing:-0.015em; color:var(--ink); margin:0; max-width: 60ch">
+        <em style="font-style:italic; color:var(--sage-deep); font-weight:300">Boilerplate.</em>
+        Youth for Sustainable Policy (YSP) is a youth‑led, non‑profit policy initiative based in Singapore. We run six asynchronous policy routes for young people aged 16–28 across the region — Research, Policy, Business, Diplomacy, Environment, and Community. The work is free, mentor‑matched, and ends in a published capstone under the fellow's byline.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Contact CTA -->
+<section class="contact-cta" data-screen-label="07 Press Contact">
+  <div class="mesh" aria-hidden="true" style="opacity:.5"><span></span></div>
+  <div class="container">
+    <h2 class="apple-reveal">Have a <em>deadline?</em></h2>
+    <p class="apple-reveal" style="transition-delay:.1s">Write to the press desk directly. We confirm receipt the same day where possible and reply in full within two working days. For broadcast bookings inside 48 hours, mark your subject line <code style="font-family:ui-monospace, Menlo, monospace; padding:2px 6px; background:rgba(31,42,34,.06); border-radius:6px">URGENT</code>.</p>
+    <div class="row apple-reveal" style="transition-delay:.2s">
+      <a href="mailto:youthforsustainablepolicy@gmail.com?subject=Press%20enquiry" class="btn btn-forest" data-magnetic>Email the press office <span class="arr">↗</span></a>
+      <a href="programmes.html#contact" class="btn btn-ghost">General contact ▸</a>
+    </div>
+    <div class="micro apple-reveal" style="transition-delay:.3s">Response time · 2 working days · SGT</div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div>
+      <div class="brand">
+        <img src="assets/ysp-logo.png" alt="" />
+        <span class="word">Y<i>S</i>P</span>
+      </div>
+      <p class="blurb">Youth for Sustainable Policy (YSP) is a youth-led initiative empowering the next generation to engage with global challenges through research, storytelling, and policy dialogue.</p>
+    </div>
+    <div>
+      <h5>Programmes</h5>
+      <ul>
+        <li><a href="programmes.html">Programme Overview</a></li>
+        <li><a href="research-route.html">Research Route</a></li>
+        <li><a href="policy-route.html">Policy Route</a></li>
+        <li><a href="business-route.html">Business Route</a></li>
+        <li><a href="diplomacy-route.html">Diplomacy Route</a></li>
+        <li><a href="environment-route.html">Environment Route</a></li>
+        <li><a href="community-route.html">Community Route</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>Organisation</h5>
+      <ul>
+        <li><a href="about.html">About</a></li>
+        <li><a href="team.html">Team</a></li>
+        <li><a href="careers.html">Careers</a></li>
+        <li><a href="press.html">Press</a></li>
+        <li><a href="programmes.html#contact">Contact</a></li>
+        <li><a href="annual-reports.html">Annual Reports</a></li>
+        <li><a href="policies.html">Policies &amp; Declarations</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="safe-band">
+    <div class="left">
+      <span class="leaf">✦</span>
+      <span>This is a safe, moderated space for youth. For Youth, By Youth.</span>
+    </div>
+    <div>View our <a href="community-policy.html">Community Policy</a> · <a href="privacy-notice.html">Privacy Notice</a></div>
+  </div>
+  <div class="copy">
+    <span>© 2026 Youth for Sustainable Policy. A registered non-profit.</span>
+    <span>Made slowly, in good company.</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const navWrap = document.getElementById('navWrap');
+  let lastScroll=-1;
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY||window.pageYOffset;
+    if (y===lastScroll) return; lastScroll=y;
+    if (y>40) navWrap.classList.add('scrolled'); else navWrap.classList.remove('scrolled');
+  }, { passive:true });
+
+  document.querySelectorAll('[data-magnetic]').forEach(el => {
+    let raf=null, tx=0, ty=0, cx=0, cy=0; const STR=10;
+    function loop(){ tx+=(cx-tx)*0.18; ty+=(cy-ty)*0.18; el.style.transform='translate('+tx.toFixed(2)+'px,'+ty.toFixed(2)+'px)'; if (Math.abs(cx-tx)>0.05||Math.abs(cy-ty)>0.05) raf=requestAnimationFrame(loop); else raf=null }
+    el.addEventListener('mousemove', e=>{ const r=el.getBoundingClientRect(); cx=((e.clientX-(r.left+r.width/2))/(r.width/2))*STR; cy=((e.clientY-(r.top+r.height/2))/(r.height/2))*STR; if (!raf) raf=requestAnimationFrame(loop) });
+    el.addEventListener('mouseleave', ()=>{ cx=0; cy=0; if (!raf) raf=requestAnimationFrame(loop) });
+  });
+
+  const io = new IntersectionObserver(entries=>{ entries.forEach(en=>{ if (en.isIntersecting){ en.target.classList.add('is-in'); io.unobserve(en.target) } }) }, { threshold:0.1, rootMargin:'0px 0px -6% 0px' });
+  document.querySelectorAll('.apple-reveal, .apple-slide-left').forEach(el=>io.observe(el));
+})();
+
+
+  // Mobile Menu Toggle
+  const menuToggle = document.getElementById('menuToggle');
+  const navElement = document.querySelector('.nav');
+  if (menuToggle && navElement) {
+    menuToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navElement.classList.toggle('menu-open');
+    });
+    document.addEventListener('click', (e) => {
+      if (!navElement.contains(e.target)) {
+        navElement.classList.remove('menu-open');
+      }
+    });
+  }
+</script>
+
+  <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
+</body>
+</html>

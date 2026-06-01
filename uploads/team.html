@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Team — YSP · Youth for Sustainable Policy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sage:#9ab078; --sage-deep:#89a36c; --sage-soft:#b9c99e;
+    --mist:#cfdfd8; --mist-pale:#e6efe9; --paper:#fbfdfa;
+    --ink:#1f2a22; --ink-soft:#3d4b40; --ink-mute:#67756a;
+    --line:rgba(31,42,34,.10);
+    --shadow-1: 0 1px 2px rgba(31,42,34,.04), 0 8px 24px -8px rgba(31,42,34,.10);
+    --shadow-2: 0 1px 2px rgba(31,42,34,.06), 0 24px 60px -20px rgba(122,150,108,.30);
+  }
+  *{box-sizing:border-box} html,body{margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Inter", system-ui, -apple-system, sans-serif;
+    color:var(--ink); background:var(--paper);
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    overflow-x:hidden; font-size:16px; line-height:1.55; letter-spacing:-0.005em;
+  }
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  .serif{font-family:"Fraunces", Georgia, serif; font-weight:400; letter-spacing:-0.02em}
+
+  .grain{
+    position:fixed; inset:0; pointer-events:none; z-index:9999;
+    opacity:.06; mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.12  0 0 0 0 0.16  0 0 0 0 0.13  0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  /* Nav */
+  .nav-wrap{ position:fixed; top:18px; left:0; right:0; z-index:100; display:flex; justify-content:center; pointer-events:none }
+  .nav{
+    pointer-events:auto; display:flex; align-items:center; gap:8px;
+    padding:8px 8px 8px 18px;
+    background:rgba(255,255,255,.42);
+    backdrop-filter: blur(14px) saturate(1.4); -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    border:1px solid rgba(255,255,255,.55); border-radius:999px;
+    box-shadow: 0 1px 1px rgba(255,255,255,.6) inset, 0 10px 30px -12px rgba(31,42,34,.18);
+    transition: backdrop-filter .35s, background .35s, box-shadow .35s;
+  }
+  .scrolled .nav{
+    background:rgba(255,255,255,.62);
+    backdrop-filter: blur(22px) saturate(1.6);
+    box-shadow: 0 1px 1px rgba(255,255,255,.7) inset, 0 18px 50px -18px rgba(31,42,34,.22);
+  }
+  .nav .brand{ display:flex; align-items:center; gap:10px; padding-right:14px; border-right:1px solid var(--line) }
+  .nav .brand img{ width:28px; height:28px; border-radius:8px; object-fit:cover; box-shadow:0 2px 6px rgba(31,42,34,.15)}
+  .nav .brand .word{ font-weight:600; letter-spacing:.02em; font-size:14px }
+  .nav .brand .word i{ font-style:normal; color:var(--sage-deep) }
+  .nav-links{ display:flex; align-items:center; gap:2px; padding:0 6px }
+  .nav-links a{ padding:8px 14px; border-radius:999px; font-size:13.5px; font-weight:500; color:var(--ink-soft); transition: background .25s, color .25s }
+  .nav-links a:hover, .nav-links a.active{ background:rgba(255,255,255,.6); color:var(--ink) }
+  .btn{ display:inline-flex; align-items:center; gap:8px; padding:10px 18px; border-radius:999px; font-size:13.5px; font-weight:500; transition: transform .25s cubic-bezier(.2,.7,.2,1), box-shadow .25s, background .25s }
+  .btn-primary{ background:var(--ink); color:#fbfdfa; box-shadow: 0 1px 1px rgba(255,255,255,.18) inset, 0 8px 22px -8px rgba(31,42,34,.45) }
+  .btn-primary:hover{ background:#0f1612 }
+
+  /* Hero */
+  .hero{
+    position:relative; min-height:70vh; padding:160px 24px 100px;
+    background:
+      radial-gradient(120% 70% at 50% 0%, var(--mist) 0%, rgba(207,223,216,0) 60%),
+      linear-gradient(180deg, #f3f8ef 0%, #fbfdfa 60%);
+    overflow:hidden; isolation:isolate;
+  }
+  .hero .mesh{ position:absolute; inset:-10%; pointer-events:none; z-index:0; filter:blur(60px); opacity:.8 }
+  .hero .mesh::before{ content:""; position:absolute; width:55%; aspect-ratio:1; left:-8%; top:-12%; background:radial-gradient(circle, rgba(207,223,216,.9), rgba(207,223,216,0) 70%); border-radius:50% }
+  .hero .mesh::after{ content:""; position:absolute; width:50%; aspect-ratio:1; right:-10%; bottom:-10%; background:radial-gradient(circle, rgba(137,163,108,.7), rgba(137,163,108,0) 70%); border-radius:50% }
+  .hero-inner{ position:relative; z-index:2; max-width:1180px; margin:0 auto; text-align:center }
+  .eyebrow-pill{
+    display:inline-flex; align-items:center; gap:10px; padding:6px;
+    background:rgba(255,255,255,.6); backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,.75); border-radius:999px;
+    box-shadow: 0 1px 1px rgba(255,255,255,.6) inset, 0 6px 18px -8px rgba(31,42,34,.15);
+    font-size:12.5px; color:var(--ink-soft); margin-bottom:32px;
+  }
+  .eyebrow-pill .tag{ display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; background:var(--ink); color:#fbfdfa; font-weight:500; font-size:11.5px; letter-spacing:.04em }
+  .eyebrow-pill .tag .dot{ width:5px; height:5px; border-radius:50%; background:var(--sage)}
+  .eyebrow-pill .meta{ padding-right:14px }
+  .hero h1{
+    margin:0 0 20px; font-size: clamp(48px, 7vw, 96px);
+    line-height:1.02; letter-spacing:-0.035em; font-weight:400; color:var(--ink);
+  }
+  .hero h1 em{ font-style:italic; font-weight:300; color:var(--sage-deep) }
+  .hero p{ max-width:58ch; margin:0 auto; color:var(--ink-soft); font-size:17px; line-height:1.6 }
+
+  /* Sections */
+  section{ position:relative; padding:100px 24px; }
+  .container{ max-width:1180px; margin:0 auto; position:relative; z-index:2 }
+  .eyebrow{ display:inline-flex; align-items:center; gap:10px; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--sage-deep); font-weight:500 }
+  .eyebrow .dot{ width:6px; height:6px; border-radius:50%; background:var(--sage) }
+  h2.section-title{
+    font-size: clamp(34px, 4.5vw, 56px); line-height:1.06; letter-spacing:-0.026em;
+    font-weight:400; color:var(--ink); margin:14px 0 16px; max-width:22ch;
+  }
+  h2.section-title em{ font-style:italic; color:var(--sage-deep); font-weight:300 }
+  p.section-sub{ max-width:58ch; color:var(--ink-soft); font-size:16px; margin:0 0 48px }
+
+  /* ── Team card with hover overlay ── */
+  .team-grid{
+    display:grid; gap:16px; margin-top:32px;
+  }
+  .cols-3{ grid-template-columns: repeat(3, 1fr) }
+  .cols-4{ grid-template-columns: repeat(4, 1fr) }
+  .cols-2{ grid-template-columns: repeat(2, 1fr) }
+
+  .person-card{
+    position:relative; border-radius:22px; overflow:hidden;
+    background:rgba(255,255,255,.7); backdrop-filter:blur(12px);
+    border:1px solid rgba(255,255,255,.75);
+    box-shadow: var(--shadow-1);
+    display:flex; flex-direction:column;
+    cursor:default;
+  }
+  .person-card.founder{ outline: 1px solid rgba(122,150,108,.35); outline-offset:-1px }
+
+  .person-card .photo{
+    aspect-ratio:1; width:100%; position:relative; flex-shrink:0;
+    background: linear-gradient(140deg, var(--mist), var(--sage));
+  }
+  .person-card .photo img{
+    position:absolute; inset:0; width:100%; height:100%;
+    object-fit:cover; object-position: center top;
+  }
+  .person-card .photo .init{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:"Fraunces", serif; font-style:italic; font-weight:300;
+    font-size: clamp(36px, 5vw, 56px); color:rgba(31,42,34,.35);
+    letter-spacing:-0.02em;
+  }
+
+  /* hover overlay */
+  .person-card .overlay{
+    position:absolute; inset:0;
+    background:rgba(20,32,22,.88);
+    backdrop-filter:blur(8px);
+    display:flex; flex-direction:column; justify-content:flex-end; padding:28px;
+    opacity:0; transform:translateY(8px);
+    transition: opacity .32s cubic-bezier(.2,.7,.2,1), transform .32s cubic-bezier(.2,.7,.2,1);
+    pointer-events:none;
+  }
+  .person-card:hover .overlay{ opacity:1; transform:translateY(0); pointer-events:auto }
+
+  .overlay .ov-name{ font-family:"Fraunces", serif; font-weight:400; font-size:22px; letter-spacing:-0.015em; color:#fbfdfa; margin-bottom:4px }
+  .overlay .ov-role{ font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--sage-soft); margin-bottom:14px }
+  .overlay .ov-bio{ font-size:13.5px; color:rgba(230,239,233,.8); line-height:1.55; margin-bottom:18px }
+  .overlay .ov-connect{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:9px 16px; border-radius:999px;
+    background: linear-gradient(140deg, var(--sage), var(--sage-deep));
+    color:#fbfdfa; font-size:12.5px; font-weight:500;
+    align-self:flex-start;
+    transition: filter .2s;
+  }
+  .overlay .ov-connect:hover{ filter:brightness(1.08) }
+
+  /* base info below photo */
+  .person-card .base{
+    padding:18px 20px 22px; display:flex; flex-direction:column; gap:5px;
+  }
+  .person-card .base .pip{
+    display:inline-block; align-self:flex-start;
+    font-size:10px; letter-spacing:.18em; font-weight:600; text-transform:uppercase; color:var(--sage-deep);
+    background: linear-gradient(140deg, rgba(255,255,255,.7), rgba(207,223,216,.55));
+    border:1px solid rgba(255,255,255,.85);
+    box-shadow: 0 1px 0 rgba(255,255,255,.9) inset;
+    backdrop-filter: blur(8px);
+    padding:4px 9px; border-radius:999px; margin-bottom:5px;
+  }
+  .person-card .base b{
+    font-family:"Fraunces", serif; font-weight:400; font-size:20px; letter-spacing:-0.015em; display:block;
+  }
+  .person-card .base span{
+    font-size:12px; color:var(--ink-mute); letter-spacing:.05em;
+  }
+  .person-card .base .location{
+    display:flex; align-items:center; gap:5px; font-size:11.5px; color:var(--ink-mute); margin-top:2px;
+  }
+
+  /* Compact card for managers/members */
+  .person-card.compact .photo{ aspect-ratio:4/3 }
+
+  /* Advisor card — wide layout */
+  .advisor-grid{ display:grid; grid-template-columns: 320px 1fr; gap:32px; align-items:center; margin-top:32px }
+  .advisor-photo{
+    aspect-ratio:4/5; border-radius:22px; overflow:hidden; position:relative;
+    background: linear-gradient(140deg, var(--mist), var(--sage));
+    box-shadow: var(--shadow-2);
+  }
+  .advisor-photo img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position: center 20% }
+  .advisor-info{ display:flex; flex-direction:column; gap:16px }
+  .advisor-info .role-tag{
+    display:inline-flex; align-items:center; gap:8px; padding:6px 14px; border-radius:999px;
+    background:rgba(255,255,255,.65); backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,.75); font-size:12.5px; color:var(--sage-deep); font-weight:500;
+    align-self:flex-start;
+  }
+  .advisor-info h3{ font-family:"Fraunces", serif; font-weight:400; font-size: clamp(28px,3.5vw,44px); letter-spacing:-0.022em; margin:0; line-height:1.12 }
+  .advisor-info h3 em{ font-style:italic; color:var(--sage-deep); font-weight:300 }
+  .advisor-info .desc{ color:var(--ink-soft); font-size:15px; line-height:1.6; max-width:52ch }
+  .advisor-info .location-row{ display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink-mute) }
+  .advisor-info .connect{
+    display:inline-flex; align-items:center; gap:8px; padding:10px 20px; border-radius:999px;
+    background: linear-gradient(180deg, var(--sage), var(--sage-deep));
+    color:#fbfdfa; font-size:13.5px; font-weight:500;
+    box-shadow: 0 1px 1px rgba(255,255,255,.35) inset, 0 8px 22px -10px rgba(137,163,108,.55);
+    align-self:flex-start; transition: filter .2s;
+  }
+  .advisor-info .connect:hover{ filter:brightness(1.05) }
+
+  /* Section backgrounds */
+  .bg-light{ background: linear-gradient(180deg, #fbfdfa 0%, #f3f8ef 100%) }
+  .bg-mid{ background: linear-gradient(180deg, #f3f8ef 0%, #eaf1e3 100%) }
+  .bg-sage{ background: linear-gradient(180deg, #eaf1e3 0%, #d9e6cf 100%) }
+  .bg-deep{ background: linear-gradient(180deg, #d9e6cf 0%, #fbfdfa 100%) }
+
+  /* Mesh decoration */
+  .mesh{ position:absolute; inset:-10%; pointer-events:none; z-index:0; filter:blur(60px); opacity:.6 }
+  .mesh::before{ content:""; position:absolute; width:50%; aspect-ratio:1; left:-5%; top:-5%; background:radial-gradient(circle, rgba(207,223,216,.8), rgba(207,223,216,0) 70%); border-radius:50% }
+  .mesh::after{ content:""; position:absolute; width:45%; aspect-ratio:1; right:-5%; bottom:-10%; background:radial-gradient(circle, rgba(137,163,108,.6), rgba(137,163,108,0) 70%); border-radius:50% }
+
+  /* Verdi section */
+  .verdi-section{ background: linear-gradient(180deg, #f3f8ef 0%, #eaf1e3 100%) }
+  .verdi-card{
+    max-width:900px; margin:32px auto 0;
+    border-radius:28px; overflow:hidden;
+    background:rgba(255,255,255,.65); backdrop-filter:blur(18px);
+    border:1px solid rgba(255,255,255,.8);
+    box-shadow: 0 1px 1px rgba(255,255,255,.7) inset, var(--shadow-2);
+    display:grid; grid-template-columns: 340px 1fr; align-items:center;
+  }
+  .verdi-img{
+    aspect-ratio:1; position:relative;
+    background: linear-gradient(140deg, rgba(207,223,216,.6), rgba(154,176,120,.4));
+  }
+  .verdi-img img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+  .verdi-content{ padding:48px 48px 48px 40px }
+  .verdi-tag{
+    display:inline-flex; align-items:center; gap:8px; padding:5px 12px; border-radius:999px;
+    background: linear-gradient(140deg, rgba(154,176,120,.2), rgba(207,223,216,.3));
+    border:1px solid rgba(154,176,120,.25); font-size:11.5px; color:var(--sage-deep); font-weight:500;
+    letter-spacing:.08em; text-transform:uppercase; margin-bottom:16px;
+  }
+  .verdi-content h3{
+    font-family:"Fraunces", serif; font-weight:400; font-size: clamp(26px,3vw,38px);
+    letter-spacing:-0.022em; line-height:1.12; margin:0 0 16px;
+  }
+  .verdi-content h3 em{ font-style:italic; color:var(--sage-deep); font-weight:300 }
+  .verdi-content p{ color:var(--ink-soft); font-size:14.5px; line-height:1.65; margin:0 }
+
+  /* Footer */
+  .footer{ background:var(--ink); color:#d6dcd2; padding:64px 24px 36px }
+  .footer-grid{ max-width:1180px; margin:0 auto; display:grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap:48px }
+  .footer .brand{ display:flex; align-items:center; gap:12px; margin-bottom:18px }
+  .footer .brand img{ width:36px; height:36px; border-radius:10px }
+  .footer .brand .word{ font-weight:600; font-size:16px; letter-spacing:.02em; color:#fbfdfa }
+  .footer .brand .word i{ font-style:normal; color:var(--sage-soft) }
+  .footer .blurb{ color:#aab1a3; font-size:14px; max-width:38ch; line-height:1.55 }
+  .footer h5{ color:#fbfdfa; font-size:12px; letter-spacing:.18em; text-transform:uppercase; margin:0 0 14px; font-weight:500 }
+  .footer ul{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px; font-size:14px }
+  .footer ul a{ color:#aab1a3; transition: color .2s }
+  .footer ul a:hover{ color:#fbfdfa }
+  .safe-band{
+    max-width:1180px; margin:48px auto 0; padding:18px 22px; border-radius:16px;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
+    display:flex; gap:14px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+    font-size:13px; color:#d6dcd2;
+  }
+  .safe-band .left{ display:flex; align-items:center; gap:12px }
+  .safe-band .leaf{ width:24px; height:24px; border-radius:50%; background:linear-gradient(140deg, var(--sage), var(--sage-deep)); display:inline-flex; align-items:center; justify-content:center; color:#fbfdfa; font-size:12px; flex-shrink:0 }
+  .safe-band a{ color:#fbfdfa; text-decoration:underline; text-decoration-color:rgba(251,253,250,.4); text-underline-offset:3px }
+  .copy{ max-width:1180px; margin:24px auto 0; display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; font-size:12px; color:#7d857a; letter-spacing:.04em }
+
+  /* Reveal animations */
+  .apple-reveal{ opacity:0; transform: translateY(24px); transition: opacity .9s cubic-bezier(.2,.7,.2,1), transform .9s cubic-bezier(.2,.7,.2,1); will-change: transform, opacity }
+  .is-in.apple-reveal{ opacity:1; transform: translateY(0) }
+
+  @media (max-width:980px){
+    .nav-links{ display:none }
+    .cols-3, .cols-4{ grid-template-columns: 1fr 1fr }
+    .advisor-grid{ grid-template-columns: 1fr; max-width:420px; margin-left:auto; margin-right:auto }
+    .verdi-card{ grid-template-columns: 1fr }
+    .footer-grid{ grid-template-columns: 1fr 1fr; gap:32px }
+  }
+  @media (max-width:640px){
+    .cols-2, .cols-3, .cols-4{ grid-template-columns: 1fr }
+    .verdi-content{ padding:32px }
+  }
+</style>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+
+<!-- Nav -->
+<div class="nav-wrap" id="navWrap">
+  <nav class="nav">
+    <a class="brand" href="index.html">
+      <img src="assets/ysp-logo.png" alt="" />
+      <span class="word">Y<i>S</i>P</span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html#programmes">Programmes</a>
+      <a href="index.html#research">Research</a>
+      <a href="team.html" class="active">Team</a>
+      <a href="index.html#careers">Careers</a>
+      <a href="index.html#about">About</a>
+    </div>
+    <a href="index.html#join" class="btn btn-primary">Join YSP <span>↗</span></a>
+  </nav>
+</div>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="mesh" aria-hidden="true"></div>
+  <div class="hero-inner">
+    <div class="eyebrow-pill">
+      <span class="tag"><span class="dot"></span>YSP Team</span>
+      <span class="meta">Singapore · ASEAN · Global</span>
+    </div>
+    <h1 class="serif">The people <em>behind</em><br/>the mission.</h1>
+    <p>Youth-led, practitioner-guided, and built on the belief that good policy work requires patience, evidence, and people who genuinely care about the outcome.</p>
+  </div>
+</div>
+
+<!-- C-Suite -->
+<section class="bg-light" id="csuite">
+  <div class="container">
+    <span class="eyebrow apple-reveal"><span class="dot"></span> C-Suite Executive</span>
+    <h2 class="section-title serif apple-reveal" style="transition-delay:.08s">
+      Founding <em>leadership</em> team.
+    </h2>
+    <p class="section-sub apple-reveal" style="transition-delay:.16s">
+      YSP's executive team founded the organisation in 2024 and leads its programmes, growth, operations, and policy vision across Southeast Asia and beyond.
+    </p>
+
+    <div class="team-grid cols-3">
+      <!-- Mei Tong Kim -->
+      <div class="person-card founder apple-reveal">
+        <div class="photo"><img src="assets/team/mei.png" alt="Mei Tong Kim" /></div>
+        <div class="overlay">
+          <div class="ov-name">Mei Tong Kim</div>
+          <div class="ov-role">Chief Executive Officer · Founder · Singapore</div>
+          <div class="ov-bio">Mei Tong founded YSP in 2024 to create a rigorous, accessible home for youth policy work across ASEAN. She leads YSP's strategic vision, partnerships, and community growth, bringing together young researchers, practitioners, and advocates from over 16 countries.</div>
+          <a class="ov-connect" href="https://www.linkedin.com/in/mei-tong-kim-505544311/" target="_blank" rel="noopener">Connect on LinkedIn ↗</a>
+        </div>
+        <div class="base">
+          <span class="pip">FOUNDER · CEO</span>
+          <b class="serif">Mei Tong Kim</b>
+          <span>CHIEF EXECUTIVE OFFICER</span>
+          <div class="location">📍 Singapore</div>
+        </div>
+      </div>
+
+      <!-- Donovan Chow -->
+      <div class="person-card apple-reveal" style="transition-delay:.06s">
+        <div class="photo"><img src="assets/team/donovan.webp" alt="Donovan Chow" /></div>
+        <div class="overlay">
+          <div class="ov-name">Donovan Chow</div>
+          <div class="ov-role">Chief Operating Officer · Singapore</div>
+          <div class="ov-bio">Donovan oversees YSP's day-to-day operations, ensuring programmes run smoothly across time zones and cohorts. His systems thinking keeps the organisation lean, mission-aligned, and ready to scale.</div>
+          <span class="ov-connect">YSP Team Member</span>
+        </div>
+        <div class="base">
+          <b class="serif">Donovan Chow</b>
+          <span>CHIEF OPERATING OFFICER</span>
+          <div class="location">📍 Singapore</div>
+        </div>
+      </div>
+
+      <!-- Harman Hunjan -->
+      <div class="person-card apple-reveal" style="transition-delay:.12s">
+        <div class="photo"><img src="assets/team/harman.webp" alt="Harman Hunjan" /></div>
+        <div class="overlay">
+          <div class="ov-name">Harman Hunjan</div>
+          <div class="ov-role">Chief of Programmes · Singapore</div>
+          <div class="ov-bio">Harman architects YSP's six programme routes and the Impact Project™ Playbook. He works directly with fellows to ensure every capstone is grounded, publishable, and genuinely impactful — not just impressive on paper.</div>
+          <span class="ov-connect">YSP Team Member</span>
+        </div>
+        <div class="base">
+          <b class="serif">Harman Hunjan</b>
+          <span>CHIEF OF PROGRAMMES</span>
+          <div class="location">📍 Singapore</div>
+        </div>
+      </div>
+
+      <!-- Derya Ovayolu -->
+      <div class="person-card apple-reveal" style="transition-delay:.06s">
+        <div class="photo"><img src="assets/team/derya.webp" alt="Derya Ovayolu" /></div>
+        <div class="overlay">
+          <div class="ov-name">Derya Ovayolu</div>
+          <div class="ov-role">Chief Growth Officer · United States</div>
+          <div class="ov-bio">Derya drives YSP's growth strategy — from international partnerships and fellowship referrals to storytelling and outreach that expands YSP's reach without compromising its depth.</div>
+          <span class="ov-connect">YSP Team Member</span>
+        </div>
+        <div class="base">
+          <b class="serif">Derya Ovayolu</b>
+          <span>CHIEF GROWTH OFFICER</span>
+          <div class="location">📍 United States</div>
+        </div>
+      </div>
+
+      <!-- Loh Zheng Ying -->
+      <div class="person-card apple-reveal" style="transition-delay:.12s">
+        <div class="photo"><img src="assets/team/zhengying.webp" alt="Loh Zheng Ying" /></div>
+        <div class="overlay">
+          <div class="ov-name">Loh Zheng Ying</div>
+          <div class="ov-role">Chief Human Resources Officer · Singapore</div>
+          <div class="ov-bio">Zheng Ying builds the culture that makes YSP a place people want to stay. She leads recruitment, onboarding, and the internal systems that keep a distributed, volunteer-driven team cohesive and cared for.</div>
+          <span class="ov-connect">YSP Team Member</span>
+        </div>
+        <div class="base">
+          <b class="serif">Loh Zheng Ying</b>
+          <span>CHIEF HUMAN RESOURCES OFFICER</span>
+          <div class="location">📍 Singapore</div>
+        </div>
+      </div>
+
+      <!-- Ho Yi Ming -->
+      <div class="person-card apple-reveal" style="transition-delay:.18s">
+        <div class="photo"><img src="assets/team/hoyiming.webp" alt="Ho Yi Ming" /></div>
+        <div class="overlay">
+          <div class="ov-name">Ho Yi Ming</div>
+          <div class="ov-role">Chief Financial Officer · Singapore</div>
+          <div class="ov-bio">Yi Ming stewards YSP's financial sustainability — ensuring the organisation remains free for members, transparent to stakeholders, and ready to invest where it matters most: in the fellows doing the work.</div>
+          <span class="ov-connect">YSP Team Member</span>
+        </div>
+        <div class="base">
+          <b class="serif">Ho Yi Ming</b>
+          <span>CHIEF FINANCIAL OFFICER</span>
+          <div class="location">📍 Singapore</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Advisor -->
+<section class="bg-mid" id="advisors">
+  <div class="mesh" aria-hidden="true"></div>
+  <div class="container">
+    <span class="eyebrow apple-reveal"><span class="dot"></span> Senior Advisor</span>
+    <h2 class="section-title serif apple-reveal" style="transition-delay:.08s">
+      Guided by <em>experience.</em>
+    </h2>
+    <p class="section-sub apple-reveal" style="transition-delay:.16s">
+      YSP's senior advisor brings decades of professional depth to mentor our community track and support the C-Suite on strategic decisions.
+    </p>
+
+    <div class="advisor-grid apple-reveal">
+      <div class="advisor-photo">
+        <img src="assets/team/fiza.png" alt="Fiza Jahanzeb" />
+      </div>
+      <div class="advisor-info">
+        <span class="role-tag">Senior Advisor · Community Track Mentor</span>
+        <h3 class="serif">Fiza <em>Jahanzeb</em></h3>
+        <p class="desc">
+          A multifaceted professional with expertise spanning school counselling, psychology, education leadership, and DBT therapy. Fiza serves as YSP's Senior Advisor and Community Track Mentor, bringing a unique blend of psychological insight and institutional experience to support our youngest and most vulnerable members.
+        </p>
+        <p class="desc" style="margin-top:12px">
+          She is also a Licensed Hypnotherapist, NLP Coach, and IT Lead — a rare combination that lets her see policy problems through the lens of both systems and human behaviour.
+        </p>
+        <div class="location-row">📍 Doha, Qatar</div>
+        <a class="connect" href="https://www.linkedin.com/in/fiza-jahanzeb-bab956235/" target="_blank" rel="noopener">Connect on LinkedIn ↗</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Directors -->
+<section class="bg-light" id="directors">
+  <div class="container">
+    <span class="eyebrow apple-reveal"><span class="dot"></span> Directors</span>
+    <h2 class="section-title serif apple-reveal" style="transition-delay:.08s">
+      Leading <em>functions</em> forward.
+    </h2>
+    <p class="section-sub apple-reveal" style="transition-delay:.16s">
+      YSP's Directors lead the Communications and Technology functions, shaping how we tell our story and build the infrastructure that powers our programmes.
+    </p>
+
+    <div class="team-grid cols-2">
+      <!-- Prakash Muthukrishnan -->
+      <div class="person-card apple-reveal">
+        <div class="photo">
+          <div class="init">P</div>
+        </div>
+        <div class="overlay">
+          <div class="ov-name">Prakash Muthukrishnan</div>
+          <div class="ov-role">Director of Communications · Singapore</div>
+          <div class="ov-bio">Prakash leads YSP's communications strategy — from editorial voice and member spotlights to media partnerships and public-facing storytelling that keeps our work visible and credible.</div>
+          <span class="ov-connect">Onboarding</span>
+        </div>
+        <div class="base">
+          <span class="pip">DIRECTOR</span>
+          <b class="serif">Prakash Muthukrishnan</b>
+          <span>DIRECTOR OF COMMUNICATIONS</span>
+          <div class="location">📍 Singapore</div>
+        </div>
+      </div>
+
+      <!-- Kaliamoorthi Thuraii Ganesh -->
+      <div class="person-card apple-reveal" style="transition-delay:.08s">
+        <div class="photo">
+          <div class="init">G</div>
+        </div>
+        <div class="overlay">
+          <div class="ov-name">Kaliamoorthi Thuraii Ganesh</div>
+          <div class="ov-role">Director of Technology · Singapore</div>
+          <div class="ov-bio">Ganesh architects the technology systems behind YSP — from member tools and research publishing infrastructure to the digital backbone that lets a distributed team operate with clarity and confidence.</div>
+          <span class="ov-connect">YSP Team Member</span>
+        </div>
+        <div class="base">
+          <span class="pip">DIRECTOR</span>
+          <b class="serif">Ganesh Kaliamoorthi</b>
+          <span>DIRECTOR OF TECHNOLOGY</span>
+          <div class="location">📍 Singapore</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Managers -->
+<section class="bg-sage" id="managers">
+  <div class="mesh" aria-hidden="true"></div>
+  <div class="container">
+    <span class="eyebrow apple-reveal"><span class="dot"></span> Managers</span>
+    <h2 class="section-title serif apple-reveal" style="transition-delay:.08s">
+      The <em>Canopy</em> layer.
+    </h2>
+    <p class="section-sub apple-reveal" style="transition-delay:.16s">
+      YSP's managers (🌳 Canopy) are the connective tissue between leadership and members — running research, policy, and communications functions day-to-day.
+    </p>
+
+    <div class="team-grid cols-4">
+      <!-- Kateryna Khokhlova -->
+      <div class="person-card apple-reveal">
+        <div class="photo">
+          <img src="assets/team/kateryna.png" alt="Kateryna Khokhlova" />
+        </div>
+        <div class="overlay">
+          <div class="ov-name">Kateryna Khokhlova</div>
+          <div class="ov-role">Manager of Research · Ryna</div>
+          <div class="ov-bio">Ryna oversees YSP's research track — coordinating fellows, ensuring rigour across briefs, and building the editorial standards that make YSP's outputs credible to policymakers and academics alike.</div>
+          <span class="ov-connect">YSP Team Member</span>
+        </div>
+        <div class="base">
+          <b class="serif">Kateryna Khokhlova</b>
+          <span>MANAGER OF RESEARCH</span>
+        </div>
+      </div>
+
+      <!-- Renad Baomar -->
+      <div class="person-card apple-reveal" style="transition-delay:.06s">
+        <div class="photo" style="background:linear-gradient(140deg,#cfdfd8,#b9c99e)">
+          <div class="init">R</div>
+        </div>
+        <div class="overlay">
+          <div class="ov-name">Renad Baomar</div>
+          <div class="ov-role">Manager of Policy · Oman</div>
+          <div class="ov-bio">Renad leads YSP's policy track, guiding fellows from research question to published white paper. She brings regional expertise in MENA policy landscapes to every project she touches.</div>
+          <span class="ov-connect">YSP Team Member</span>
+        </div>
+        <div class="base">
+          <b class="serif">Renad Baomar</b>
+          <span>MANAGER OF POLICY</span>
+          <div class="location">📍 Oman</div>
+        </div>
+      </div>
+
+      <!-- Wang Yi Kun -->
+      <div class="person-card apple-reveal" style="transition-delay:.12s">
+        <div class="photo" style="background:linear-gradient(140deg,#b9c99e,#89a36c)">
+          <div class="init">J</div>
+        </div>
+        <div class="overlay">
+          <div class="ov-name">Wang Yi Kun (Joiwe)</div>
+          <div class="ov-role">Social Media Manager · Singapore</div>
+          <div class="ov-bio">Joiwe shapes how YSP shows up across social channels — translating complex policy work into accessible, engaging content that grows the community without losing the depth that makes YSP distinctive.</div>
+          <span class="ov-connect">YSP Team Member</span>
+        </div>
+        <div class="base">
+          <b class="serif">Wang Yi Kun</b>
+          <span>SOCIAL MEDIA MANAGER</span>
+          <div class="location">📍 Singapore</div>
+        </div>
+      </div>
+
+      <!-- Suma Ratheesh Mathangi -->
+      <div class="person-card apple-reveal" style="transition-delay:.18s">
+        <div class="photo" style="background:linear-gradient(140deg,#e6efe9,#cfdfd8)">
+          <div class="init">M</div>
+        </div>
+        <div class="overlay">
+          <div class="ov-name">Suma Ratheesh Mathangi</div>
+          <div class="ov-role">Social Media Manager · India</div>
+          <div class="ov-bio">Mathangi co-manages YSP's social presence with a focus on the South Asian region — amplifying member stories, research highlights, and programme updates across platforms.</div>
+          <span class="ov-connect">Onboarding</span>
+        </div>
+        <div class="base">
+          <b class="serif">Suma Mathangi</b>
+          <span>SOCIAL MEDIA MANAGER</span>
+          <div class="location">📍 India</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Members -->
+<section class="bg-deep" id="members">
+  <div class="container">
+    <span class="eyebrow apple-reveal"><span class="dot"></span> Research &amp; Policy Team</span>
+    <h2 class="section-title serif apple-reveal" style="transition-delay:.08s">
+      The <em>Seed</em> layer.
+    </h2>
+    <p class="section-sub apple-reveal" style="transition-delay:.16s">
+      YSP's team members (🌱 Seed) are active contributors producing research, policy analysis, and on-the-ground work across the network.
+    </p>
+
+    <div class="team-grid cols-3">
+      <!-- Carin Alston -->
+      <div class="person-card apple-reveal">
+        <div class="photo" style="background:linear-gradient(140deg,#cfdfd8,#9ab078)">
+          <div class="init">C</div>
+        </div>
+        <div class="overlay">
+          <div class="ov-name">Carin Alston</div>
+          <div class="ov-role">Research &amp; Policy Team Member · United States</div>
+          <div class="ov-bio">Carin contributes to YSP's research and policy track from the United States, bringing local context and analytical depth to cross-border policy questions. She's one of our founding Seed-tier members and an active voice in the community.</div>
+          <span class="ov-connect">YSP Team Member</span>
+        </div>
+        <div class="base">
+          <b class="serif">Carin Alston</b>
+          <span>RESEARCH &amp; POLICY TEAM MEMBER</span>
+          <div class="location">📍 United States</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Verdi Mascot -->
+<section class="verdi-section" id="verdi">
+  <div class="mesh" aria-hidden="true"></div>
+  <div class="container">
+    <span class="eyebrow apple-reveal"><span class="dot"></span> Meet Verdi</span>
+    <h2 class="section-title serif apple-reveal" style="transition-delay:.08s">
+      Our <em>mascot</em> — and heart.
+    </h2>
+
+    <div class="verdi-card apple-reveal" style="transition-delay:.12s">
+      <div class="verdi-img">
+        <img src="assets/team/verdi-guide.png" alt="Verdi, YSP Mascot" />
+      </div>
+      <div class="verdi-content">
+        <div class="verdi-tag">🌍 YSP Mascot</div>
+        <h3 class="serif">Verdi, <em>Our Mascot</em></h3>
+        <p>
+          Verdi is the heart of Youth for Sustainable Policy. She's curious, thoughtful, and quietly determined — Verdi represents the kind of youth leadership we believe in: grounded in evidence, driven by empathy, and hopeful about the future.
+        </p>
+        <p style="margin-top:14px">
+          Named after "Verde," meaning green, Verdi reminds us that sustainability is about people, communities, and the long-term care of our planet. You'll see her pop up across YSP spaces to guide discussions, introduce programmes, and celebrate milestones.
+        </p>
+        <p style="margin-top:14px">
+          Whenever things feel complex or overwhelming, Verdi is our reminder to slow down, think critically, and keep going — one well-researched, well-intentioned step at a time 🌍💚
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div>
+      <div class="brand">
+        <img src="assets/ysp-logo.png" alt="" />
+        <span class="word">Y<i>S</i>P</span>
+      </div>
+      <p class="blurb" style="font-family:system-ui">
+        Youth for Sustainable Policy (YSP) is a youth-led initiative empowering the next generation to engage with global challenges through research, storytelling, and policy dialogue.
+      </p>
+    </div>
+    <div>
+      <h5>Programmes</h5>
+      <ul>
+        <li><a href="index.html#programmes">Research Route</a></li>
+        <li><a href="index.html#programmes">Policy Route</a></li>
+        <li><a href="index.html#programmes">Business Route</a></li>
+        <li><a href="index.html#programmes">Diplomacy Route</a></li>
+        <li><a href="index.html#programmes">Environment Route</a></li>
+        <li><a href="index.html#programmes">Community Route</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>Organisation</h5>
+      <ul>
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="team.html">Team</a></li>
+        <li><a href="index.html#careers">Careers</a></li>
+        <li><a href="#">Press</a></li>
+        <li><a href="index.html#join">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>Resources</h5>
+      <ul>
+        <li><a href="index.html#research">Research Hub</a></li>
+        <li><a href="#">Annual reports</a></li>
+        <li><a href="community-policy.html">Community Policy</a></li>
+        <li><a href="privacy-notice.html">Privacy Notice</a></li>
+        <li><a href="community-policy.html">Content Safety Framework</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="safe-band">
+    <div class="left">
+      <span class="leaf">✦</span>
+      <span>This is a safe, moderated space for youth aged 16–28. No accounts needed.</span>
+    </div>
+    <div>View our <a href="community-policy.html">Community Policy</a> · <a href="privacy-notice.html">Privacy Notice</a></div>
+  </div>
+  <div class="copy">
+    <span>© 2026 Youth for Sustainable Policy. A registered non‑profit.</span>
+    <span>Made slowly, in good company.</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  // Nav scroll
+  const navWrap = document.getElementById('navWrap');
+  window.addEventListener('scroll', () => {
+    if ((window.scrollY||window.pageYOffset) > 40) navWrap.classList.add('scrolled');
+    else navWrap.classList.remove('scrolled');
+  }, {passive:true});
+
+  // Reveal
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(en => {
+      if (en.isIntersecting){ en.target.classList.add('is-in'); io.unobserve(en.target); }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -6% 0px' });
+  document.querySelectorAll('.apple-reveal').forEach(el => io.observe(el));
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Research Route — YSP · Youth for Sustainable Policy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sage:#9ab078;
+    --sage-deep:#89a36c;
+    --sage-soft:#b9c99e;
+    --mist:#cfdfd8;
+    --mist-pale:#e6efe9;
+    --paper:#fbfdfa;
+    --ink:#1f2a22;
+    --ink-soft:#3d4b40;
+    --ink-mute:#67756a;
+    --line:rgba(31,42,34,.10);
+    --shadow-1: 0 1px 2px rgba(31,42,34,.04), 0 8px 24px -8px rgba(31,42,34,.10);
+    --shadow-2: 0 1px 2px rgba(31,42,34,.06), 0 24px 60px -20px rgba(122,150,108,.30);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color:var(--ink); background:var(--paper);
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    overflow-x:hidden; font-size:16px; line-height:1.55; letter-spacing:-0.005em;
+  }
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  .serif{font-family:"Fraunces", Georgia, serif; font-weight:400; letter-spacing:-0.02em}
+  .mono{font-family: ui-monospace, "SF Mono", Menlo, monospace}
+
+  /* Grain */
+  .grain{
+    position:fixed; inset:0; pointer-events:none; z-index:9999;
+    opacity:.06; mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.12  0 0 0 0 0.16  0 0 0 0 0.13  0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  /* Mesh */
+  .mesh{ position:absolute; inset:-10%; pointer-events:none; z-index:0; filter:blur(60px) saturate(1.05); opacity:.85 }
+  .mesh::before, .mesh::after, .mesh > span{ content:""; position:absolute; border-radius:50% }
+  .mesh::before{ width:55%; aspect-ratio:1; left:-8%; top:-12%; background:radial-gradient(circle at 50% 50%, rgba(207,223,216,.95), rgba(207,223,216,0) 70%) }
+  .mesh::after{ width:60%; aspect-ratio:1; right:-12%; bottom:-18%; background:radial-gradient(circle at 50% 50%, rgba(137,163,108,.78), rgba(137,163,108,0) 70%) }
+  .mesh > span{ width:48%; aspect-ratio:1; left:30%; top:25%; background:radial-gradient(circle at 50% 50%, rgba(154,176,120,.55), rgba(154,176,120,0) 70%) }
+
+  /* Nav */
+  .nav-wrap{ position:fixed; top:18px; left:0; right:0; z-index:100; display:flex; justify-content:center; pointer-events:none; transition: top .35s cubic-bezier(.2,.7,.2,1) }
+  .nav{
+    pointer-events:auto; display:flex; align-items:center; gap:8px;
+    padding:8px 8px 8px 18px;
+    background:rgba(255,255,255,.42);
+    backdrop-filter: blur(14px) saturate(1.4); -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    border:1px solid rgba(255,255,255,.55); border-radius:999px;
+    box-shadow: 0 1px 1px rgba(255,255,255,.6) inset, 0 10px 30px -12px rgba(31,42,34,.18);
+  }
+  .scrolled .nav{
+    background:rgba(255,255,255,.62);
+    backdrop-filter: blur(22px) saturate(1.6); -webkit-backdrop-filter: blur(22px) saturate(1.6);
+    box-shadow: 0 1px 1px rgba(255,255,255,.7) inset, 0 18px 50px -18px rgba(31,42,34,.22);
+    border-color: rgba(255,255,255,.7);
+  }
+  .nav .brand{ display:flex; align-items:center; gap:10px; padding-right:14px; border-right:1px solid var(--line) }
+  .nav .brand img{ width:28px; height:28px; border-radius:8px; object-fit:cover; box-shadow:0 2px 6px rgba(31,42,34,.15)}
+  .nav .brand .word{ font-weight:600; letter-spacing:.02em; font-size:14px }
+  .nav .brand .word i{ font-style:normal; color:var(--sage-deep) }
+  .nav-links{ display:flex; align-items:center; gap:2px; padding:0 6px }
+  .nav-links a{ padding:8px 14px; border-radius:999px; font-size:13.5px; font-weight:500; color:var(--ink-soft); transition: background .25s, color .25s }
+  .nav-links a:hover{ background:rgba(255,255,255,.6); color:var(--ink) }
+  .nav-links a.active{ background:rgba(255,255,255,.7); color:var(--ink) }
+
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:10px 18px; border-radius:999px; font-size:13.5px; font-weight:500;
+    transition: transform .25s cubic-bezier(.2,.7,.2,1), box-shadow .25s, background .25s, filter .25s;
+  }
+  .btn-primary{ background:var(--ink); color:#fbfdfa; box-shadow: 0 1px 1px rgba(255,255,255,.18) inset, 0 8px 22px -8px rgba(31,42,34,.45) }
+  .btn-primary:hover{ background:#0f1612 }
+  .btn-forest{
+    background: linear-gradient(180deg, var(--sage), var(--sage-deep));
+    color:#fbfdfa;
+    box-shadow: 0 1px 1px rgba(255,255,255,.35) inset, 0 10px 26px -10px rgba(137,163,108,.6);
+  }
+  .btn-forest:hover{ filter:brightness(1.04) }
+  .btn-ghost{ color:var(--ink); background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.7); backdrop-filter: blur(10px) }
+  .btn-ghost:hover{ background:rgba(255,255,255,.8) }
+  .btn .arr{ display:inline-block; transition: transform .25s }
+  .btn:hover .arr{ transform: translate(2px,-2px) }
+
+  /* ─────────────── HERO ─────────────── */
+  .hero{
+    position:relative; padding: 150px 24px 60px; overflow:hidden; isolation:isolate;
+    background:
+      radial-gradient(120% 60% at 50% 0%, var(--mist) 0%, rgba(207,223,216,0) 60%),
+      linear-gradient(180deg, #f3f8ef 0%, #fbfdfa 70%);
+  }
+  .hero .container{ max-width: 1180px; margin: 0 auto; position:relative; z-index:2 }
+  .hero .crumbs{
+    display:inline-flex; align-items:center; gap:10px;
+    font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-mute);
+    margin-bottom:18px;
+  }
+  .hero .crumbs .leaf{ width:5px; height:5px; border-radius:50%; background:var(--sage)}
+  .hero .crumbs a{ color:var(--ink-mute); transition:color .2s }
+  .hero .crumbs a:hover{ color:var(--ink) }
+  .hero .crumbs .sep{ opacity:.4 }
+
+  .hero-grid{
+    display:grid; grid-template-columns: 1.4fr 1fr; gap: 56px; align-items:start;
+  }
+  .hero .title-block{ position:relative }
+  .hero h1{
+    font-family:"Fraunces", serif; font-weight:400;
+    font-size: clamp(54px, 8vw, 112px);
+    line-height:.98; letter-spacing:-0.038em;
+    margin: 0 0 22px; color:var(--ink);
+  }
+  .hero h1 em{ font-style:italic; font-weight:300; color:var(--sage-deep) }
+  .hero .lede{
+    font-size: 18px; line-height:1.55; max-width:54ch; color:var(--ink-soft); margin: 0 0 32px;
+  }
+  .hero .lede b{ font-weight:600; color:var(--ink) }
+  .hero .cta-row{ display:flex; gap:10px; flex-wrap:wrap }
+
+  /* Route stamp on the right */
+  .route-stamp{
+    position:relative; aspect-ratio: 1;
+    border-radius: 28px; overflow:hidden;
+    background: linear-gradient(140deg, rgba(154,176,120,.35), rgba(207,223,216,.55) 60%, rgba(255,255,255,.45));
+    border:1px solid rgba(255,255,255,.7);
+    box-shadow: 0 1px 1px rgba(255,255,255,.6) inset, 0 30px 70px -30px rgba(122,150,108,.45);
+    display:flex; align-items:center; justify-content:center;
+    isolation:isolate;
+  }
+  .route-stamp::before{
+    content:""; position:absolute; inset:8%;
+    border-radius:50%;
+    background: radial-gradient(circle at 50% 50%, rgba(255,255,255,.85), rgba(255,255,255,0) 65%);
+    z-index:0;
+  }
+  .route-stamp .big-letter{
+    position:relative; z-index:1;
+    font-family:"Fraunces", serif; font-weight:300; font-style:italic;
+    font-size: clamp(180px, 24vw, 280px); line-height:.85;
+    color: var(--sage-deep); letter-spacing:-0.04em;
+    text-shadow: 0 6px 24px rgba(137,163,108,.25);
+  }
+  .route-stamp .corner{
+    position:absolute; top:18px; left:18px; right:18px;
+    display:flex; justify-content:space-between; align-items:center; z-index:2;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size:11px;
+    letter-spacing:.16em; text-transform:uppercase; color:var(--ink-soft);
+  }
+  .route-stamp .corner .seal{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:5px 10px; border-radius:999px;
+    background:rgba(255,255,255,.7); backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,.8);
+  }
+  .route-stamp .corner .seal .dot{ width:5px; height:5px; border-radius:50%; background:var(--sage)}
+  .route-stamp .foot{
+    position:absolute; bottom:18px; left:18px; right:18px; z-index:2;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size:10.5px;
+    letter-spacing:.16em; text-transform:uppercase; color:var(--ink-mute);
+    display:flex; justify-content:space-between;
+  }
+
+  /* hero meta strip */
+  .meta-strip{
+    display:grid; grid-template-columns: repeat(4, 1fr); gap:0;
+    border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+    margin-top:56px;
+  }
+  .meta-strip .cell{
+    padding: 22px 22px 22px 0;
+    display:flex; flex-direction:column; gap:6px;
+    border-right: 1px solid var(--line);
+  }
+  .meta-strip .cell:last-child{ border-right:0 }
+  .meta-strip .cell:not(:first-child){ padding-left: 22px }
+  .meta-strip .num{
+    font-family:"Fraunces", serif; font-weight:300; font-size: 44px; letter-spacing:-0.025em; line-height:1;
+  }
+  .meta-strip .num em{ font-style:italic; color:var(--sage-deep); font-size:.6em }
+  .meta-strip .lbl{ font-size:12px; color:var(--ink-mute); letter-spacing:.06em; text-transform:uppercase }
+
+  /* ─────────────── SECTIONS ─────────────── */
+  section{ position:relative; padding: 110px 24px; isolation:isolate }
+  .container{ max-width:1180px; margin:0 auto; position:relative; z-index:2 }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:10px;
+    font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--sage-deep); font-weight:500;
+  }
+  .eyebrow .leaf{ width:6px; height:6px; border-radius:50%; background:var(--sage) }
+  h2.section-title{
+    font-family:"Fraunces", serif; font-weight:400;
+    font-size: clamp(36px, 5vw, 62px); line-height:1.04; letter-spacing:-0.028em;
+    margin: 16px 0 18px; max-width:22ch;
+  }
+  h2.section-title em{ font-style:italic; color:var(--sage-deep); font-weight:300 }
+  p.section-sub{ max-width:60ch; color:var(--ink-soft); font-size:17px; margin:0 0 36px }
+
+  /* Overview */
+  .overview{ background: linear-gradient(180deg, #fbfdfa 0%, #f3f8ef 100%) }
+  .ov-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:48px; align-items:start }
+  .ov-grid p{ font-family:"Fraunces", serif; font-weight:400; font-size: clamp(22px, 2.4vw, 30px); line-height:1.28; letter-spacing:-0.015em; color:var(--ink); margin:0 0 24px }
+  .ov-grid p b{ font-weight:500; color:var(--ink); font-style:italic; color:var(--sage-deep) }
+  .ov-side{
+    padding: 28px; border-radius:22px;
+    background: rgba(255,255,255,.6); backdrop-filter: blur(16px);
+    border:1px solid rgba(255,255,255,.75);
+    box-shadow: var(--shadow-1);
+    display:flex; flex-direction:column; gap:18px;
+    position:sticky; top: 100px;
+  }
+  .ov-side .tag{
+    display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:999px;
+    background: var(--ink); color: #fbfdfa; font-size: 10.5px; letter-spacing:.16em; text-transform:uppercase; width:fit-content;
+  }
+  .ov-side .tag .dot{ width:5px; height:5px; border-radius:50%; background:var(--sage) }
+  .ov-side h3{
+    margin:0; font-family:"Fraunces", serif; font-weight:400; font-size:26px; line-height:1.18; letter-spacing:-0.02em;
+  }
+  .ov-side h3 em{ font-style:italic; color:var(--sage-deep); font-weight:300 }
+  .ov-side .row{
+    display:flex; justify-content:space-between; gap:14px;
+    padding: 12px 0; border-top: 1px solid var(--line); font-size:13px;
+  }
+  .ov-side .row:first-of-type{ border-top:0 }
+  .ov-side .row .k{ color:var(--ink-mute); letter-spacing:.04em }
+  .ov-side .row .v{ color:var(--ink); font-weight:500; text-align:right; max-width:60% }
+  .ov-side .note{ font-size:13px; color:var(--ink-soft); line-height:1.55; padding-top:14px; border-top:1px solid var(--line); margin-top:4px }
+
+  /* Curriculum / Modules */
+  .curriculum{ background: linear-gradient(180deg, #f3f8ef 0%, #eaf1e3 100%) }
+  .mod-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-top: 8px }
+  .module{
+    position:relative; padding: 30px; border-radius:22px;
+    background: rgba(255,255,255,.65); backdrop-filter:blur(16px);
+    border:1px solid rgba(255,255,255,.75);
+    box-shadow: var(--shadow-1);
+    display:flex; flex-direction:column; gap: 14px; min-height: 260px;
+    transition: transform .3s cubic-bezier(.2,.7,.2,1), box-shadow .3s;
+  }
+  .module:hover{ transform: translateY(-3px); box-shadow: var(--shadow-2) }
+  .module .m-head{ display:flex; justify-content:space-between; align-items:center; font-family: ui-monospace, Menlo, monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase }
+  .module .m-wk{ color:var(--sage-deep); font-weight:500 }
+  .module .m-num{ color:var(--ink-mute) }
+  .module h3{ margin:0; font-family:"Fraunces", serif; font-weight:400; font-size: 28px; line-height:1.15; letter-spacing:-0.02em; color:var(--ink); }
+  .module h3 em.m-em{ font-style:italic; color:var(--sage-deep); font-weight:300; font-size:.7em; display:block; margin-top:4px; letter-spacing:-0.01em }
+  .module p{ color:var(--ink-soft); font-size:14.5px; line-height:1.55; margin:0; max-width: 42ch }
+
+  /* Capstone */
+  .capstone{ background: linear-gradient(180deg, #eaf1e3 0%, #d9e6cf 100%); overflow:hidden }
+  .cap-card{
+    position:relative; padding: 48px 48px 48px 48px;
+    background:
+      radial-gradient(80% 60% at 100% 0%, rgba(154,176,120,.25), transparent 60%),
+      linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.35));
+    backdrop-filter: blur(22px) saturate(1.4);
+    border:1px solid rgba(255,255,255,.85);
+    border-radius:28px;
+    box-shadow: 0 1px 1px rgba(255,255,255,.9) inset, var(--shadow-2);
+    display:grid; grid-template-columns: 1.4fr 1fr; gap:48px;
+    margin-top: 8px;
+  }
+  .cap-card .left .tag{
+    display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:999px;
+    background: var(--ink); color: #fbfdfa; font-size:10.5px; letter-spacing:.16em; text-transform:uppercase;
+  }
+  .cap-card .left .tag .dot{ width:5px;height:5px;border-radius:50%;background:var(--sage) }
+  .cap-card .left h3{
+    margin:18px 0 18px; font-family:"Fraunces", serif; font-weight:400;
+    font-size: clamp(32px, 4vw, 52px); line-height:1.05; letter-spacing:-0.028em;
+  }
+  .cap-card .left h3 em{ font-style:italic; color:var(--sage-deep); font-weight:300 }
+  .cap-card .left p{ font-size:16px; color:var(--ink-soft); line-height:1.55; margin: 0 0 22px; max-width:48ch }
+  .cap-card .left .micro{
+    font-family: ui-monospace, Menlo, monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--ink-mute); display:flex; align-items:center; gap:10px;
+  }
+  .cap-card .left .micro .leaf{ width:5px; height:5px; border-radius:50%; background:var(--sage) }
+  .cap-mock{
+    aspect-ratio: 7/9;
+    background:
+      linear-gradient(180deg, #fff 0%, #f5f7f2 100%);
+    border:1px solid rgba(255,255,255,.9);
+    border-radius:14px; padding: 26px 22px;
+    box-shadow: 0 1px 1px rgba(255,255,255,.9) inset, 0 30px 60px -24px rgba(31,42,34,.25);
+    position:relative; overflow:hidden;
+    display:flex; flex-direction:column; gap:14px;
+    transform: rotate(1.5deg);
+  }
+  .cap-mock::after{
+    content:""; position:absolute; top:0; right:0; width:60px; height:60px;
+    background: linear-gradient(225deg, #eaf1e3 50%, transparent 50%);
+    border-bottom: 1px solid rgba(31,42,34,.08); border-left: 1px solid rgba(31,42,34,.08);
+  }
+  .cap-mock .mock-tag{ font-family: ui-monospace, Menlo, monospace; font-size:9.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--sage-deep); font-weight:500 }
+  .cap-mock .mock-title{ font-family:"Fraunces", serif; font-weight:400; font-size: clamp(18px, 1.8vw, 22px); line-height:1.18; letter-spacing:-0.018em; color:var(--ink) }
+  .cap-mock .mock-title em{ font-style:italic; color:var(--sage-deep); font-weight:300 }
+  .cap-mock .mock-line{ height:6px; border-radius:3px; background: rgba(31,42,34,.08) }
+  .cap-mock .mock-line.s{ width:60% }
+  .cap-mock .mock-line.m{ width:88% }
+  .cap-mock .mock-foot{
+    margin-top:auto; display:flex; align-items:center; gap:8px;
+    font-family: ui-monospace, Menlo, monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-mute);
+  }
+  .cap-mock .mock-foot .av{ width:18px; height:18px; border-radius:50%; background: linear-gradient(135deg, var(--mist), var(--sage)) }
+
+  /* Sample capstones */
+  .samples{ background: linear-gradient(180deg, #d9e6cf 0%, #fbfdfa 100%) }
+  .sample-list{ display:flex; flex-direction:column; gap:0; margin-top:8px }
+  .sample{
+    display:grid; grid-template-columns: 80px 1fr 220px 60px;
+    gap:24px; align-items:center;
+    padding: 24px 8px; border-top: 1px solid var(--line);
+    transition: background .25s, padding .25s; cursor:pointer;
+  }
+  .sample:last-child{ border-bottom: 1px solid var(--line) }
+  .sample:hover{ background: rgba(255,255,255,.5); padding-left:18px }
+  .sample .yr{
+    font-family: ui-monospace, Menlo, monospace; font-weight:500;
+    font-size: 13.5px; color:var(--sage-deep); letter-spacing:.06em;
+  }
+  .sample h4{
+    margin:0; font-family:"Fraunces", serif; font-weight:400;
+    font-size: clamp(20px, 2vw, 26px); line-height:1.22; letter-spacing:-0.018em; color:var(--ink);
+  }
+  .sample h4 em{ font-style:italic; color:var(--sage-deep); font-weight:300 }
+  .sample .tag{
+    font-family: ui-monospace, Menlo, monospace; font-size:11px;
+    color:var(--ink-mute); letter-spacing:.14em; text-transform:uppercase;
+  }
+  .sample .arrow{
+    width:36px; height:36px; border-radius:50%;
+    background:rgba(255,255,255,.7); border:1px solid var(--line);
+    display:inline-flex; align-items:center; justify-content:center;
+    transition: transform .25s, background .25s, color .25s;
+  }
+  .sample:hover .arrow{ background:var(--ink); color:#fbfdfa; transform: translate(2px,-2px) }
+
+  /* Fit / Not fit */
+  .fit{ background: linear-gradient(180deg, #fbfdfa 0%, #f3f8ef 100%) }
+  .fit-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-top:8px }
+  .fit-card{
+    padding: 32px; border-radius:22px;
+    background: rgba(255,255,255,.6); backdrop-filter: blur(16px);
+    border:1px solid rgba(255,255,255,.75);
+    box-shadow: var(--shadow-1);
+  }
+  .fit-card .head{
+    display:flex; align-items:center; gap:10px;
+    font-family: ui-monospace, Menlo, monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+    margin-bottom:18px;
+  }
+  .fit-card.good .head{ color: var(--sage-deep) }
+  .fit-card.bad .head{ color: var(--ink-mute) }
+  .fit-card h3{
+    margin:0 0 18px; font-family:"Fraunces", serif; font-weight:400; font-size: 24px;
+    letter-spacing:-0.018em; line-height:1.2;
+  }
+  .fit-card h3 em{ font-style:italic; color:var(--sage-deep); font-weight:300 }
+  .fit-card ul{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:14px }
+  .fit-card ul li{ display:flex; gap:12px; align-items:flex-start; font-size:14.5px; line-height:1.5; color:var(--ink-soft) }
+  .fit-card ul li a{ color:var(--sage-deep); border-bottom:1px solid rgba(137,163,108,.4) }
+  .fit-card ul li a:hover{ color:var(--ink); border-bottom-color:var(--ink) }
+  .fit-card .check, .fit-card .x{
+    flex-shrink:0; width:22px; height:22px; border-radius:50%;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:600;
+    margin-top:1px;
+  }
+  .fit-card .check{ background: var(--sage); color:#fff }
+  .fit-card .x{ background: rgba(31,42,34,.08); color:var(--ink-mute) }
+
+  /* Mentors */
+  .mentors-band{ background: linear-gradient(180deg, #f3f8ef 0%, #eaf1e3 100%) }
+  .mentor-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; margin-top:8px }
+  .mentor{
+    padding: 26px; border-radius:20px;
+    background: rgba(255,255,255,.65); backdrop-filter: blur(14px);
+    border:1px solid rgba(255,255,255,.75);
+    box-shadow: var(--shadow-1);
+    display:flex; flex-direction:column; gap:14px;
+  }
+  .mentor .av{
+    width:64px; height:64px; border-radius:50%; border:2px solid #fff;
+    box-shadow: 0 2px 6px rgba(31,42,34,.12);
+  }
+  .mentor .av.a{ background: linear-gradient(135deg, var(--mist), var(--sage)) }
+  .mentor .av.b{ background: linear-gradient(135deg, var(--sage-soft), var(--sage-deep)) }
+  .mentor .av.c{ background: linear-gradient(135deg, var(--mist-pale), var(--mist)) }
+  .mentor h4{ margin:0; font-family:"Fraunces", serif; font-weight:400; font-size: 22px; letter-spacing:-0.018em; line-height:1.2 }
+  .mentor .role{ font-size:12.5px; color:var(--ink-mute); letter-spacing:.04em }
+  .mentor p{ color:var(--ink-soft); font-size:14px; line-height:1.55; margin:0 }
+  .mentor .specialty{
+    margin-top:auto; padding-top:14px; border-top:1px solid var(--line);
+    display:flex; gap:6px; flex-wrap:wrap;
+  }
+  .mentor .specialty span{
+    font-family: ui-monospace, Menlo, monospace; font-size:10.5px;
+    padding:4px 10px; border-radius:999px;
+    background:rgba(31,42,34,.04); color:var(--ink-mute);
+    letter-spacing:.1em; text-transform:uppercase;
+  }
+
+  /* FAQ */
+  .faq-section{ background: linear-gradient(180deg, #eaf1e3 0%, #fbfdfa 100%) }
+  .faq-grid{ display:grid; grid-template-columns: 1fr 1.2fr; gap:48px; align-items:start }
+  .faq-list{ display:flex; flex-direction:column; gap:8px }
+  .faq{
+    background: rgba(255,255,255,.6); backdrop-filter: blur(14px);
+    border:1px solid rgba(255,255,255,.75); border-radius:18px;
+    overflow:hidden; transition: box-shadow .25s;
+  }
+  .faq[open]{ box-shadow: var(--shadow-1) }
+  .faq summary{
+    list-style:none; padding: 22px 24px;
+    display:flex; justify-content:space-between; align-items:center; gap:18px;
+    cursor:pointer; font-family:"Fraunces", serif; font-weight:400;
+    font-size: 19px; letter-spacing:-0.015em; color:var(--ink);
+    transition: background .2s;
+  }
+  .faq summary::-webkit-details-marker{ display:none }
+  .faq summary:hover{ background: rgba(255,255,255,.4) }
+  .faq .ic{
+    width:28px; height:28px; border-radius:50%; flex-shrink:0;
+    background: rgba(31,42,34,.06); display:inline-flex; align-items:center; justify-content:center;
+    font-size:16px; color:var(--ink-soft); transition: transform .25s, background .25s, color .25s;
+  }
+  .faq[open] .ic{ transform: rotate(45deg); background: var(--ink); color:#fbfdfa }
+  .faq .a{ padding: 0 24px 22px; color:var(--ink-soft); font-size:14.5px; line-height:1.6 }
+  .faq .a p{ margin:0 }
+
+  /* Other routes */
+  .other-routes{ background: linear-gradient(180deg, #fbfdfa 0%, #f3f8ef 100%) }
+  .other-grid{ display:grid; grid-template-columns: repeat(5, 1fr); gap:10px; margin-top:8px }
+  .other-route{
+    position:relative; padding: 22px 18px;
+    background: rgba(255,255,255,.55); backdrop-filter: blur(12px);
+    border:1px solid rgba(255,255,255,.75); border-radius:18px;
+    box-shadow: var(--shadow-1);
+    display:flex; flex-direction:column; gap:14px; min-height:180px;
+    transition: transform .25s cubic-bezier(.2,.7,.2,1), box-shadow .25s;
+  }
+  .other-route:hover{ transform: translateY(-3px); box-shadow: var(--shadow-2) }
+  .other-route .glyph{
+    width: 44px; height:44px; border-radius:12px;
+    display:inline-flex; align-items:center; justify-content:center;
+    background: linear-gradient(140deg, var(--mist), var(--sage));
+    color: var(--ink);
+    font-family:"Fraunces", serif; font-style:italic; font-weight:300; font-size:22px;
+    box-shadow: 0 1px 1px rgba(255,255,255,.7) inset;
+  }
+  .other-route .t .num{
+    display:block; font-family: ui-monospace, Menlo, monospace; font-size:10.5px;
+    color: var(--ink-mute); letter-spacing:.16em; margin-bottom:6px;
+  }
+  .other-route .t b{
+    font-family:"Fraunces", serif; font-weight:400; font-size:18px;
+    letter-spacing:-0.015em; line-height:1.2; color:var(--ink); display:block;
+  }
+  .other-route .t b em{ font-style:italic; color:var(--sage-deep); font-weight:300 }
+  .other-route .arr{ margin-top:auto; align-self:flex-end; color:var(--ink-mute); transition: transform .2s, color .2s }
+  .other-route:hover .arr{ color:var(--ink); transform: translate(2px,-2px) }
+
+  /* Final CTA */
+  .final{
+    padding: 130px 24px 150px;
+    background: linear-gradient(180deg, #f3f8ef 0%, #d9e6cf 100%);
+    overflow:hidden;
+    text-align:center;
+  }
+  .final .container{ max-width: 920px }
+  .final h2{
+    margin:0 0 22px; font-family:"Fraunces", serif; font-weight:400;
+    font-size: clamp(44px, 6.4vw, 88px); line-height:1.02; letter-spacing:-0.03em;
+  }
+  .final h2 em{ font-style:italic; color:var(--sage-deep); font-weight:300 }
+  .final p{ color:var(--ink-soft); font-size:17px; max-width: 56ch; margin: 0 auto 36px }
+  .final-cta{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap }
+  .final .micro{
+    margin-top:24px; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-mute);
+  }
+
+  /* Footer */
+  .footer{ background:var(--ink); color:#d6dcd2; padding:72px 24px 36px }
+  .footer-grid{ max-width:1180px; margin:0 auto; display:grid; grid-template-columns: 2fr 1fr 1fr; gap:48px }
+  .footer .brand{ display:flex; align-items:center; gap:12px; margin-bottom:18px }
+  .footer .brand img{ width:36px; height:36px; border-radius:10px}
+  .footer .brand .word{ font-weight:600; font-size:16px; letter-spacing:.02em; color:#fbfdfa }
+  .footer .brand .word i{ font-style:normal; color:var(--sage-soft) }
+  .footer .blurb{ color:#aab1a3; font-size:14px; max-width:38ch; line-height:1.55 }
+  .footer h5{ color:#fbfdfa; font-size:12px; letter-spacing:.18em; text-transform:uppercase; margin:0 0 14px; font-weight:500 }
+  .footer ul{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px; font-size:14px }
+  .footer ul a{ color:#aab1a3; transition: color .2s }
+  .footer ul a:hover{ color:#fbfdfa }
+  .safe-band{
+    max-width:1180px; margin:56px auto 0; padding:18px 22px; border-radius:16px;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
+    display:flex; gap:14px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+    font-size:13px; color:#d6dcd2;
+  }
+  .safe-band .left{ display:flex; align-items:center; gap:12px }
+  .safe-band .leaf{ width:24px; height:24px; border-radius:50%; background:linear-gradient(140deg, var(--sage), var(--sage-deep)); display:inline-flex; align-items:center; justify-content:center; color:#fbfdfa; font-size:12px; flex-shrink:0 }
+  .safe-band a{ color:#fbfdfa; text-decoration:underline; text-decoration-color:rgba(251,253,250,.4); text-underline-offset:3px }
+  .safe-band a:hover{ text-decoration-color:var(--sage-soft) }
+  .copy{ max-width:1180px; margin:24px auto 0; display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; font-size:12px; color:#7d857a; letter-spacing:.04em }
+
+  /* Apple reveal */
+  .apple-reveal, .apple-slide-left{
+    opacity:0; transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1);
+  }
+  .apple-reveal{ transform: translateY(24px) }
+  .apple-slide-left{ transform: translateX(-24px) }
+  .is-in.apple-reveal{ opacity:1; transform: translateY(0) }
+  .is-in.apple-slide-left{ opacity:1; transform: translateX(0) }
+
+  @media (max-width: 980px){
+    .nav-links{ display:none }
+    .hero-grid{ grid-template-columns: 1fr; gap:32px }
+    .route-stamp{ max-width:360px; margin: 0 auto }
+    .meta-strip{ grid-template-columns: 1fr 1fr }
+    .meta-strip .cell{ border-right:0; border-bottom: 1px solid var(--line) }
+    .meta-strip .cell:nth-child(2){ border-right:0 }
+    .meta-strip .cell:nth-last-child(-n+2){ border-bottom:0 }
+    .ov-grid, .fit-grid, .faq-grid, .cap-card{ grid-template-columns: 1fr }
+    .mod-grid{ grid-template-columns: 1fr }
+    .mentor-grid{ grid-template-columns: 1fr 1fr }
+    .other-grid{ grid-template-columns: 1fr 1fr }
+    .sample{ grid-template-columns: 60px 1fr 40px; gap:14px }
+    .sample .tag{ display:none }
+    .footer-grid{ grid-template-columns: 1fr 1fr; gap:32px }
+  }
+  @media (max-width: 640px){
+    .mentor-grid, .other-grid{ grid-template-columns: 1fr }
+  }
+
+  /* Hamburger button styling */
+  .menu-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    width: 24px;
+    height: 18px;
+    justify-content: space-between;
+    cursor: pointer;
+    z-index: 101;
+    margin-left: 12px;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+  .menu-toggle span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background-color: var(--ink);
+    border-radius: 2px;
+    transition: transform .3s var(--ease, ease), opacity .3s var(--ease, ease);
+  }
+
+  @media (max-width: 980px) {
+    .menu-toggle {
+      display: flex;
+    }
+    
+    /* Responsive navbar dropdown layout */
+    .nav.menu-open {
+      border-radius: 28px !important;
+      flex-wrap: wrap;
+      padding: 16px 20px !important;
+      width: calc(100vw - 32px) !important;
+      max-width: 480px !important;
+      transition: all 0.3s cubic-bezier(.2,.7,.2,1);
+    }
+    
+    .nav.menu-open .nav-links {
+      display: flex !important;
+      flex-direction: column;
+      width: 100%;
+      gap: 6px;
+      margin-top: 16px;
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+      align-items: flex-start;
+    }
+    
+    .nav.menu-open .nav-links a {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      display: block;
+      text-align: left;
+    }
+    
+    .nav.menu-open .nav-links a:hover {
+      background: rgba(255,255,255,0.7);
+    }
+    
+    /* Transform hamburger into an X when open */
+    .nav.menu-open .menu-toggle span:nth-child(1) {
+      transform: translateY(8px) rotate(45deg);
+    }
+    .nav.menu-open .menu-toggle span:nth-child(2) {
+      opacity: 0;
+    }
+    .nav.menu-open .menu-toggle span:nth-child(3) {
+      transform: translateY(-8px) rotate(-45deg);
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+
+<!-- Nav -->
+<div class="nav-wrap" id="navWrap">
+  <nav class="nav">
+    <a class="brand" href="index.html">
+      <img src="assets/ysp-logo.png" alt="" />
+      <span class="word">Y<i>S</i>P</span>
+    </a>
+    <div class="nav-links">
+      <a href="programmes.html">Programmes</a>
+      <a href="research.html">Research</a>
+      <a href="team.html">Team</a>
+      <a href="careers.html">Careers</a>
+      <a href="about.html">About</a>
+      <a href="/learn">YSP Learns</a>
+    </div>
+    <a href="https://form.typeform.com/to/a3IchqzP" target="_blank" rel="noopener" class="btn btn-forest" data-magnetic>Express Interest <span class="arr">↗</span></a>
+      <button class="menu-toggle" id="menuToggle" aria-label="Toggle Menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </nav>
+</div>
+
+<!-- Hero -->
+<section class="hero" data-screen-label="01 Research Hero">
+  <div class="mesh" aria-hidden="true"><span></span></div>
+  <div class="container">
+    <div class="crumbs apple-reveal">
+      <span class="leaf"></span>
+      <a href="index.html">YSP</a>
+      <span class="sep">/</span>
+      <a href="programmes.html">Programmes</a>
+      <span class="sep">/</span>
+      <span>Research Route</span>
+    </div>
+    <div class="hero-grid">
+      <div class="title-block">
+        <h1 class="apple-reveal" style="transition-delay:.08s">Build the rigour <em>policy needs.</em></h1>
+        <p class="lede apple-reveal" style="transition-delay:.18s">Original research, literature reviews, and evidence‑based analysis — from primary sources to publishable briefs that hold up under citation.</p>
+        <div class="cta-row apple-reveal" style="transition-delay:.28s">
+          <a href="https://form.typeform.com/to/a3IchqzP" target="_blank" rel="noopener" class="btn btn-forest" data-magnetic>Express Interest <span class="arr">↗</span></a>
+          <a href="#curriculum" class="btn btn-ghost">See the curriculum ▸</a>
+        </div>
+      </div>
+      <div class="route-stamp apple-reveal" style="transition-delay:.16s">
+        <div class="corner">
+          <span class="seal"><span class="dot"></span>Route 01 / 06</span>
+          <span>Research</span>
+        </div>
+        <span class="big-letter">R</span>
+        <div class="foot">
+          <span>16 weeks · async</span>
+          <span>Capstone · Free</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="meta-strip apple-reveal" style="transition-delay:.34s">
+      
+        <div class="cell"><div class="num">16<em>wk</em></div><div class="lbl">Async curriculum</div></div>
+        <div class="cell"><div class="num">1</div><div class="lbl">Capstone paper</div></div>
+        <div class="cell"><div class="num">3–5<em>k</em></div><div class="lbl">Words, single author</div></div>
+        <div class="cell"><div class="num"><em>Free</em></div><div class="lbl">No fees, no gates</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Overview -->
+<section class="overview" data-screen-label="02 Overview">
+  <div class="container">
+    <span class="eyebrow apple-reveal"><span class="leaf"></span> 01 / What this route is for</span>
+    <h2 class="section-title apple-reveal" style="transition-delay:.08s">A route, not a <em>summer programme.</em></h2>
+    <div class="ov-grid">
+      <div class="apple-reveal" style="transition-delay:.16s">
+        <p>The Research Route is for members who want to produce <b>citable, evidence‑based work</b>. We treat research as a craft — slow reading, careful sourcing, and a refusal to let a good sentence stand in for a missing data point.</p><p>Over sixteen weeks you will learn how primary and secondary sources are actually combined into a policy argument, choose a question that fits your time budget, and ship a paper that another researcher can build on. Every member is paired with a senior advisor and a peer reviewer.</p>
+      </div>
+      <aside class="ov-side apple-reveal" style="transition-delay:.22s">
+        <span class="tag"><span class="dot"></span>At a glance</span>
+        <h3 class="serif"><em>Research</em> Route · 16 weeks</h3>
+        <div class="row"><span class="k">Capstone</span><span class="v">Research paper or policy brief</span></div>
+        <div class="row"><span class="k">Format</span><span class="v">Async + advisor sessions</span></div>
+        <div class="row"><span class="k">Cohort size</span><span class="v">20–30 members</span></div>
+        <div class="row"><span class="k">Cost</span><span class="v">Free, no application fee</span></div>
+        <div class="row"><span class="k">Open to</span><span class="v">Youth aged 16–28</span></div>
+        <p class="note">Single‑author byline, peer‑reviewed by senior advisors before publication on the YSP research hub.</p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- Curriculum -->
+<section class="curriculum" id="curriculum" data-screen-label="03 Curriculum">
+  <div class="container">
+    <span class="eyebrow apple-reveal"><span class="leaf"></span> 02 / Curriculum</span>
+    <h2 class="section-title apple-reveal" style="transition-delay:.08s">Sixteen weeks, <em>four modules.</em></h2>
+    <p class="section-sub apple-reveal" style="transition-delay:.16s">Async readings, weekly drops, and three advisor sessions across the cohort. Modules build toward the capstone — there is no busywork, and there is no skipping.</p>
+
+    <div class="mod-grid">
+      
+      <article class="module apple-reveal">
+        <div class="m-head">
+          <span class="m-wk">Weeks 01–04</span>
+          <span class="m-num">M1</span>
+        </div>
+        <h3 class="serif">Foundations <em class="m-em">— How research actually gets used.</em></h3>
+        <p>Where evidence sits in the policy cycle. The difference between a position, a paper, and a brief. How to read a literature review against its own assumptions. Picking a question small enough to finish.</p>
+      </article>
+      <article class="module apple-reveal" style="transition-delay:0.06s">
+        <div class="m-head">
+          <span class="m-wk">Weeks 05–08</span>
+          <span class="m-num">M2</span>
+        </div>
+        <h3 class="serif">Methods <em class="m-em">— Quantitative, qualitative, and honest mixed.</em></h3>
+        <p>Survey design, semi‑structured interviews, descriptive statistics, and the ethics of each. We do not require quant skills — we require that you know which method your question deserves.</p>
+      </article>
+      <article class="module apple-reveal" style="transition-delay:0.12s">
+        <div class="m-head">
+          <span class="m-wk">Weeks 09–12</span>
+          <span class="m-num">M3</span>
+        </div>
+        <h3 class="serif">The Brief <em class="m-em">— From data to recommendation.</em></h3>
+        <p>Argument structure for non‑academic readers. Caveats and confidence intervals in plain English. Visualising a finding without overstating it. Writing the executive summary last, on purpose.</p>
+      </article>
+      <article class="module apple-reveal" style="transition-delay:0.18s">
+        <div class="m-head">
+          <span class="m-wk">Weeks 13–16</span>
+          <span class="m-num">M4</span>
+        </div>
+        <h3 class="serif">Capstone <em class="m-em">— Write, peer‑review, ship.</em></h3>
+        <p>Two drafts. One advisor session per draft. A blinded peer review with another fellow. A public‑facing version and an academic‑facing version of the same finding.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Capstone -->
+<section class="capstone" id="capstone" data-screen-label="04 Capstone">
+  <div class="container">
+    <span class="eyebrow apple-reveal"><span class="leaf"></span> 03 / Capstone</span>
+    <h2 class="section-title apple-reveal" style="transition-delay:.08s">Something you can <em>point at.</em></h2>
+    <p class="section-sub apple-reveal" style="transition-delay:.16s">Every route ends in one Capstone with your name on it — published, archived, and citable. No certificate without it.</p>
+
+    <div class="cap-card apple-reveal" style="transition-delay:.22s">
+      <div class="left">
+        <span class="tag"><span class="dot"></span>The Capstone</span>
+        <h3>Research paper or policy brief <em>—</em><br/>under your byline.</h3>
+        <p>Single‑author byline, peer‑reviewed by senior advisors before publication on the YSP research hub.</p>
+        <div class="micro"><span class="leaf"></span> 3,000 – 5,000 words</div>
+      </div>
+      <div class="cap-mock">
+        <span class="mock-tag">YSP · RESEARCH ROUTE · CAPSTONE</span>
+        <div class="mock-title">Mapping Public Housing Eligibility Across <em>Three Generations</em></div>
+        <div class="mock-line m"></div>
+        <div class="mock-line"></div>
+        <div class="mock-line m"></div>
+        <div class="mock-line s"></div>
+        <div class="mock-line"></div>
+        <div class="mock-line m"></div>
+        <div class="mock-foot">
+          <span class="av"></span>
+          <span>A YSP Fellow · Cohort 2026</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Sample Capstones -->
+<section class="samples" data-screen-label="05 Sample Capstones">
+  <div class="container">
+    <span class="eyebrow apple-reveal"><span class="leaf"></span> 04 / Past work</span>
+    <h2 class="section-title apple-reveal" style="transition-delay:.08s">What recent <em>fellows shipped.</em></h2>
+    <p class="section-sub apple-reveal" style="transition-delay:.16s">A handful of recent capstones from the Research Route — to give you a sense of the scope and shape we expect, not to tell you what to write.</p>
+
+    <div class="sample-list">
+      
+      <a class="sample apple-slide-left" href="#">
+        <span class="yr">2026</span>
+        <h4 class="serif">Mapping Public Housing Eligibility Across <em>Three Generations</em></h4>
+        <span class="tag">Housing · Brief</span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="sample apple-slide-left" href="#" style="transition-delay:0.08s">
+        <span class="yr">2025</span>
+        <h4 class="serif">Why Adolescent Mental Health Surveys Systematically <em>Underreport</em></h4>
+        <span class="tag">Health · Field note</span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="sample apple-slide-left" href="#" style="transition-delay:0.16s">
+        <span class="yr">2025</span>
+        <h4 class="serif">A Comparison of Cooling Centre Policies in <em>Singapore and Seoul</em></h4>
+        <span class="tag">Climate · Paper</span>
+        <span class="arrow">↗</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Fit / Not fit -->
+<section class="fit" data-screen-label="06 Fit">
+  <div class="container">
+    <span class="eyebrow apple-reveal"><span class="leaf"></span> 05 / Is this you?</span>
+    <h2 class="section-title apple-reveal" style="transition-delay:.08s">Pick the route that <em>fits the work</em> you want to do.</h2>
+    <p class="section-sub apple-reveal" style="transition-delay:.16s">No route is harder than another — they reward different temperaments. Here is who tends to thrive in Research, and who is probably better served elsewhere.</p>
+
+    <div class="fit-grid">
+      <div class="fit-card good apple-reveal" style="transition-delay:.22s">
+        <div class="head"><span style="width:6px;height:6px;border-radius:50%;background:var(--sage);display:inline-block"></span> A good fit</div>
+        <h3 class="serif">You will <em>thrive here</em> if…</h3>
+        <ul>
+        <li><span class="check">✓</span><span>You want to write something a journalist, MP, or junior analyst could actually cite.</span></li>
+        <li><span class="check">✓</span><span>You are comfortable with ambiguity — the answer is often "it depends, and here is on what."</span></li>
+        <li><span class="check">✓</span><span>You read slowly, and you are not in a rush to publish before you understand.</span></li>
+        </ul>
+      </div>
+      <div class="fit-card bad apple-reveal" style="transition-delay:.30s">
+        <div class="head"><span style="width:6px;height:6px;border-radius:50%;background:var(--ink-mute);display:inline-block"></span> Maybe elsewhere</div>
+        <h3 class="serif">You will be <em>better served</em> elsewhere if…</h3>
+        <ul>
+        <li><span class="x">×</span><span>You want a short, opinionated op‑ed — try the <a href="policy-route.html">Policy Route</a>.</span></li>
+        <li><span class="x">×</span><span>You want fieldwork in your own neighbourhood — try the <a href="community-route.html">Community Route</a>.</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Mentors -->
+<section class="mentors-band" data-screen-label="07 Mentors">
+  <div class="container">
+    <span class="eyebrow apple-reveal"><span class="leaf"></span> 06 / Advisors</span>
+    <h2 class="section-title apple-reveal" style="transition-delay:.08s">Mentors who have <em>done the work.</em></h2>
+    <p class="section-sub apple-reveal" style="transition-delay:.16s">Every member is paired with a senior advisor. The names below are representative of the Research Route advisor bench across recent cohorts.</p>
+
+    <div class="mentor-grid">
+      <article class="mentor apple-reveal">
+        <span class="av a"></span>
+        <h4 class="serif">Senior advisor</h4>
+        <span class="role">Practitioner · Research domain</span>
+        <p>15+ years across regional policy. Reads two drafts and runs a 60‑minute session with each advisee.</p>
+        <div class="specialty"><span>Drafting</span><span>Scope</span></div>
+      </article>
+      <article class="mentor apple-reveal" style="transition-delay:.08s">
+        <span class="av b"></span>
+        <h4 class="serif">Field advisor</h4>
+        <span class="role">Working in the room</span>
+        <p>Currently serving in government, an NGO, or a research institute. Brings a live sense of what is plausible this year.</p>
+        <div class="specialty"><span>Access</span><span>Reality‑check</span></div>
+      </article>
+      <article class="mentor apple-reveal" style="transition-delay:.16s">
+        <span class="av c"></span>
+        <h4 class="serif">Peer reviewer</h4>
+        <span class="role">A fellow from your cohort</span>
+        <p>Blinded review of your draft, paired by the programme team. You will be a peer reviewer for someone in turn — that is part of the work.</p>
+        <div class="specialty"><span>Read‑back</span><span>Edit</span></div>
+      </article>
+    </div>
+    <p class="section-sub apple-reveal" style="margin: 32px 0 0; font-size:13px; color:var(--ink-mute); letter-spacing:.04em">
+      ↗ The full advisor bench is listed on the <a href="team.html" style="color:var(--sage-deep); border-bottom: 1px solid rgba(137,163,108,.3)">Team page</a>.
+    </p>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section" data-screen-label="08 FAQ">
+  <div class="container">
+    <div class="faq-grid">
+      <div class="apple-reveal">
+        <span class="eyebrow"><span class="leaf"></span> 07 / Questions</span>
+        <h2 class="section-title">A few <em>honest answers.</em></h2>
+        <p class="section-sub">If your question is not here, write to us. We read everything.</p>
+        <a href="mailto:youthforsustainablepolicy@gmail.com?subject=Research%20Route" class="btn btn-ghost">Email us ▸</a>
+      </div>
+      <div class="faq-list">
+        
+      <details class="faq apple-reveal">
+        <summary>
+          <span class="q">Do I need a statistics background?</span>
+          <span class="ic">+</span>
+        </summary>
+        <div class="a"><p>No. We teach you which questions need quant and which do not. You will leave able to read a regression table critically; you will not leave able to run one from scratch.</p></div>
+      </details>
+      <details class="faq apple-reveal" style="transition-delay:0.04s">
+        <summary>
+          <span class="q">Can I co‑author with another fellow?</span>
+          <span class="ic">+</span>
+        </summary>
+        <div class="a"><p>Yes. Roughly a third of Research Route capstones are two‑author. Co‑authors share a single advisor and submit one joint draft per round.</p></div>
+      </details>
+      <details class="faq apple-reveal" style="transition-delay:0.08s">
+        <summary>
+          <span class="q">What if my question changes mid‑cohort?</span>
+          <span class="ic">+</span>
+        </summary>
+        <div class="a"><p>Expected. Your Week 4 question rarely survives contact with Week 8's evidence. We rescope formally at the Week 8 advisor session.</p></div>
+      </details>
+      <details class="faq apple-reveal" style="transition-delay:0.12s">
+        <summary>
+          <span class="q">Is the work published?</span>
+          <span class="ic">+</span>
+        </summary>
+        <div class="a"><p>Capstones that pass advisor review are published on the YSP research hub under your byline, with a permanent URL and DOI.</p></div>
+      </details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Other routes -->
+<section class="other-routes" data-screen-label="09 Other Routes">
+  <div class="container">
+    <span class="eyebrow apple-reveal"><span class="leaf"></span> 08 / The other five</span>
+    <h2 class="section-title apple-reveal" style="transition-delay:.08s">Or take a <em>different route.</em></h2>
+    <p class="section-sub apple-reveal" style="transition-delay:.16s">Members usually arrive certain about one route and leave curious about the next. Each route is sixteen weeks; some fellows have done two over consecutive cohorts.</p>
+
+    <div class="other-grid">
+
+      <a class="other-route apple-reveal" href="policy-route.html">
+        <span class="glyph">P</span>
+        <div class="t">
+          <span class="num">02</span>
+          <b class="serif"><em>Policy</em> Route</b>
+        </div>
+        <span class="arr">↗</span>
+      </a>
+      <a class="other-route apple-reveal" href="business-route.html" style="transition-delay:0.05s">
+        <span class="glyph">B</span>
+        <div class="t">
+          <span class="num">03</span>
+          <b class="serif"><em>Business</em> Route</b>
+        </div>
+        <span class="arr">↗</span>
+      </a>
+      <a class="other-route apple-reveal" href="diplomacy-route.html" style="transition-delay:0.10s">
+        <span class="glyph">D</span>
+        <div class="t">
+          <span class="num">04</span>
+          <b class="serif"><em>Diplomacy</em> Route</b>
+        </div>
+        <span class="arr">↗</span>
+      </a>
+      <a class="other-route apple-reveal" href="environment-route.html" style="transition-delay:0.15s">
+        <span class="glyph">E</span>
+        <div class="t">
+          <span class="num">05</span>
+          <b class="serif"><em>Environment</em> Route</b>
+        </div>
+        <span class="arr">↗</span>
+      </a>
+      <a class="other-route apple-reveal" href="community-route.html" style="transition-delay:0.20s">
+        <span class="glyph">C</span>
+        <div class="t">
+          <span class="num">06</span>
+          <b class="serif"><em>Community</em> Route</b>
+        </div>
+        <span class="arr">↗</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Final CTA -->
+<section class="final" data-screen-label="10 Apply">
+  <div class="mesh" aria-hidden="true" style="opacity:.5"><span></span></div>
+  <div class="container">
+    <h2 class="apple-reveal">Pick up the <em>Research</em> Route.</h2>
+    <p class="apple-reveal" style="transition-delay:.1s">Express interest for the next cohort. We open intakes four times a year and you can roll your application forward at any time — no penalty, no fee.</p>
+    <div class="final-cta apple-reveal" style="transition-delay:.2s">
+      <a href="https://form.typeform.com/to/a3IchqzP" target="_blank" rel="noopener" class="btn btn-forest" data-magnetic>Express Interest <span class="arr">↗</span></a>
+      <a href="programmes.html#pledge" class="btn btn-ghost">Take the YSP Pledge ✦</a>
+    </div>
+    <div class="micro apple-reveal" style="transition-delay:.3s">Four intakes per year · Asynchronous · Free</div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div>
+      <div class="brand">
+        <img src="assets/ysp-logo.png" alt="" />
+        <span class="word">Y<i>S</i>P</span>
+      </div>
+      <p class="blurb" style="font-family:system-ui">
+        Youth for Sustainable Policy (YSP) is a youth-led initiative empowering the next generation to engage with global challenges through research, storytelling, and policy dialogue.
+      </p>
+    </div>
+    <div>
+      <h5>Routes</h5>
+      <ul>
+        <li><a href="research-route.html">Research</a></li>
+        <li><a href="policy-route.html">Policy</a></li>
+        <li><a href="business-route.html">Business</a></li>
+        <li><a href="diplomacy-route.html">Diplomacy</a></li>
+        <li><a href="environment-route.html">Environment</a></li>
+        <li><a href="community-route.html">Community</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>Organisation</h5>
+      <ul>
+        <li><a href="about.html">About</a></li>
+        <li><a href="team.html">Team</a></li>
+        <li><a href="careers.html">Careers</a></li>
+        <li><a href="programmes.html#contact">Contact</a></li>
+        <li><a href="annual-reports.html">Annual Reports</a></li>
+        <li><a href="policies.html">Policies &amp; Declarations</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="safe-band">
+    <div class="left">
+      <span class="leaf">✦</span>
+      <span>This is a safe, moderated space for youth. For Youth, By Youth.</span>
+    </div>
+    <div>View our <a href="community-policy.html">Community Policy</a> · <a href="privacy-notice.html">Privacy Notice</a></div>
+  </div>
+  <div class="copy">
+    <span>© 2026 Youth for Sustainable Policy. A registered non-profit.</span>
+    <span>Made slowly, in good company.</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const navWrap = document.getElementById('navWrap');
+  let lastScroll = -1;
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY || window.pageYOffset;
+    if (y === lastScroll) return; lastScroll = y;
+    if (y > 40) navWrap.classList.add('scrolled'); else navWrap.classList.remove('scrolled');
+  }, { passive:true });
+
+  // Magnetic
+  document.querySelectorAll('[data-magnetic]').forEach(el => {
+    let raf=null, tx=0, ty=0, cx=0, cy=0; const STR = 10;
+    function loop(){
+      tx += (cx-tx)*0.18; ty += (cy-ty)*0.18;
+      el.style.transform = 'translate(' + tx.toFixed(2) + 'px,' + ty.toFixed(2) + 'px)';
+      if (Math.abs(cx-tx)>0.05 || Math.abs(cy-ty)>0.05) raf = requestAnimationFrame(loop); else raf=null;
+    }
+    el.addEventListener('mousemove', e => {
+      const r = el.getBoundingClientRect();
+      cx = ((e.clientX - (r.left + r.width/2)) / (r.width/2)) * STR;
+      cy = ((e.clientY - (r.top + r.height/2)) / (r.height/2)) * STR;
+      if (!raf) raf = requestAnimationFrame(loop);
+    });
+    el.addEventListener('mouseleave', () => { cx=0; cy=0; if (!raf) raf = requestAnimationFrame(loop); });
+  });
+
+  // Reveals
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(en => { if (en.isIntersecting){ en.target.classList.add('is-in'); io.unobserve(en.target); } });
+  }, { threshold: 0.1, rootMargin: '0px 0px -6% 0px' });
+  document.querySelectorAll('.apple-reveal, .apple-slide-left').forEach(el => io.observe(el));
+})();
+
+
+  // Mobile Menu Toggle
+  const menuToggle = document.getElementById('menuToggle');
+  const navElement = document.querySelector('.nav');
+  if (menuToggle && navElement) {
+    menuToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navElement.classList.toggle('menu-open');
+    });
+    document.addEventListener('click', (e) => {
+      if (!navElement.contains(e.target)) {
+        navElement.classList.remove('menu-open');
+      }
+    });
+  }
+</script>
+
+  <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
+</body>
+</html>

@@ -108,6 +108,91 @@ def create_tables(conn):
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_modules_programme ON modules(programme_area)')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_modules_cluster ON modules(cluster)')
 
+    # Route Enrollments — tracks which YSP route a student is on and their phase progress
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS route_enrollments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER NOT NULL,
+            route_name TEXT NOT NULL CHECK(route_name IN ('Research', 'Policy', 'Business', 'Diplomacy', 'Environment', 'Community')),
+            current_phase TEXT NOT NULL DEFAULT 'Foundations' CHECK(current_phase IN ('Foundations', 'Deep Dive', 'Capstone')),
+            current_week INTEGER NOT NULL DEFAULT 1,
+            start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+            UNIQUE(student_id, route_name)
+        )
+    ''')
+
+    # Capstone Milestones — tracks capstone project progress per student
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS capstone_milestones (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER NOT NULL,
+            route_enrollment_id INTEGER NOT NULL,
+            draft_submitted_at TIMESTAMP,
+            feedback_received_at TIMESTAMP,
+            revised_draft_at TIMESTAMP,
+            published_at TIMESTAMP,
+            project_title TEXT,
+            notes TEXT,
+            FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (route_enrollment_id) REFERENCES route_enrollments(id) ON DELETE CASCADE,
+            UNIQUE(student_id, route_enrollment_id)
+        )
+    ''')
+
+    # Mentor Sessions — logs mentor meetings per student
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS mentor_sessions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER NOT NULL,
+            session_date TIMESTAMP NOT NULL,
+            duration_minutes INTEGER DEFAULT 60,
+            notes TEXT,
+            mentor_name TEXT,
+            next_session_date TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    ''')
+
+    # Certificates — tracks certificate status per student per module
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS certificates (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER NOT NULL,
+            module_id INTEGER NOT NULL,
+            status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending', 'issued')),
+            issued_at TIMESTAMP,
+            certificate_code TEXT,
+            FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE,
+            UNIQUE(student_id, module_id)
+        )
+    ''')
+
+    # Resources — admin-managed secondary sources (articles, papers, templates)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS resources (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT,
+            category TEXT NOT NULL DEFAULT 'Article' CHECK(category IN ('Article', 'Research Paper', 'Template', 'News', 'Video', 'Other')),
+            url TEXT,
+            file_filename TEXT,
+            file_original_name TEXT,
+            admin_id INTEGER,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (admin_id) REFERENCES users(id) ON DELETE SET NULL
+        )
+    ''')
+
+    # Indexes for new tables
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_route_enrollments_student ON route_enrollments(student_id)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_capstone_student ON capstone_milestones(student_id)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_mentor_sessions_student ON mentor_sessions(student_id)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_certificates_student ON certificates(student_id)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_resources_category ON resources(category)')
+
     conn.commit()
     print("[OK] Tables created successfully.")
 
@@ -231,6 +316,79 @@ def seed_data(conn):
             (title, content, admin_id, created.strftime('%Y-%m-%d %H:%M:%S'))
         )
     print(f"[OK] {len(announcements)} announcements created.")
+
+    # ── Sample Route Enrollment (test student enrolled in Research route) ──
+    cursor.execute(
+        "INSERT INTO route_enrollments (student_id, route_name, current_phase, current_week, start_date) VALUES (?, ?, ?, ?, ?)",
+        (student_id, 'Research', 'Deep Dive', 6, (now - timedelta(weeks=6)).strftime('%Y-%m-%d %H:%M:%S'))
+    )
+    route_enrollment_id = cursor.lastrowid
+    print("[OK] Test student enrolled in Research route (Deep Dive, Week 6).")
+
+    # ── Sample Capstone Milestone ──
+    cursor.execute(
+        "INSERT INTO capstone_milestones (student_id, route_enrollment_id, draft_submitted_at, project_title, notes) VALUES (?, ?, ?, ?, ?)",
+        (student_id, route_enrollment_id,
+         (now - timedelta(days=3)).strftime('%Y-%m-%d %H:%M:%S'),
+         'Impact of Urban Green Spaces on Youth Mental Health',
+         'First draft submitted for review. Awaiting mentor feedback.')
+    )
+    print("[OK] Capstone milestone created for test student.")
+
+    # ── Sample Mentor Sessions ──
+    mentor_sessions = [
+        ((now - timedelta(weeks=4)).strftime('%Y-%m-%d %H:%M:%S'), 45,
+         'Discussed research question framing and literature review scope. Mentor suggested focusing on Southeast Asian urban contexts.',
+         'Dr. Sarah Chen', (now - timedelta(weeks=2)).strftime('%Y-%m-%d %H:%M:%S')),
+        ((now - timedelta(weeks=2)).strftime('%Y-%m-%d %H:%M:%S'), 60,
+         'Reviewed draft methodology section. Discussed qualitative vs mixed-methods approach. Action item: revise interview protocol.',
+         'Dr. Sarah Chen', (now + timedelta(weeks=1)).strftime('%Y-%m-%d %H:%M:%S')),
+    ]
+    for sd, dur, notes, mentor, nxt in mentor_sessions:
+        cursor.execute(
+            "INSERT INTO mentor_sessions (student_id, session_date, duration_minutes, notes, mentor_name, next_session_date) VALUES (?, ?, ?, ?, ?, ?)",
+            (student_id, sd, dur, notes, mentor, nxt)
+        )
+    print(f"[OK] {len(mentor_sessions)} mentor sessions created.")
+
+    # ── Sample Certificates (one issued, one pending) ──
+    cursor.execute(
+        "INSERT INTO certificates (student_id, module_id, status, issued_at, certificate_code) VALUES (?, ?, ?, ?, ?)",
+        (student_id, 1, 'issued', (now - timedelta(days=5)).strftime('%Y-%m-%d %H:%M:%S'), 'YSP-2026-RES-0001')
+    )
+    cursor.execute(
+        "INSERT INTO certificates (student_id, module_id, status) VALUES (?, ?, ?)",
+        (student_id, 5, 'pending')
+    )
+    print("[OK] 2 sample certificates created (1 issued, 1 pending).")
+
+    # ── Sample Resources ──
+    resources = [
+        ('How to Write a Policy Brief',
+         'A step-by-step guide to writing effective policy briefs that influence decision-makers. Covers structure, evidence use, and persuasion techniques.',
+         'Template', 'https://www.idrc.ca/en/how-write-policy-brief'),
+        ('Climate Action: Youth Perspectives (UN Report 2025)',
+         'United Nations report documenting how young people around the world are contributing to climate policy through local and global advocacy.',
+         'Research Paper', 'https://www.un.org/en/climatechange/youth-in-action'),
+        ('Introduction to Research Ethics',
+         'Essential reading on ethical considerations in social research, including informed consent, privacy, and data management best practices.',
+         'Article', 'https://www.who.int/ethics/research/en/'),
+        ('YSP Capstone Project Template',
+         'Official template for structuring your capstone project document. Includes sections for abstract, methodology, findings, and policy recommendations.',
+         'Template', None),
+        ('Sustainability in ASEAN: Policy Challenges & Opportunities',
+         'News article covering the latest developments in sustainability policy across Southeast Asian nations, with focus on youth engagement.',
+         'News', 'https://asean.org/sustainability-youth-engagement'),
+        ('Data Visualization for Policy Research (Video)',
+         'A 45-minute workshop recording covering how to create compelling data visualizations for policy documents using free tools.',
+         'Video', 'https://www.youtube.com/watch?v=example_ysp'),
+    ]
+    for r_title, r_desc, r_cat, r_url in resources:
+        cursor.execute(
+            "INSERT INTO resources (title, description, category, url, admin_id) VALUES (?, ?, ?, ?, ?)",
+            (r_title, r_desc, r_cat, r_url, admin_id)
+        )
+    print(f"[OK] {len(resources)} sample resources created.")
 
     conn.commit()
     print("\n[DONE] Database seeded successfully!")

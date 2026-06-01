@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Remote Work — YSP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sage:#9ab078; --sage-deep:#89a36c; --sage-soft:#b9c99e;
+    --mist:#cfdfd8; --paper:#fbfdfa;
+    --ink:#1f2a22; --ink-soft:#3d4b40; --ink-mute:#67756a;
+    --line:rgba(31,42,34,.10);
+  }
+  *{box-sizing:border-box} html,body{margin:0;padding:0}
+  body{
+    font-family:"Inter", system-ui, -apple-system, sans-serif;
+    color:var(--ink); background:var(--paper);
+    -webkit-font-smoothing:antialiased; line-height:1.65; font-size:16px;
+  }
+  a{color:var(--sage-deep); text-decoration:underline; text-decoration-color: rgba(137,163,108,.4); text-underline-offset:3px}
+  a:hover{ text-decoration-color: var(--sage-deep) }
+  .serif{font-family:"Fraunces", Georgia, serif; font-weight:400; letter-spacing:-0.02em}
+  .grain{
+    position:fixed; inset:0; pointer-events:none; z-index:9999; opacity:.05; mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.12  0 0 0 0 0.16  0 0 0 0 0.13  0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+  header.top{
+    position:relative; padding: 100px 24px 64px;
+    background:
+      radial-gradient(120% 70% at 50% 0%, var(--mist) 0%, rgba(207,223,216,0) 60%),
+      linear-gradient(180deg, #f3f8ef 0%, #fbfdfa 100%);
+    text-align:center; overflow:hidden;
+  }
+  header.top::before{
+    content:""; position:absolute; right:-8%; bottom:-30%;
+    width:60%; aspect-ratio:1; border-radius:50%;
+    background: radial-gradient(circle, rgba(137,163,108,.55), rgba(137,163,108,0) 70%);
+    filter: blur(60px); pointer-events:none;
+  }
+  .back{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:8px 16px; border-radius:999px;
+    background:rgba(255,255,255,.6); backdrop-filter:blur(12px);
+    border:1px solid rgba(255,255,255,.7);
+    font-size:13px; color:var(--ink-soft); text-decoration:none;
+    margin-bottom: 22px;
+  }
+  .chip{
+    display:inline-block; padding:5px 12px; border-radius:999px;
+    background: var(--ink); color:#fbfdfa;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px; letter-spacing:.14em; text-transform:uppercase; font-weight:500;
+    margin-bottom: 18px;
+  }
+  h1{
+    font-family:"Fraunces", serif; font-weight:400;
+    font-size: clamp(40px, 6vw, 76px);
+    line-height:1.04; letter-spacing:-0.03em; margin: 0 0 18px;
+  }
+  h1 em{ font-style:italic; color:var(--sage-deep); font-weight:300 }
+  .lede{ max-width: 60ch; margin: 0 auto; color:var(--ink-soft); font-size: 17px }
+
+  main{ max-width: 760px; margin: 0 auto; padding: 64px 24px 100px; position:relative }
+  .preamble{
+    padding: 24px 28px; border-radius:18px;
+    background: rgba(255,255,255,.55); backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,.7);
+    font-family:"Fraunces", serif; font-size: 19px; line-height:1.45; letter-spacing:-0.012em;
+    color:var(--ink); margin-bottom: 36px;
+  }
+  .preamble em{ font-style:italic; color:var(--sage-deep); font-weight:300 }
+
+  section.clause{ padding: 36px 0; border-top: 1px solid var(--line) }
+  section.clause:first-of-type{ border-top:0; padding-top: 20px }
+  section.clause .num{
+    display:inline-block; font-family:"Fraunces", serif; font-style:italic; font-weight:300;
+    color:var(--sage-deep); font-size:13px; margin-bottom:8px;
+  }
+  section.clause h2{
+    font-family:"Fraunces", serif; font-weight:400;
+    font-size: clamp(24px, 2.8vw, 32px); letter-spacing:-0.018em;
+    line-height:1.15; margin: 0 0 14px;
+  }
+  section.clause h2 em{ font-style:italic; color:var(--sage-deep); font-weight:300 }
+  section.clause p{ color: var(--ink-soft); font-size: 16px; margin: 0 0 12px; max-width:62ch }
+  section.clause ul{ padding-left: 20px; margin: 10px 0 14px; color: var(--ink-soft); font-size: 15.5px }
+  section.clause li{ margin: 6px 0; max-width:60ch }
+  section.clause li b{ color: var(--ink); font-weight:500 }
+
+  .leaves{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px }
+  .leaf{
+    padding: 16px 18px; border-radius:14px;
+    background: rgba(255,255,255,.5); backdrop-filter:blur(10px);
+    border: 1px solid rgba(255,255,255,.7);
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .leaf h4{
+    font-family:"Fraunces", serif; font-weight:400; font-size:17px; letter-spacing:-0.012em;
+    margin:0;
+  }
+  .leaf h4 em{ font-style:italic; color:var(--sage-deep); font-weight:300 }
+  .leaf p{ color:var(--ink-soft); font-size:14px; margin:0; line-height:1.55 }
+  .leaf ul{ padding-left: 18px; margin: 4px 0 0; font-size:14px; color:var(--ink-soft) }
+  .leaf li{ margin: 4px 0 }
+
+  .callout{
+    margin: 16px 0 0; padding: 14px 18px;
+    border-radius: 12px;
+    background: linear-gradient(140deg, rgba(154,176,120,.15), rgba(255,255,255,.5));
+    border: 1px solid rgba(154,176,120,.35);
+    color: var(--ink); font-family:"Fraunces", serif; font-size:16px; line-height:1.45; letter-spacing:-0.01em;
+  }
+  .callout em{ font-style:italic; color: var(--sage-deep); font-weight:300 }
+
+  .agreement{
+    margin-top: 36px; padding: 22px 26px;
+    border-radius: 18px;
+    background: rgba(255,255,255,.55); backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,.7);
+    font-family:"Fraunces", serif; font-size: 18px; line-height:1.45; letter-spacing:-0.012em;
+    color:var(--ink);
+  }
+  .agreement em{ font-style:italic; color:var(--sage-deep); font-weight:300 }
+
+  .meta-line{
+    margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--line);
+    display:flex; gap:14px 26px; flex-wrap:wrap;
+    font-size: 12.5px; color: var(--ink-mute);
+  }
+  .meta-line b{
+    display:inline-block; margin-right:6px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; font-weight:500;
+    color: var(--ink-mute);
+  }
+
+  .related{
+    margin-top: 48px; padding: 28px;
+    background: rgba(255,255,255,.5); backdrop-filter:blur(12px);
+    border:1px solid rgba(255,255,255,.7);
+    border-radius: 18px;
+  }
+  .related h3{
+    font-family:"Fraunces", serif; font-weight:400; font-size: 20px;
+    margin: 0 0 14px; letter-spacing:-0.015em;
+  }
+  .related h3 em{ font-style:italic; color: var(--sage-deep); font-weight:300 }
+  .related ul{ list-style:none; padding:0; margin:0; display:grid; grid-template-columns: 1fr 1fr; gap:10px }
+  .related ul a{
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    padding: 10px 14px; border-radius:10px;
+    background: rgba(255,255,255,.55); border:1px solid var(--line);
+    color: var(--ink); text-decoration:none; font-size:13.5px;
+    transition: background .2s, transform .2s;
+  }
+  .related ul a:hover{ background:#fff; transform: translateY(-1px) }
+  .related ul a .arr{ color: var(--sage-deep); font-family:"Fraunces", serif; font-style:italic }
+
+  footer{
+    padding: 36px 24px; border-top: 1px solid var(--line);
+    color: var(--ink-mute); font-size: 12.5px; text-align:center;
+    background: linear-gradient(180deg, transparent, rgba(207,223,216,.25));
+  }
+  footer a{ color: var(--ink-soft); text-decoration:none }
+  footer a:hover{ color: var(--ink) }
+
+  @media (max-width: 640px){
+    .leaves{ grid-template-columns: 1fr }
+    .related ul{ grid-template-columns: 1fr }
+  }
+</style>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="top">
+  <a href="policies.html" class="back">← All policies</a>
+  <div><span class="chip">Workways</span></div>
+  <h1 class="serif">Remote <em>Work</em></h1>
+  <p class="lede">How a globally distributed, asynchronous team collaborates across borders, time zones, and academic schedules — without burning out.</p>
+</header>
+
+<main>
+  <div class="preamble">YSP operates as a <em>fully remote, globally distributed</em> organization. This policy outlines how we collaborate effectively across borders, time zones, and personal commitments while maintaining a supportive and productive working environment.</div>
+
+  <section class="clause">
+  <span class="num">01</span>
+  <h2 class="serif"><em>Scope</em></h2>
+  <p>This policy applies to all YSP team members, including volunteers, interns, and leadership. We recognize that members balance academic responsibilities, family obligations, and other commitments.</p>
+</section>
+
+<section class="clause">
+  <span class="num">02</span>
+  <h2 class="serif">Remote‑first <em>structure</em></h2>
+  <p>All operations, meetings, and communications are conducted through digital platforms unless otherwise specified for special events or local initiatives. Remote collaboration enables broader participation, reduces barriers to entry, and ensures diverse global representation in our work.</p>
+</section>
+
+<section class="clause">
+  <span class="num">03</span>
+  <h2 class="serif"><em>Flexibility</em> &amp; personal commitments</h2>
+  <p>Flexibility supports the well‑being and development of our members.</p>
+  <ul>
+    <li>Communicate availability clearly.</li>
+    <li>Inform teams of major academic or personal commitments.</li>
+    <li>Work asynchronously when needed to manage time effectively.</li>
+  </ul>
+</section>
+
+<section class="clause">
+  <span class="num">04</span>
+  <h2 class="serif">Time zones &amp; <em>global collaboration</em></h2>
+  <ul>
+    <li>Meetings are scheduled with consideration for regional time differences.</li>
+    <li>When live meetings are not feasible, asynchronous updates and recordings are provided.</li>
+    <li>Teams use shared documents and task platforms to maintain transparency and continuity.</li>
+  </ul>
+</section>
+
+<section class="clause">
+  <span class="num">05</span>
+  <h2 class="serif">Communication <em>expectations</em></h2>
+  <ul>
+    <li>Check official communication channels regularly.</li>
+    <li>Provide updates on assigned tasks within agreed timelines.</li>
+    <li>Maintain a professional and supportive tone in all digital interactions.</li>
+  </ul>
+</section>
+
+<section class="clause">
+  <span class="num">06</span>
+  <h2 class="serif"><em>Accountability</em> &amp; trust</h2>
+  <p>YSP operates on a foundation of trust. Rather than tracking hours, we focus on outcomes, initiative, and collaboration. Team members are responsible for meeting agreed deliverables and communicating proactively if challenges arise.</p>
+</section>
+
+<section class="clause">
+  <span class="num">07</span>
+  <h2 class="serif">Inclusivity &amp; <em>accessibility</em></h2>
+  <p>We strive to create a remote environment that is inclusive and accessible to all members, regardless of geography, background, or resources. Where possible, we select tools that are free, low‑bandwidth friendly, and accessible across regions.</p>
+</section>
+
+<section class="clause">
+  <span class="num">08</span>
+  <h2 class="serif">Policy <em>updates</em></h2>
+  <p>As YSP grows, this policy may be updated to reflect new operational needs, technological changes, and feedback from team members.</p>
+</section>
+
+
+  <div class="agreement">Approved by Executive Leadership, Youth for Sustainable Policy. <em>Effective</em> 2026.</div>
+
+  <div class="meta-line">
+    <span><b>Last updated</b>21 March 2026</span>
+    <span><b>Signed</b>Executive Leadership · YSP</span>
+    <span><b>Reach us</b><a href="mailto:youthforsustainablepolicy@gmail.com">youthforsustainablepolicy@gmail.com</a></span>
+  </div>
+
+  
+  <div class="related">
+    <h3 class="serif">Related <em>policies</em></h3>
+    <ul>
+        <li><a href="programme-charter.html"><span>Programme Charter</span><span class="arr">↗</span></a></li>
+        <li><a href="code-of-conduct.html"><span>Code of Conduct</span><span class="arr">↗</span></a></li>
+        <li><a href="data-privacy-policy.html"><span>Data Privacy & PDPA Compliance</span><span class="arr">↗</span></a></li>
+        <li><a href="ip-policy.html"><span>Intellectual Property</span><span class="arr">↗</span></a></li>
+        <li><a href="dei-pledge.html"><span>Diversity, Equity & Inclusion</span><span class="arr">↗</span></a></li>
+        <li><a href="policies.html"><span>All policies &amp; declarations</span><span class="arr">↗</span></a></li>
+    </ul>
+  </div>
+</main>
+
+<footer>
+  © 2026 Youth for Sustainable Policy ·
+  <a href="index.html">Home</a> ·
+  <a href="policies.html">Policies</a> ·
+  <a href="community-policy.html">Community Policy</a> ·
+  <a href="privacy-notice.html">Privacy Notice</a>
+</footer>
+
+</body>
+</html>

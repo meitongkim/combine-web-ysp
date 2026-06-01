@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Resources — YSP Learns{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Student Portal</div>
+      <a href="{{ url_for('student_dashboard') }}" class="sidebar-link">
+        <span class="icon">📊</span> Dashboard
+      </a>
+      <a href="{{ url_for('student_progress') }}" class="sidebar-link">
+        <span class="icon">🛤️</span> My Progress
+      </a>
+      <a href="{{ url_for('student_resources') }}" class="sidebar-link active">
+        <span class="icon">📄</span> Resources
+      </a>
+      <a href="{{ url_for('student_calendar') }}" class="sidebar-link">
+        <span class="icon">📅</span> Calendar
+      </a>
+      <a href="{{ url_for('catalog') }}" class="sidebar-link">
+        <span class="icon">📚</span> Browse Modules
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">My Modules</div>
+      {% for e in enrollments %}
+        <a href="{{ url_for('student_module', module_id=e.module_id) }}" class="sidebar-link">
+          <span class="icon">{{ '✅' if e.progress == 'completed' else '📖' }}</span>
+          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ e.title }}</span>
+        </a>
+      {% endfor %}
+      {% if not enrollments %}
+        <div style="padding:10px 14px; font-size:13px; color:var(--ink-mute)">No modules enrolled yet</div>
+      {% endif %}
+    </div>
+    <div class="sidebar-section" style="margin-top:auto; padding-top:16px; border-top:1px solid var(--line)">
+      <div style="padding:10px 14px">
+        <div style="font-size:13px; font-weight:500; color:var(--ink)">{{ current_user.full_name }}</div>
+        <div style="font-size:12px; color:var(--ink-mute)">{{ current_user.email }}</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Mobile sidebar toggle -->
+  <button class="mobile-menu-btn" id="sidebarToggle"><span>☰</span></button>
+
+  <!-- Main Content -->
+  <main class="dashboard-main" style="background:linear-gradient(180deg, #f0f5e6 0%, var(--paper) 60%)">
+    <div class="page-header apple-reveal">
+      <span class="eyebrow"><span class="leaf"></span> Resources</span>
+      <h2 class="section-title serif" style="font-size:clamp(24px, 3.5vw, 38px)">
+        Secondary <em>Sources & Materials</em>
+      </h2>
+      <p style="max-width:600px; color:var(--ink-mute); font-size:14px; margin-top:8px">News articles, research papers, templates, and more — curated to support your learning journey.</p>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="apple-reveal" style="transition-delay:.1s; margin-bottom:28px">
+      <form method="GET" action="{{ url_for('student_resources') }}" style="display:flex; gap:12px; flex-wrap:wrap; align-items:center">
+        <div style="display:flex; gap:8px; flex-wrap:wrap; flex:1">
+          <a href="{{ url_for('student_resources') }}"
+             class="chip {{ 'chip-active' if not current_category else '' }}"
+             style="text-decoration:none; padding:8px 16px; font-size:13px; border-radius:20px; {{ 'background:var(--ink); color:white; border-color:var(--ink)' if not current_category else '' }}">
+            All
+          </a>
+          {% for cat in categories %}
+          <a href="{{ url_for('student_resources', category=cat.category) }}"
+             class="chip {{ 'chip-active' if current_category == cat.category else '' }}"
+             style="text-decoration:none; padding:8px 16px; font-size:13px; border-radius:20px; {{ 'background:var(--ink); color:white; border-color:var(--ink)' if current_category == cat.category else '' }}">
+            {% if cat.category == 'Article' %}📰{% elif cat.category == 'Research Paper' %}📑{% elif cat.category == 'Template' %}📋{% elif cat.category == 'News' %}🗞️{% elif cat.category == 'Video' %}🎬{% else %}📎{% endif %}
+            {{ cat.category }}
+          </a>
+          {% endfor %}
+        </div>
+        <div style="display:flex; gap:8px">
+          <input type="text" name="search" placeholder="Search resources..." value="{{ current_search }}"
+                 style="padding:8px 14px; border:1px solid var(--line); border-radius:12px; font-size:13px; background:rgba(255,255,255,0.8); outline:none; width:200px" />
+          <button type="submit" class="btn btn-outline btn-sm">Search</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Resources Grid -->
+    {% if resources %}
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:16px">
+      {% for r in resources %}
+      <div class="apple-reveal" style="transition-delay:{{ loop.index0 * 0.06 }}s; background:rgba(255,255,255,0.75); backdrop-filter:blur(12px); border:1px solid var(--line); border-radius:16px; padding:20px; display:flex; flex-direction:column; transition:transform 0.2s, box-shadow 0.2s; cursor:default"
+           onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.06)'"
+           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+        <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:12px">
+          <span style="font-size:28px">
+            {% if r.category == 'Article' %}📰{% elif r.category == 'Research Paper' %}📑{% elif r.category == 'Template' %}📋{% elif r.category == 'News' %}🗞️{% elif r.category == 'Video' %}🎬{% else %}📎{% endif %}
+          </span>
+          <span class="chip" style="font-size:10px; padding:3px 10px; border-radius:12px; background:rgba(137,163,108,0.12); color:#5a7a3c; border:none; font-weight:600; text-transform:uppercase; letter-spacing:0.04em">{{ r.category }}</span>
+        </div>
+        <h4 style="font-size:16px; font-weight:600; margin:0 0 8px; color:var(--ink); line-height:1.3">{{ r.title }}</h4>
+        <p style="font-size:13px; color:var(--ink-mute); line-height:1.5; flex:1; margin:0 0 16px">{{ r.description[:180] }}{% if r.description and r.description|length > 180 %}...{% endif %}</p>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; padding-top:12px; border-top:1px solid var(--line)">
+          <div style="font-size:11px; color:var(--ink-mute)">
+            {{ r.author or 'Admin' }} · {{ r.created_at[:10] }}
+          </div>
+          <div style="display:flex; gap:8px">
+            {% if r.url %}
+            <a href="{{ r.url }}" target="_blank" rel="noopener"
+               style="font-size:12px; color:#89a36c; text-decoration:none; font-weight:500; display:flex; align-items:center; gap:4px"
+               onmouseover="this.style.color='#5a7a3c'" onmouseout="this.style.color='#89a36c'">
+              Open ↗
+            </a>
+            {% endif %}
+            {% if r.file_filename %}
+            <a href="{{ url_for('uploaded_file', filename=r.file_filename) }}" download="{{ r.file_original_name }}"
+               style="font-size:12px; color:#89a36c; text-decoration:none; font-weight:500; display:flex; align-items:center; gap:4px"
+               onmouseover="this.style.color='#5a7a3c'" onmouseout="this.style.color='#89a36c'">
+              📥 Download
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state apple-reveal" style="padding:60px 40px; text-align:center">
+      <div class="empty-icon" style="font-size:48px; margin-bottom:16px">📄</div>
+      <h3 class="serif" style="font-size:20px">No resources found</h3>
+      <p style="color:var(--ink-mute); font-size:14px">{% if current_search or current_category %}Try adjusting your filters or search query.{% else %}Resources will be added by the admin team soon.{% endif %}</p>
+      {% if current_search or current_category %}
+      <a href="{{ url_for('student_resources') }}" class="btn btn-outline btn-sm" style="margin-top:12px">Clear Filters</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </main>
+</div>
+{% endblock %}
