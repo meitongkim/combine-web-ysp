@@ -42,6 +42,24 @@
         {% endif %}
       </div>
 
+      <!-- Language Selector -->
+      <div class="lang-selector notranslate" id="langSelector">
+        <button class="lang-btn" id="langBtn" aria-expanded="false" aria-haspopup="listbox">
+          <svg class="globe-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+          <span class="lang-text" id="currentLangText">English</span>
+          <svg class="lang-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <ul class="lang-dropdown" id="langDropdown" role="listbox" aria-label="Language selection">
+          <li role="option" data-lang="en" class="lang-option active">🇺🇸 English</li>
+          <li role="option" data-lang="es" class="lang-option">🇪🇸 Español</li>
+          <li role="option" data-lang="zh-CN" class="lang-option">🇨🇳 中文</li>
+          <li role="option" data-lang="fr" class="lang-option">🇫🇷 Français</li>
+          <li role="option" data-lang="ms" class="lang-option">🇲🇾 Melayu</li>
+          <li role="option" data-lang="ta" class="lang-option">🇮🇳 தமிழ்</li>
+          <li role="option" data-lang="hi" class="lang-option">🇮🇳 हिन्दी</li>
+        </ul>
+      </div>
+
       {% if current_user.is_authenticated %}
         <div class="nav-user">
           <span class="nav-avatar">{{ current_user.full_name[0] }}</span>
@@ -104,6 +122,21 @@
     </div>
   </footer>
   {% endblock %}
+
+  <!-- Google Translate Element (hidden) -->
+  <div id="google_translate_element" style="display:none"></div>
+
+  <!-- Google Translate Initialization Script -->
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+        autoDisplay: false
+      }, 'google_translate_element');
+    }
+  </script>
+  <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
   <!-- JavaScript -->
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>

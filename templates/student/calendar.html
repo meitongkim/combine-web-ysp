@@ -21,13 +21,13 @@
     <div class="sidebar-section">
       <div class="sidebar-label">My Modules</div>
       {% for e in enrollments %}
-        <a href="{{ url_for('student_module', module_id=e.module_id) }}" class="sidebar-link">
-          <span class="icon">📖</span>
-          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ e.title }}</span>
-        </a>
+      <a href="{{ url_for('student_module', module_id=e.module_id) }}" class="sidebar-link">
+        <span class="icon">📖</span>
+        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ e.title }}</span>
+      </a>
       {% endfor %}
       {% if not enrollments %}
-        <div style="padding:10px 14px; font-size:13px; color:var(--ink-mute)">No modules enrolled yet</div>
+      <div style="padding:10px 14px; font-size:13px; color:var(--ink-mute)">No modules enrolled yet</div>
       {% endif %}
     </div>
     <div class="sidebar-section" style="margin-top:auto; padding-top:16px; border-top:1px solid var(--line)">
@@ -44,7 +44,8 @@
   <!-- Main Content -->
   <main class="dashboard-main" style="background:linear-gradient(180deg, #f0f5e6 0%, var(--paper) 60%)">
     <!-- Header -->
-    <div class="page-header apple-reveal" style="display:flex; justify-content:space-between; align-items:start; flex-wrap:wrap; gap:16px; margin-bottom:32px">
+    <div class="page-header apple-reveal"
+      style="display:flex; justify-content:space-between; align-items:start; flex-wrap:wrap; gap:16px; margin-bottom:32px">
       <div>
         <span class="eyebrow"><span class="leaf"></span> My Schedule</span>
         <h2 class="section-title serif" style="font-size:clamp(28px, 4vw, 42px); margin:0">
@@ -69,7 +70,7 @@
               <button class="btn-cal-nav" id="nextMonthBtn" aria-label="Next Month">›</button>
             </div>
           </div>
-          
+
           <!-- Month Day Grid -->
           <div class="cal-month-grid">
             <div class="cal-weekday">Sun</div>
@@ -101,27 +102,36 @@
 
 <!-- iCal Sync Modal -->
 <div class="modal-backdrop" id="syncModalBackdrop" aria-hidden="true" style="display:none"></div>
-<div class="modal" id="syncModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true" style="display:none">
+<div class="modal" id="syncModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true"
+  style="display:none">
   <div class="modal-head">
     <h3 id="modalTitle" class="serif">Sync with <em>Google Calendar</em></h3>
     <button class="modal-close" id="closeSyncModal" aria-label="Close">✕</button>
   </div>
   <div class="modal-body">
     <p class="text-mute" style="font-size:13.5px; line-height:1.5; margin-bottom:18px">
-      Subscribe to your personalized YSP Learns calendar feed. This dynamically syncs your module starts, target deadlines, and completions directly to Google Calendar, Apple Calendar, or Outlook in real-time.
+      Subscribe to your personalized YSP Learns calendar feed. This dynamically syncs your module starts, target
+      deadlines, and completions directly to Google Calendar, Apple Calendar, or Outlook in real-time.
     </p>
-    
-    <label style="font-size:12px; font-weight:600; text-transform:uppercase; color:var(--sage-deep); display:block; margin-bottom:6px">Your Secure Feed URL</label>
+
+    <label
+      style="font-size:12px; font-weight:600; text-transform:uppercase; color:var(--sage-deep); display:block; margin-bottom:6px">Your
+      Secure Feed URL</label>
     <div style="display:flex; gap:8px; margin-bottom:20px">
-      <input type="text" id="feedUrlInput" readonly value="" style="flex:1; padding:10px 14px; border:1px solid rgba(31,42,34,.15); border-radius:10px; font-size:12.5px; font-family:monospace; background:#fbfdfa; outline:none" />
-      <button class="btn btn-forest" id="copyFeedUrlBtn" style="padding:0 16px; font-size:13px; border-radius:10px">Copy Link</button>
+      <input type="text" id="feedUrlInput" readonly value=""
+        style="flex:1; padding:10px 14px; border:1px solid rgba(31,42,34,.15); border-radius:10px; font-size:12.5px; font-family:monospace; background:#fbfdfa; outline:none" />
+      <button class="btn btn-forest" id="copyFeedUrlBtn" style="padding:0 16px; font-size:13px; border-radius:10px">Copy
+        Link</button>
     </div>
 
-    <h4 style="font-size:13.5px; font-weight:600; color:var(--ink); margin:0 0 10px">Google Calendar subscription steps:</h4>
+    <h4 style="font-size:13.5px; font-weight:600; color:var(--ink); margin:0 0 10px">Google Calendar subscription steps:
+    </h4>
     <ol style="font-size:12.5px; line-height:1.6; color:#3d4b40; margin:0; padding-left:20px">
       <li style="margin-bottom:6px">Copy the secure link above.</li>
-      <li style="margin-bottom:6px">Open <a href="https://calendar.google.com" target="_blank" rel="noopener" style="color:var(--sage-deep); font-weight:600">Google Calendar</a> in your web browser.</li>
-      <li style="margin-bottom:6px">On the left panel, click the plus sign (<strong>+</strong>) next to <strong>Other calendars</strong>, then choose <strong>From URL</strong>.</li>
+      <li style="margin-bottom:6px">Open <a href="https://calendar.google.com" target="_blank" rel="noopener"
+          style="color:var(--sage-deep); font-weight:600">Google Calendar</a> in your web browser.</li>
+      <li style="margin-bottom:6px">On the left panel, click the plus sign (<strong>+</strong>) next to <strong>Other
+          calendars</strong>, then choose <strong>From URL</strong>.</li>
       <li style="margin-bottom:6px">Paste the copied URL in the text field and click <strong>Add calendar</strong>.</li>
       <li>Google Calendar will now subscribe to your feed and update your events automatically!</li>
     </ol>
@@ -133,11 +143,13 @@
   .calendar-container {
     margin-top: 12px;
   }
+
   .calendar-grid-layout {
     display: grid;
     grid-template-columns: 2.2fr 1fr;
     gap: 24px;
   }
+
   .calendar-card {
     background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(20px) saturate(1.5);
@@ -147,21 +159,25 @@
     padding: 20px;
     box-shadow: 0 4px 24px rgba(31, 42, 34, 0.05);
   }
+
   .cal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
   }
+
   .cal-header h3 {
     margin: 0;
     font-size: 20px;
     color: var(--sage-deep);
   }
+
   .cal-nav-btns {
     display: flex;
     gap: 8px;
   }
+
   .btn-cal-nav {
     width: 32px;
     height: 32px;
@@ -176,16 +192,19 @@
     justify-content: center;
     transition: all 0.2s;
   }
+
   .btn-cal-nav:hover {
     background: var(--sage-light);
     border-color: #89a36c;
     color: var(--sage-deep);
   }
+
   .cal-month-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     text-align: center;
   }
+
   .cal-weekday {
     font-size: 11px;
     font-weight: 600;
@@ -195,12 +214,14 @@
     letter-spacing: 0.1em;
     border-bottom: 1px solid var(--line);
   }
+
   .days-container {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     grid-column: span 7;
     margin-top: 6px;
   }
+
   .cal-day {
     aspect-ratio: 1.15;
     padding: 6px;
@@ -214,21 +235,26 @@
     position: relative;
     transition: background 0.2s;
   }
+
   .cal-day:nth-child(7n) {
     border-right: none;
   }
+
   .cal-day:hover {
     background: rgba(137, 163, 108, 0.08);
   }
+
   .cal-day.empty {
     cursor: default;
     background: transparent;
     opacity: 0.35;
     pointer-events: none;
   }
+
   .cal-day.today {
     background: rgba(137, 163, 108, 0.12);
   }
+
   .cal-day.today .day-num {
     background: #89a36c;
     color: #ffffff;
@@ -240,18 +266,20 @@
     justify-content: center;
     font-weight: 600;
   }
+
   .cal-day.selected {
     background: rgba(31, 42, 34, 0.05);
     box-shadow: 0 0 0 1.5px var(--sage-deep) inset;
     border-radius: 8px;
   }
+
   .day-num {
     font-size: 12px;
     font-weight: 500;
     color: var(--ink);
     margin-bottom: 4px;
   }
-  
+
   /* Event Indicators in Grid Cells */
   .cal-dots {
     display: flex;
@@ -260,15 +288,28 @@
     width: 100%;
     margin-top: auto;
   }
+
   .cal-dot {
     width: 6px;
     height: 6px;
     border-radius: 50%;
   }
-  .cal-dot.start { background-color: #89a36c; }
-  .cal-dot.target { background-color: #f59e0b; }
-  .cal-dot.completed { background-color: #10b981; }
-  .cal-dot.announcement { background-color: #3b82f6; }
+
+  .cal-dot.start {
+    background-color: #89a36c;
+  }
+
+  .cal-dot.target {
+    background-color: #f59e0b;
+  }
+
+  .cal-dot.completed {
+    background-color: #10b981;
+  }
+
+  .cal-dot.announcement {
+    background-color: #3b82f6;
+  }
 
   /* Details Panel Card */
   .calendar-details-card {
@@ -281,11 +322,13 @@
     box-shadow: 0 4px 24px rgba(31, 42, 34, 0.05);
     height: fit-content;
   }
+
   .events-list-container {
     display: flex;
     flex-direction: column;
     gap: 12px;
   }
+
   .event-item-detail {
     padding: 12px 14px;
     border-radius: 12px;
@@ -295,21 +338,35 @@
     flex-direction: column;
     gap: 4px;
   }
-  .event-item-detail.start { border-left: 4px solid #89a36c; }
-  .event-item-detail.target { border-left: 4px solid #f59e0b; }
-  .event-item-detail.completed { border-left: 4px solid #10b981; }
-  .event-item-detail.announcement { border-left: 4px solid #3b82f6; }
+
+  .event-item-detail.start {
+    border-left: 4px solid #89a36c;
+  }
+
+  .event-item-detail.target {
+    border-left: 4px solid #f59e0b;
+  }
+
+  .event-item-detail.completed {
+    border-left: 4px solid #10b981;
+  }
+
+  .event-item-detail.announcement {
+    border-left: 4px solid #3b82f6;
+  }
 
   .event-title {
     font-size: 13.5px;
     font-weight: 600;
     color: var(--ink);
   }
+
   .event-desc {
     font-size: 12px;
     color: var(--ink-mute);
     line-height: 1.4;
   }
+
   .event-tag {
     font-size: 10px;
     font-weight: 600;
@@ -319,23 +376,44 @@
     border-radius: 4px;
     letter-spacing: 0.05em;
   }
-  .event-tag.start { background: #f0f5e6; color: #5f7446; }
-  .event-tag.target { background: #fef3c7; color: #b45309; }
-  .event-tag.completed { background: #d1fae5; color: #065f46; }
-  .event-tag.announcement { background: #dbeafe; color: #1e40af; }
+
+  .event-tag.start {
+    background: #f0f5e6;
+    color: #5f7446;
+  }
+
+  .event-tag.target {
+    background: #fef3c7;
+    color: #b45309;
+  }
+
+  .event-tag.completed {
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  .event-tag.announcement {
+    background: #dbeafe;
+    color: #1e40af;
+  }
 
   /* Modal Styles */
   .modal-backdrop {
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background: rgba(31, 42, 34, 0.4);
     backdrop-filter: blur(8px);
     z-index: 10000;
     animation: yspFadeIn 0.25s ease;
   }
+
   .modal {
     position: fixed;
-    top: 50%; left: 50%;
+    top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%);
     width: 90vw;
     max-width: 520px;
@@ -349,8 +427,28 @@
     overflow: hidden;
     animation: yspSlideUp 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
   }
-  @keyframes yspFadeIn { from { opacity: 0; } to { opacity: 1; } }
-  @keyframes yspSlideUp { from { opacity: 0; transform: translate(-50%, -40%); } to { opacity: 1; transform: translate(-50%, -50%); } }
+
+  @keyframes yspFadeIn {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes yspSlideUp {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -40%);
+    }
+
+    to {
+      opacity: 1;
+      transform: translate(-50%, -50%);
+    }
+  }
 
   .modal-head {
     padding: 20px 24px;
@@ -359,10 +457,12 @@
     justify-content: space-between;
     align-items: center;
   }
+
   .modal-head h3 {
     margin: 0;
     font-size: 20px;
   }
+
   .modal-close {
     background: none;
     border: none;
@@ -370,9 +470,11 @@
     font-size: 16px;
     color: var(--ink-mute);
   }
+
   .modal-close:hover {
     color: var(--ink);
   }
+
   .modal-body {
     padding: 24px;
   }
@@ -386,15 +488,16 @@
 
 <!-- JavaScript Calendar Logic -->
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  // Parse events from Flask
-  const rawEvents = {{ events | tojson | safe }};
-  
+  document.addEventListener("DOMContentLoaded", () => {
+    // Parse events from Flask
+    const rawEvents = {{ events | tojson | safe
+  }};
+
   // Date state
   let currentMonth = new Date().getMonth();
   let currentYear = new Date().getFullYear();
   let selectedDate = new Date();
-  
+
   // DOM Elements
   const currentMonthYearLabel = document.getElementById("currentMonthYear");
   const calendarDaysContainer = document.getElementById("calendarDays");
@@ -413,14 +516,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // Render Calendar Days
   function renderCalendar() {
     calendarDaysContainer.innerHTML = "";
-    
+
     const monthNames = [
       "January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December"
     ];
-    
+
     currentMonthYearLabel.textContent = `${monthNames[currentMonth]} ${currentYear}`;
-    
+
     // First day of current month
     const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
     // Total days in current month
@@ -443,12 +546,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const dayEl = document.createElement("div");
       dayEl.className = "cal-day";
       dayEl.setAttribute("data-date", dateStr);
-      
+
       // Highlight today
       if (today.getDate() === day && today.getMonth() === currentMonth && today.getFullYear() === currentYear) {
         dayEl.classList.add("today");
       }
-      
+
       // Highlight selected
       if (selectedDate.getDate() === day && selectedDate.getMonth() === currentMonth && selectedDate.getFullYear() === currentYear) {
         dayEl.classList.add("selected");
@@ -461,13 +564,13 @@ document.addEventListener("DOMContentLoaded", () => {
       if (dateEvents.length > 0) {
         const dotsContainer = document.createElement("div");
         dotsContainer.className = "cal-dots";
-        
+
         dateEvents.forEach(e => {
           const dot = document.createElement("span");
           dot.className = `cal-dot ${e.type}`;
           dotsContainer.appendChild(dot);
         });
-        
+
         dayEl.appendChild(dotsContainer);
       }
 
@@ -481,7 +584,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       calendarDaysContainer.appendChild(dayEl);
     }
-    
+
     // Autofill selected day events on load/navigation
     const activeSelectedDateStr = formatDateString(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
     showEventsForDate(activeSelectedDateStr);
@@ -495,9 +598,9 @@ document.addEventListener("DOMContentLoaded", () => {
     selectedDateLabel.textContent = parsedDate.toLocaleDateString('en-US', options);
 
     dayEventsListContainer.innerHTML = "";
-    
+
     const dateEvents = rawEvents.filter(e => e.date === dateStr);
-    
+
     if (dateEvents.length === 0) {
       dayEventsListContainer.innerHTML = `
         <div style="text-align:center; padding:32px; color:var(--ink-mute); font-size:13.5px">
@@ -510,9 +613,9 @@ document.addEventListener("DOMContentLoaded", () => {
     dateEvents.forEach(e => {
       const item = document.createElement("div");
       item.className = `event-item-detail ${e.type}`;
-      
+
       const tagText = e.type === 'start' ? 'Started' : (e.type === 'target' ? 'Target' : (e.type === 'completed' ? 'Completed' : 'Announcement'));
-      
+
       item.innerHTML = `
         <span class="event-tag ${e.type}">${tagText}</span>
         <div class="event-title">${e.title}</div>

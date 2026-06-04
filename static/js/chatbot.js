@@ -6,6 +6,334 @@
 (function () {
   "use strict";
 
+  // ─── Dynamic Language Selector Injection ───────────────────────────────
+  (function injectLanguageSelectorCSSAndMarkup() {
+    if (document.getElementById("langSelector")) return;
+
+    // 1. Language selector CSS rules
+    const langStyles = `
+      .lang-selector {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        padding-left: 12px;
+        border-left: 1px solid rgba(31, 42, 34, 0.10);
+        margin-left: auto;
+      }
+      .lang-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        font-size: 13px;
+        font-weight: 500;
+        color: #3d4b40;
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+        white-space: nowrap;
+        font-family: inherit;
+      }
+      .lang-btn:hover {
+        background: rgba(255, 255, 255, 0.85);
+        border-color: #9ab078;
+        color: #1f2a22;
+        transform: translateY(-1px);
+      }
+      .globe-svg {
+        width: 14px;
+        height: 14px;
+        stroke: #89a36c;
+        transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        fill: none;
+      }
+      .lang-btn:hover .globe-svg {
+        transform: rotate(20deg) scale(1.1);
+      }
+      .lang-arrow {
+        width: 8px;
+        height: 8px;
+        stroke: #67756a;
+        transition: transform 0.25s ease;
+        fill: none;
+      }
+      .lang-selector.open .lang-arrow {
+        transform: rotate(180deg);
+      }
+      .lang-dropdown {
+        position: absolute;
+        top: calc(100% + 12px);
+        right: 0;
+        background: rgba(255, 255, 255, 0.60);
+        backdrop-filter: blur(16px) saturate(1.4);
+        -webkit-backdrop-filter: blur(16px) saturate(1.4);
+        border: 1px solid rgba(255, 255, 255, 0.75);
+        border-radius: 18px;
+        box-shadow: 0 1px 2px rgba(31, 42, 34, 0.06), 0 24px 60px -20px rgba(122, 150, 108, 0.30);
+        padding: 6px;
+        min-width: 155px;
+        opacity: 0;
+        transform: translateY(10px) scale(0.95);
+        pointer-events: none;
+        visibility: hidden;
+        transition: opacity 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
+                    transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
+                    visibility 0.25s;
+        display: flex;
+        flex-direction: column;
+        list-style: none;
+        margin: 0;
+        z-index: 10000;
+        padding-left: 0;
+      }
+      .lang-selector.open .lang-dropdown {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        pointer-events: auto;
+        visibility: visible;
+      }
+      .lang-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 14px;
+        border-radius: 12px;
+        font-size: 13.5px;
+        color: #3d4b40;
+        transition: background 0.2s, color 0.2s, transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+        cursor: pointer;
+        white-space: nowrap;
+        text-align: left;
+      }
+      .lang-option:hover {
+        background: rgba(154, 176, 120, 0.14);
+        color: #89a36c;
+        transform: translateX(4px);
+      }
+      .lang-option.active {
+        font-weight: 600;
+        color: #89a36c;
+        background: rgba(154, 176, 120, 0.08);
+      }
+      .lang-selector + .nav-user {
+        border-left: none;
+        padding-left: 0;
+        margin-left: 12px;
+      }
+      .lang-selector + .btn-primary {
+        margin-left: 12px;
+      }
+
+      /* Google Translate Overrides */
+      .goog-te-banner-frame,
+      .goog-te-banner,
+      .goog-te-menu-value,
+      .goog-te-menu2-frame,
+      .goog-te-balloon-frame {
+        display: none !important;
+      }
+      body {
+        top: 0 !important;
+        position: static !important;
+      }
+      .skiptranslate {
+        display: none !important;
+      }
+      font[style*="background-color"] {
+        background-color: transparent !important;
+        box-shadow: none !important;
+      }
+
+      @media (max-width: 980px) {
+        .lang-selector {
+          border-left: none;
+          padding-left: 0;
+          margin-left: auto;
+        }
+      }
+      @media (max-width: 640px) {
+        .lang-selector {
+          padding-left: 0;
+          margin-left: auto;
+        }
+        .lang-text {
+          display: none;
+        }
+        .lang-btn {
+          padding: 6px 8px;
+        }
+        .lang-dropdown {
+          right: -40px;
+        }
+      }
+    `;
+
+    // Inject styles
+    const styleEl = document.createElement("style");
+    styleEl.className = "lang-selector-styles";
+    styleEl.textContent = langStyles;
+    document.head.appendChild(styleEl);
+
+    // Dynamic builder logic
+    function tryInjectSelector() {
+      if (document.getElementById("langSelector")) return;
+
+      const navElement = document.querySelector("#navWrap nav") || document.querySelector("nav.nav");
+      if (!navElement) return;
+
+      const langSelector = document.createElement("div");
+      langSelector.className = "lang-selector notranslate";
+      langSelector.id = "langSelector";
+
+      langSelector.innerHTML = `
+        <button class="lang-btn" id="langBtn" aria-expanded="false" aria-haspopup="listbox">
+          <svg class="globe-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+          <span class="lang-text" id="currentLangText">English</span>
+          <svg class="lang-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <ul class="lang-dropdown" id="langDropdown" role="listbox" aria-label="Language selection">
+          <li role="option" data-lang="en" class="lang-option active">🇺🇸 English</li>
+          <li role="option" data-lang="es" class="lang-option">🇪🇸 Español</li>
+          <li role="option" data-lang="zh-CN" class="lang-option">🇨🇳 中文</li>
+          <li role="option" data-lang="fr" class="lang-option">🇫🇷 Français</li>
+          <li role="option" data-lang="ms" class="lang-option">🇲🇾 Melayu</li>
+          <li role="option" data-lang="ta" class="lang-option">🇮🇳 தமிழ்</li>
+          <li role="option" data-lang="hi" class="lang-option">🇮🇳 हिन्दी</li>
+        </ul>
+      `;
+
+      // Insert before Join button or right side profile block
+      const actionBtn = navElement.querySelector(".btn-primary") || navElement.querySelector(".btn") || navElement.querySelector(".nav-user");
+      if (actionBtn) {
+        navElement.insertBefore(langSelector, actionBtn);
+      } else {
+        navElement.appendChild(langSelector);
+      }
+
+      const langBtn = document.getElementById("langBtn");
+      const currentLangText = document.getElementById("currentLangText");
+      const langOptions = langSelector.querySelectorAll(".lang-option");
+
+      // Cookie Helpers
+      function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+      }
+
+      function setCookie(name, value, days) {
+        let expires = "";
+        if (days) {
+          const date = new Date();
+          date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+          expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = `${name}=${value || ""}${expires}; path=/;`;
+        document.cookie = `${name}=${value || ""}${expires}; path=/; domain=${window.location.hostname};`;
+      }
+
+      function deleteCookie(name) {
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`;
+      }
+
+      // Check current language cookie
+      const transCookie = getCookie("googtrans");
+      let currentLang = "en";
+
+      if (transCookie) {
+        const parts = transCookie.split("/");
+        if (parts.length >= 3) {
+          currentLang = parts[2];
+        }
+      }
+
+      let selectedOptionFound = false;
+      langOptions.forEach((option) => {
+        const optLang = option.getAttribute("data-lang");
+        if (optLang === currentLang) {
+          option.classList.add("active");
+          if (currentLangText) {
+            const textContent = option.textContent.trim();
+            const words = textContent.split(" ");
+            currentLangText.textContent = words.slice(1).join(" ");
+          }
+          selectedOptionFound = true;
+        } else {
+          option.classList.remove("active");
+        }
+      });
+
+      if (!selectedOptionFound && currentLang === "en" && currentLangText) {
+        currentLangText.textContent = "English";
+      }
+
+      // Dropdown toggle trigger
+      langBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isOpen = langSelector.classList.toggle("open");
+        langBtn.setAttribute("aria-expanded", isOpen);
+      });
+
+      // Close on outside click
+      document.addEventListener("click", (e) => {
+        if (!langSelector.contains(e.target)) {
+          langSelector.classList.remove("open");
+          langBtn.setAttribute("aria-expanded", "false");
+        }
+      });
+
+      // Handle language swap clicks
+      langOptions.forEach((option) => {
+        option.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const selectedLang = option.getAttribute("data-lang");
+
+          if (selectedLang === "en") {
+            deleteCookie("googtrans");
+          } else {
+            setCookie("googtrans", `/en/${selectedLang}`, 30);
+          }
+
+          langSelector.classList.remove("open");
+          langBtn.setAttribute("aria-expanded", "false");
+          window.location.reload();
+        });
+      });
+
+      // Load Google Translate script dynamically if not present
+      if (!document.querySelector('script[src*="translate.google.com"]')) {
+        if (!document.getElementById("google_translate_element")) {
+          const translateDiv = document.createElement("div");
+          translateDiv.id = "google_translate_element";
+          translateDiv.style.display = "none";
+          document.body.appendChild(translateDiv);
+        }
+
+        window.googleTranslateElementInit = function() {
+          new google.translate.TranslateElement({
+            pageLanguage: 'en',
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+            autoDisplay: false
+          }, 'google_translate_element');
+        };
+
+        const script = document.createElement("script");
+        script.type = "text/javascript";
+        script.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+        document.head.appendChild(script);
+      }
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", tryInjectSelector);
+    } else {
+      tryInjectSelector();
+    }
+  })();
+
   // Prevent multiple initializations
   if (document.getElementById("yspChatWidget")) return;
 

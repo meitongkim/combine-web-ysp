@@ -246,4 +246,108 @@
       }
     });
   }
+
+  // ─── Language Selector Interactivity & Cookie Management ───────────────
+  const langSelector = document.getElementById("langSelector");
+  const langBtn = document.getElementById("langBtn");
+  const currentLangText = document.getElementById("currentLangText");
+
+  if (langSelector && langBtn) {
+    // Helper to read cookies
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    // Helper to set cookies
+    function setCookie(name, value, days) {
+      let expires = "";
+      if (days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+      }
+      document.cookie = `${name}=${value || ""}${expires}; path=/;`;
+      document.cookie = `${name}=${value || ""}${expires}; path=/; domain=${window.location.hostname};`;
+    }
+
+    // Helper to delete cookies
+    function deleteCookie(name) {
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`;
+    }
+
+    // Determine current language from googtrans cookie (e.g. "/en/es" or "/auto/es")
+    const transCookie = getCookie("googtrans");
+    let currentLang = "en";
+
+    if (transCookie) {
+      const parts = transCookie.split("/");
+      if (parts.length >= 3) {
+        currentLang = parts[2];
+      }
+    }
+
+    // Update dropdown selection classes and UI text based on active cookie
+    const langOptions = langSelector.querySelectorAll(".lang-option");
+    let selectedOptionFound = false;
+
+    langOptions.forEach((option) => {
+      const optLang = option.getAttribute("data-lang");
+      if (optLang === currentLang) {
+        option.classList.add("active");
+        if (currentLangText) {
+          // Keep only the text (slice after emoji space)
+          const textContent = option.textContent.trim();
+          const words = textContent.split(" ");
+          // "🇺🇸 English" -> "English"
+          currentLangText.textContent = words.slice(1).join(" ");
+        }
+        selectedOptionFound = true;
+      } else {
+        option.classList.remove("active");
+      }
+    });
+
+    if (!selectedOptionFound && currentLang === "en" && currentLangText) {
+      currentLangText.textContent = "English";
+    }
+
+    // Toggle dropdown menu display
+    langBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = langSelector.classList.toggle("open");
+      langBtn.setAttribute("aria-expanded", isOpen);
+    });
+
+    // Close dropdown on click outside
+    document.addEventListener("click", (e) => {
+      if (!langSelector.contains(e.target)) {
+        langSelector.classList.remove("open");
+        langBtn.setAttribute("aria-expanded", "false");
+      }
+    });
+
+    // Listen to option selections
+    langOptions.forEach((option) => {
+      option.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const selectedLang = option.getAttribute("data-lang");
+
+        if (selectedLang === "en") {
+          deleteCookie("googtrans");
+        } else {
+          // Set googtrans cookie to auto translate
+          setCookie("googtrans", `/en/${selectedLang}`, 30);
+        }
+
+        langSelector.classList.remove("open");
+        langBtn.setAttribute("aria-expanded", "false");
+        
+        // Force reload to apply Google Translate dynamically
+        window.location.reload();
+      });
+    });
+  }
 })();
