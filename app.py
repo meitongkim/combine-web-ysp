@@ -1504,6 +1504,8 @@ def api_diag():
         'test_result': test_result,
         'test_error': test_error,
         'test_response': test_response,
+        'railway_environment_name': os.environ.get('RAILWAY_ENVIRONMENT_NAME'),
+        'railway_service_name': os.environ.get('RAILWAY_SERVICE_NAME'),
         'env_keys': env_keys
     })
 
