@@ -1337,22 +1337,6 @@ def api_chat():
     if not messages:
         return jsonify({'status': 'error', 'message': 'No messages provided'}), 400
 
-    # Map message roles to Gemini's expected roles ('user', 'model')
-    gemini_contents = []
-    for msg in messages:
-        role = msg.get('role', 'user')
-        content = msg.get('content', '')
-        gemini_role = 'model' if role in ('assistant', 'model') else 'user'
-        gemini_contents.append({
-            'role': gemini_role,
-            'parts': [{'text': content}]
-        })
-
-    # Gemini requires the conversation to start with a 'user' turn.
-    # Discard any initial 'model' turns (like the welcome message).
-    while gemini_contents and gemini_contents[0]['role'] == 'model':
-        gemini_contents.pop(0)
-
     # Helper for generating Demo Mode fallback responses
     def get_demo_response(messages_list):
         last_msg = messages_list[-1].get('content', '') if messages_list else ''
@@ -1360,12 +1344,14 @@ def api_chat():
 
         if any(w in last_msg_lower for w in ['program', 'route', 'research', 'policy', 'business', 'diplomacy', 'environment', 'community']):
             return "We offer 6 specialized Programme Routes: **Research, Policy, Business, Diplomacy, Environment, and Community**. Each route is designed to help fellows develop publishable capstones or real-world policy briefs. 🌿 Which track interests you most?"
-        elif any(w in last_msg_lower for w in ['learn', 'module', 'portal', 'course', 'lms']):
+        elif any(w in last_msg_lower for w in ['learn', 'module', 'portal', 'course', 'lms', 'student', 'calendar', 'progress', 'dashboard']):
             return "YSP Learns is our dynamic learning platform where you can sign up for self-paced modules in policy, research, climate, and more! Click on the **YSP Learns** menu link at the top to check out the module catalog! 📚"
-        elif any(w in last_msg_lower for w in ['join', 'apply', 'volunteer', 'hiring', 'intake']):
+        elif any(w in last_msg_lower for w in ['join', 'apply', 'volunteer', 'hiring', 'intake', 'job', 'work', 'career', 'offer', 'recruit', 'position']):
             return "You can apply for our next intake by clicking the **Apply for the next intake** button on the homepage, or contact us directly. We'd love to have you onboard! 🌱"
-        elif any(w in last_msg_lower for w in ['who are you', 'your name', 'mascot', 'verdi']):
+        elif any(w in last_msg_lower for w in ['who are you', 'your name', 'mascot', 'verdi', 'what is verdi']):
             return "I'm **Verdi**, the official mascot and AI assistant for Youth for Sustainable Policy! 🌍💚 I represent curiosity, empathy, and evidence-based action."
+        elif any(w in last_msg_lower for w in ['contact', 'email', 'reach out', 'help', 'support', 'question']):
+            return "You can reach the YSP team by emailing us at **contact@yspolicy.org** or via our contact page. We're here to help! 📬"
         else:
             return (
                 f"Hi! I'm Verdi, your friendly YSP mascot. 🌿\n\n"
