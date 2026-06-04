@@ -1449,6 +1449,60 @@ def api_chat():
         })
 
 
+@app.route('/api/diag')
+def api_diag():
+    """Diagnostics endpoint to debug Gemini integration on Railway."""
+    import os
+    import json
+    import urllib.request
+    import urllib.error
+
+    api_key = os.environ.get('GEMINI_API_KEY') or app.config.get('GEMINI_API_KEY')
+    key_status = "Not Set"
+    key_preview = ""
+    if api_key:
+        key_status = "Set"
+        key_preview = api_key[:6] + "..." + api_key[-6:] if len(api_key) > 12 else "Too Short"
+
+    test_result = "Not Run"
+    test_error = ""
+    test_response = ""
+
+    if api_key:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+        payload = {
+            "contents": [{"role": "user", "parts": [{"text": "Say Hello"}]}]
+        }
+        try:
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode('utf-8'),
+                headers={'Content-Type': 'application/json'},
+                method='POST'
+            )
+            with urllib.request.urlopen(req, timeout=5) as response:
+                res_data = json.loads(response.read().decode('utf-8'))
+                test_result = "Success"
+                test_response = str(res_data)
+        except urllib.error.HTTPError as e:
+            test_result = f"HTTPError {e.code}"
+            test_error = e.read().decode('utf-8', errors='ignore')
+        except Exception as e:
+            test_result = "Exception"
+            test_error = str(e)
+
+    env_keys = list(os.environ.keys())
+
+    return jsonify({
+        'GEMINI_API_KEY_status': key_status,
+        'GEMINI_API_KEY_preview': key_preview,
+        'test_result': test_result,
+        'test_error': test_error,
+        'test_response': test_response,
+        'env_keys': env_keys
+    })
+
+
 # ─── File Serving ────────────────────────────────────────────────────────────
 
 @app.route('/uploads/<filename>')
