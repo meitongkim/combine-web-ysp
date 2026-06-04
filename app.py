@@ -1376,6 +1376,8 @@ def api_chat():
         gemini_contents.pop(0)
 
     api_key = os.environ.get('GEMINI_API_KEY') or app.config.get('GEMINI_API_KEY')
+    if api_key:
+        api_key = api_key.strip()
     if not api_key:
         return jsonify({
             'status': 'success',
@@ -1458,6 +1460,9 @@ def api_diag():
     import urllib.error
 
     api_key = os.environ.get('GEMINI_API_KEY') or app.config.get('GEMINI_API_KEY')
+    if api_key:
+        api_key = api_key.strip()
+
     key_status = "Not Set"
     key_preview = ""
     if api_key:
