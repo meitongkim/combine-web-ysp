@@ -487,11 +487,11 @@
 </style>
 
 <!-- JavaScript Calendar Logic -->
+<div id="calendar-events-data" style="display: none;" data-events="{{ events | tojson | forceescape }}"></div>
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     // Parse events from Flask
-    const rawEvents = {{ events | tojson | safe
-  }};
+    const rawEvents = JSON.parse(document.getElementById("calendar-events-data").dataset.events || "[]");
 
   // Date state
   let currentMonth = new Date().getMonth();
